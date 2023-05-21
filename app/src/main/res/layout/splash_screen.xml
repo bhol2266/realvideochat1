@@ -3,36 +3,37 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fitsSystemWindows="true"
-    android:background="@drawable/splashcreen_bg">
+    android:background="@drawable/splashcreen_bg"
+    android:fitsSystemWindows="true">
+
 
 
     <TextView
         android:id="@+id/textView_splashscreen"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
-        android:background="#000000"
-        android:alpha="0.5"
+        android:paddingTop="10dp"
+        android:paddingBottom="10dp"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="50dp"
-        android:fontFamily="@font/kalam_regular"
+        android:fontFamily="@font/shortbaby"
         android:text="Chutlunds - Live Video Chat"
-        android:textColor="@color/themeColor"
-        android:textSize="30dp"
-        android:textStyle="bold" />
+        android:textAlignment="center"
+        android:textColor="@color/white"
+        android:textSize="27dp"
+       />
 
     <com.airbnb.lottie.LottieAnimationView
         android:id="@+id/lottie"
-        android:layout_width="300dp"
-        android:layout_height="300dp"
-        android:layout_alignParentTop="true"
+        android:layout_width="200dp"
+        android:layout_height="200dp"
+        android:layout_alignParentBottom="true"
         android:layout_centerInParent="true"
-        android:layout_marginTop="500dp"
         android:elevation="5dp"
         app:lottie_autoPlay="true"
         app:lottie_rawRes="@raw/splashscreen_booksanim"
-        app:lottie_speed="3.6" />
+        app:lottie_repeatCount="2"
+        app:lottie_speed="2.5" />
 
     <LinearLayout
         android:id="@+id/progressbar"
