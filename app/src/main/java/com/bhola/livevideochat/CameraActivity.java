@@ -68,6 +68,7 @@ public class CameraActivity extends Activity {
         @Override
         public void onOpened(@NonNull CameraDevice cameraDevicee) {
             cameraDevice = cameraDevicee;
+
             try {
                 createPreviewSession();
             } catch (CameraAccessException e) {
@@ -97,6 +98,7 @@ public class CameraActivity extends Activity {
         fullscreenMode();
 
         textureView = findViewById(R.id.textureView);
+        textureView.setOpaque(false);
         playRinging();
         dragCamera();
         controlCamera();
@@ -159,7 +161,7 @@ public class CameraActivity extends Activity {
                             throw new RuntimeException(e);
                         }
                     }
-                }, 200);
+                }, 100);
 
 
 
@@ -363,10 +365,6 @@ public class CameraActivity extends Activity {
             }
         }
 
-        Log.d(SplashScreen.TAG, "chooseOptimalSize: " + outputSizes[1]);
-        Log.d(SplashScreen.TAG, "width: " + width);
-        Log.d(SplashScreen.TAG, "height: " + height);
-        Log.d(SplashScreen.TAG, "currentOptimalSize: " + currentOptimalSize);
         return currentOptimalSize;
     }
 
