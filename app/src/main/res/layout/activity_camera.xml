@@ -30,18 +30,20 @@
 
         </RelativeLayout>
 
-        <LinearLayout
+        <androidx.cardview.widget.CardView
             android:id="@+id/draggableView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            app:cardCornerRadius="15dp"
+            android:layout_margin="10dp"
             android:layout_gravity="bottom|right">
 
                 <TextureView
                     android:id="@+id/textureView"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent" />
+                    android:layout_width="150dp"
+                    android:layout_height="250dp" />
 
-        </LinearLayout>
+        </androidx.cardview.widget.CardView>
 
 
         <LinearLayout
@@ -56,6 +58,7 @@
                 android:id="@+id/speaker"
                 android:layout_width="40dp"
                 android:layout_height="40dp"
+                android:visibility="gone"
                 android:src="@drawable/speaker_off"
                 android:tag="speaker" />
 
@@ -64,6 +67,7 @@
                 android:layout_width="40dp"
                 android:layout_height="40dp"
                 android:layout_marginTop="30dp"
+                android:visibility="gone"
                 android:src="@drawable/microphone_off" />
 
             <ImageView

@@ -1,7 +1,10 @@
 package com.bhola.livevideochat;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.SurfaceTexture;
@@ -33,10 +36,12 @@ import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 import android.widget.VideoView;
 
 
 import androidx.annotation.NonNull;
+import androidx.cardview.widget.CardView;
 import androidx.core.app.ActivityCompat;
 import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -47,23 +52,27 @@ import java.util.Collections;
 
 public class CameraActivity extends Activity {
 
+    CardView textureCardview;
     VideoView videoView;
-
-
+    int currentSeekPosition = 0;
+    Runnable runnable, runnable2, runnable3;
+    Handler handler, handler2, handler3;
     MediaPlayer mediaPlayer;
-    MediaPlayer mediaPlayerRingtone;
+    MediaPlayer ringtonePlayer;
     TextView messageTextView;
 
     //Camera stuffs
     private static final int CAMERA_PERMISSION_REQUEST_CODE = 123;
     private TextureView textureView;
+
     CameraManager cameraManager;
     Size previewSize;
     String cameraId;
     Handler backgroundHandler;
     HandlerThread handlerThread;
-    CameraDevice cameraDevice;
+
     CameraCaptureSession cameraCaptureSession;
+    CameraDevice cameraDevice;
     CameraDevice.StateCallback stateCallback = new CameraDevice.StateCallback() {
         @Override
         public void onOpened(@NonNull CameraDevice cameraDevicee) {
@@ -89,45 +98,81 @@ public class CameraActivity extends Activity {
             CameraActivity.this.cameraDevice = null;
         }
     };
-    String currentCameraSide;
+    String currentCameraSide = "Front";
+    private String TAG = "activity_camera";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_camera);
-        fullscreenMode();
+//        fullscreenMode();
 
         textureView = findViewById(R.id.textureView);
-        textureView.setOpaque(false);
+        textureCardview = findViewById(R.id.draggableView);
         playRinging();
-        dragCamera();
         controlCamera();
+
 
     }
 
     private void playRinging() {
         messageTextView = findViewById(R.id.message);
-        mediaPlayerRingtone = MediaPlayer.create(CameraActivity.this, R.raw.ringback_tone);
+        ringtonePlayer = MediaPlayer.create(CameraActivity.this, R.raw.ringback_tone);
 
-        new Handler().postDelayed(new Runnable() {
+        handler = new Handler();
+        runnable = new Runnable() {
             @Override
             public void run() {
                 messageTextView.setText("ringing...");
-                mediaPlayerRingtone.start();
+                ringtonePlayer.start();
             }
-        }, 1000);
+        };
+        handler.postDelayed(runnable, 1000);
 
-        new Handler().postDelayed(new Runnable() {
+
+        handler2 = new Handler();
+        runnable2 = new Runnable() {
             @Override
             public void run() {
                 messageTextView.setVisibility(View.GONE);
                 LinearLayout controlsLayout = findViewById(R.id.controlsLayout);
                 ImageView warningSign = findViewById(R.id.warningSign);
+                warningSign.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        AlertDialog.Builder builder = new AlertDialog.Builder(CameraActivity.this);
+                        builder.setTitle("Report this user");
+                        builder.setMessage("If you want to report and block this user");
+
+// Set up the buttons
+                        builder.setPositiveButton("REPORT", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                // Handle positive button click
+                                Toast.makeText(CameraActivity.this, "Reported", Toast.LENGTH_SHORT).show();
+                                onBackPressed();
+                            }
+                        });
+
+                        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                // Handle negative button click
+                                dialog.cancel();
+                            }
+                        });
+
+// Create and show the alert dialog
+                        AlertDialog dialog = builder.create();
+                        dialog.show();
+
+                    }
+                });
                 VideoView videoView = findViewById(R.id.videoView);
                 videoView.setVisibility(View.VISIBLE);
                 warningSign.setVisibility(View.VISIBLE);
                 controlsLayout.setVisibility(View.VISIBLE);
-                mediaPlayerRingtone.stop();
+                ringtonePlayer.stop();
                 playVideoinTheBackground();
 
 
@@ -146,39 +191,34 @@ public class CameraActivity extends Activity {
                 layoutParams.height = desiredHeightPx;
 
 // Apply the updated layout parameters to the TextureView
-                textureView.setLayoutParams(layoutParams);
+//                textureView.setLayoutParams(layoutParams);// when textureView size change the textureView listener does the remaining job
 
-                new Handler().postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        Log.d("TAGG", "textureView.getWidth(): " + textureView.getWidth());
-                        Log.d("TAGG", "textureView.getHeight(): " + textureView.getHeight());
-                        closeCamera();
-                        setUpCamera(currentCameraSide);
-                        try {
-                            openCamera();
-                        } catch (CameraAccessException e) {
-                            throw new RuntimeException(e);
-                        }
-                    }
-                }, 100);
+                //Since call is received enable speaker and microphone icon and webcam
+
+                ImageView speaker = findViewById(R.id.speaker);
+                speaker.setVisibility(View.VISIBLE);
+                ImageView microphone = findViewById(R.id.microphone);
+                microphone.setVisibility(View.VISIBLE);
+
+                textureCardview.setVisibility(View.VISIBLE);
 
 
 
             }
-        }, 8000);
+        };
+        handler2.postDelayed(runnable2, 8000);
 
 
     }
 
 
     private void playVideoinTheBackground() {
+
         videoView = findViewById(R.id.videoView);
         String videoPath = "android.resource://" + getPackageName() + "/" + R.raw.sample_video;
         Uri videoUri = Uri.parse(videoPath);
         videoView.setVideoURI(videoUri);
         videoView.start();
-
 
         videoView.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
             @Override
@@ -188,18 +228,6 @@ public class CameraActivity extends Activity {
                 mp.setLooping(true);
             }
         });
-    }
-
-    private void fullscreenMode() {
-        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
-        WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
-        WindowInsetsControllerCompat windowInsetsCompat = new WindowInsetsControllerCompat(getWindow(), getWindow().getDecorView());
-        windowInsetsCompat.hide(WindowInsetsCompat.Type.statusBars());
-        windowInsetsCompat.setSystemBarsBehavior(WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);
-        getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_FULLSCREEN | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-            getWindow().getAttributes().layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
-        }
     }
 
 
@@ -235,10 +263,9 @@ public class CameraActivity extends Activity {
         }
     }
 
-    private void openCamera() throws CameraAccessException {
+    private void connectCamera() throws CameraAccessException {
         try {
-            if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.CAMERA)
-                    == PackageManager.PERMISSION_GRANTED) {
+            if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
                 cameraManager.openCamera(cameraId, stateCallback, backgroundHandler);
             }
         } catch (CameraAccessException e) {
@@ -246,64 +273,6 @@ public class CameraActivity extends Activity {
         }
 
 
-    }
-
-    private void openBackgroundHandler() {
-        handlerThread = new HandlerThread("camera_app");
-        handlerThread.start();
-        backgroundHandler = new Handler(handlerThread.getLooper());
-    }
-
-    private void closeBackgroundHandler() {
-        if (handlerThread != null) {
-            handlerThread.quitSafely();
-            handlerThread = null;
-        }
-        backgroundHandler = null;
-    }
-
-    @Override
-    public void onBackPressed() {
-        super.onBackPressed();
-        closeCamera();
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        textureView.setSurfaceTextureListener(new TextureView.SurfaceTextureListener() {
-            @Override
-            public void onSurfaceTextureAvailable(@NonNull SurfaceTexture surfaceTexture, int i, int i1) {
-                openBackgroundHandler();
-                setUpCamera("Front");
-                try {
-                    openCamera();
-                } catch (CameraAccessException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-
-            @Override
-            public void onSurfaceTextureSizeChanged(@NonNull SurfaceTexture surfaceTexture, int i, int i1) {
-
-            }
-
-            @Override
-            public boolean onSurfaceTextureDestroyed(@NonNull SurfaceTexture surfaceTexture) {
-                return false;
-            }
-
-            @Override
-            public void onSurfaceTextureUpdated(@NonNull SurfaceTexture surfaceTexture) {
-
-            }
-        });
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        closeBackgroundHandler();
     }
 
 
@@ -320,6 +289,7 @@ public class CameraActivity extends Activity {
     }
 
     private void createPreviewSession() throws CameraAccessException {
+        Log.d(TAG, "createPreviewSession ");
 
         SurfaceTexture surfaceTexture = textureView.getSurfaceTexture();
         surfaceTexture.setDefaultBufferSize(previewSize.getWidth(), previewSize.getHeight());
@@ -333,10 +303,12 @@ public class CameraActivity extends Activity {
                     return;
                 }
                 try {
+
                     CaptureRequest captureRequest = captureRequestBuilder.build();
                     CameraActivity.this.cameraCaptureSession = cameraCaptureSession;
                     cameraCaptureSession.setRepeatingRequest(captureRequest,
                             null, backgroundHandler);
+
                 } catch (CameraAccessException e) {
                     throw new RuntimeException(e);
                 }
@@ -347,6 +319,98 @@ public class CameraActivity extends Activity {
 
             }
         }, backgroundHandler);
+
+
+    }
+
+
+    private void controlCamera() {
+        ImageView speaker = findViewById(R.id.speaker);
+        speaker.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+
+                final Bitmap currentImage = ((BitmapDrawable) speaker.getDrawable()).getBitmap();
+                Drawable myDrawable = getResources().getDrawable(R.drawable.speaker);
+                final Bitmap speaker_on = ((BitmapDrawable) myDrawable).getBitmap();
+
+                if (currentImage.sameAs(speaker_on)) {
+                    mediaPlayer.setVolume(0f, 0f);
+                    speaker.setImageResource(R.drawable.speaker_off);
+                } else {
+
+
+                    mediaPlayer.setVolume(1f, 1f);
+                    speaker.setImageResource(R.drawable.speaker);
+
+                }
+
+
+            }
+        });
+        ImageView microphone = findViewById(R.id.microphone);
+        microphone.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                final Bitmap currentImage = ((BitmapDrawable) microphone.getDrawable()).getBitmap();
+                Drawable myDrawable = getResources().getDrawable(R.drawable.microphone);
+                final Bitmap microphone_on = ((BitmapDrawable) myDrawable).getBitmap();
+
+                if (currentImage.sameAs(microphone_on)) {
+                    microphone.setImageResource(R.drawable.microphone_off);
+                } else {
+                    microphone.setImageResource(R.drawable.microphone);
+                }
+
+            }
+        });
+        ImageView camera = findViewById(R.id.camera);
+        camera.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Vibrator vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+                vibrator.vibrate(100);
+                closeCamera();
+                if (currentCameraSide.equals("Front")) {
+                    setUpCamera("Back");
+                } else {
+                    setUpCamera("Front");
+                }
+                try {
+                    connectCamera();
+                } catch (CameraAccessException e) {
+                    throw new RuntimeException(e);
+                }
+
+
+            }
+        });
+
+
+        ImageView end_call = findViewById(R.id.end_call);
+        end_call.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                onBackPressed();
+            }
+        });
+
+    }
+
+
+    private void openBackgroundHandler() {
+        handlerThread = new HandlerThread("camera_app");
+        handlerThread.start();
+        backgroundHandler = new Handler(handlerThread.getLooper());
+    }
+
+    private void closeBackgroundHandler() {
+        if (handlerThread != null) {
+            handlerThread.quitSafely();
+            handlerThread = null;
+        }
+        backgroundHandler = null;
     }
 
 
@@ -404,80 +468,98 @@ public class CameraActivity extends Activity {
         });
     }
 
-    private void controlCamera() {
-        ImageView speaker = findViewById(R.id.speaker);
-        speaker.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
+    private void fullscreenMode() {
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
+        WindowInsetsControllerCompat windowInsetsCompat = new WindowInsetsControllerCompat(getWindow(), getWindow().getDecorView());
+        windowInsetsCompat.hide(WindowInsetsCompat.Type.statusBars());
+        windowInsetsCompat.setSystemBarsBehavior(WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);
+        getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_FULLSCREEN | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            getWindow().getAttributes().layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
+        }
+    }
 
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        if (ringtonePlayer != null) {
+            ringtonePlayer.stop();
+        }
+        if (mediaPlayer != null) {
 
-                final Bitmap currentImage = ((BitmapDrawable) speaker.getDrawable()).getBitmap();
-                Drawable myDrawable = getResources().getDrawable(R.drawable.speaker);
-                final Bitmap speaker_on = ((BitmapDrawable) myDrawable).getBitmap();
-
-                if (currentImage.sameAs(speaker_on)) {
-                    mediaPlayer.setVolume(0f, 0f);
-                    speaker.setImageResource(R.drawable.speaker_off);
-                } else {
-
-
-                    mediaPlayer.setVolume(1f, 1f);
-                    speaker.setImageResource(R.drawable.speaker);
-
-                }
-
-
+            mediaPlayer.stop();
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            if (handler.hasCallbacks(runnable)) {
+                handler.removeCallbacks(runnable);
             }
-        });
-        ImageView microphone = findViewById(R.id.microphone);
-        microphone.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                final Bitmap currentImage = ((BitmapDrawable) microphone.getDrawable()).getBitmap();
-                Drawable myDrawable = getResources().getDrawable(R.drawable.microphone);
-                final Bitmap microphone_on = ((BitmapDrawable) myDrawable).getBitmap();
-
-                if (currentImage.sameAs(microphone_on)) {
-                    microphone.setImageResource(R.drawable.microphone_off);
-                } else {
-                    microphone.setImageResource(R.drawable.microphone);
-                }
-
+            if (handler2.hasCallbacks(runnable2)) {
+                handler2.removeCallbacks(runnable2);
             }
-        });
-        ImageView camera = findViewById(R.id.camera);
-        camera.setOnClickListener(new View.OnClickListener() {
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Log.d(TAG, "onResume: Im here");
+        textureView.setSurfaceTextureListener(new TextureView.SurfaceTextureListener() {
             @Override
-            public void onClick(View view) {
-                Vibrator vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
-                vibrator.vibrate(100);
-                closeCamera();
-                if (currentCameraSide.equals("Front")) {
-                    setUpCamera("Back");
-                } else {
-                    setUpCamera("Front");
-                }
+            public void onSurfaceTextureAvailable(@NonNull SurfaceTexture surfaceTexture, int width, int height) {
+                Log.d(TAG, "onSurfaceTextureAvailable");
+                textureCardview.setVisibility(View.INVISIBLE);
+                openBackgroundHandler();
+                setUpCamera("Front");
                 try {
-                    openCamera();
+                    connectCamera();
                 } catch (CameraAccessException e) {
                     throw new RuntimeException(e);
                 }
-
+                dragCamera();
 
             }
-        });
 
-
-        ImageView end_call = findViewById(R.id.end_call);
-        end_call.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view) {
-                mediaPlayer.stop();
-                mediaPlayerRingtone.stop();
-                onBackPressed();
+            public void onSurfaceTextureSizeChanged(@NonNull SurfaceTexture surfaceTexture, int width, int height) {
+                //when call received the camera becomes the following functions are called to resize the camera
+                closeCamera();
+                setUpCamera(currentCameraSide);
+                try {
+                    connectCamera();
+                } catch (CameraAccessException e) {
+                    throw new RuntimeException(e);
+                }
+                dragCamera();
+            }
+
+            @Override
+            public boolean onSurfaceTextureDestroyed(@NonNull SurfaceTexture surfaceTexture) {
+                return false;
+            }
+
+            @Override
+            public void onSurfaceTextureUpdated(@NonNull SurfaceTexture surfaceTexture) {
+
             }
         });
+        if (mediaPlayer != null) {
+            videoView.seekTo(currentSeekPosition);
+            videoView.start();
 
+        }
+
+    }
+
+    @Override
+    protected void onPause() {
+
+        super.onPause();
+        if (mediaPlayer != null && mediaPlayer.isPlaying()) {
+            currentSeekPosition = videoView.getCurrentPosition();
+            videoView.pause();
+        }
+        closeBackgroundHandler();
     }
 
 
