@@ -13,6 +13,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.animation.Animation;
@@ -29,7 +30,13 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.core.view.WindowInsetsControllerCompat;
 
 import com.airbnb.lottie.LottieAnimationView;
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.android.gms.auth.api.signin.GoogleSignInClient;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.firebase.FirebaseApp;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -74,6 +81,13 @@ public class SplashScreen extends AppCompatActivity {
     public static int Native_Ad_Interval = 5;
     public static boolean homepageAdShown = false;
     boolean animationCompleted = false;
+
+
+    //Google login
+    public static boolean userLoggedIn = false;
+    public static String userLoggedIAs = "not set";
+    public static String authProviderName = "";
+    public static String userEmail = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -174,9 +188,19 @@ public class SplashScreen extends AppCompatActivity {
 
     private void sharedPrefrences() {
 
-        //Reading Login Times
+        //Reading Login Times and login details
         SharedPreferences sh = getSharedPreferences("UserInfo", MODE_PRIVATE);
         int a = sh.getInt("loginTimes", 0);
+        String loginAs = sh.getString("loginAs", "not set");
+        if (!loginAs.equals("not set")) {
+            userLoggedIn = true;
+            if (loginAs.equals("Google")) {
+                userLoggedIAs = "Google";
+            } else {
+                userLoggedIAs = "Guest";
+
+            }
+        }
         Login_Times = a + 1;
 
         // Updating Login Times data into SharedPreferences
@@ -185,6 +209,7 @@ public class SplashScreen extends AppCompatActivity {
         myEdit.putInt("loginTimes", a + 1);
         myEdit.commit();
         Log.d(TAG, "sharedPrefrences: " + Login_Times);
+
 
     }
 
@@ -211,13 +236,10 @@ public class SplashScreen extends AppCompatActivity {
             }
 
 
-
         } catch (JSONException e) {
             e.printStackTrace();
         }
     }
-
-
 
 
     private void generateFCMToken() {
@@ -253,8 +275,13 @@ public class SplashScreen extends AppCompatActivity {
 
 
     private void handler_forIntent() {
-        Intent intent = new Intent(getApplicationContext(), MainActivity.class);
-        startActivity(intent);
+        if (SplashScreen.userLoggedIn) {
+            Intent intent = new Intent(getApplicationContext(), Profile.class);
+            startActivity(intent);
+        } else {
+            Intent intent = new Intent(getApplicationContext(), LoginScreen.class);
+            startActivity(intent);
+        }
         overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
 
         finish();
@@ -369,5 +396,21 @@ public class SplashScreen extends AppCompatActivity {
         }
     }
 
+
+    protected void onStart() {
+        super.onStart();
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user != null) {
+            authProviderName = user.getProviderData().get(user.getProviderData().size() - 1).getProviderId();
+            Log.d(TAG, "AuthProvider: " + authProviderName);
+            userLoggedIn = true;
+
+        }
+
+        GoogleSignInAccount acct = GoogleSignIn.getLastSignedInAccount(this);
+        Log.d(TAG, "FirebaseUser: " + user);
+        Log.d(TAG, "GoogleSignInAccount: " + acct);
+
+    }
 
 }
