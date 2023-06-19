@@ -11,4 +11,9 @@
     <color name="themeColorlight">#F44336</color>
     <color name="grey">#BFDFDFDF</color>
 
+    <color name="colorDivider">#ECECEC</color>
+
+
+
+
 </resources>

@@ -33,7 +33,7 @@
         app:lottie_autoPlay="true"
         app:lottie_rawRes="@raw/splashscreen_booksanim"
         app:lottie_repeatCount="2"
-        app:lottie_speed="2.5" />
+        app:lottie_speed="10" />
 
     <LinearLayout
         android:id="@+id/progressbar"

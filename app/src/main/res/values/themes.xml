@@ -20,4 +20,13 @@
         <!-- Customize your light theme here. -->
         <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
     </style>
+
+
+    <style name="tabText">
+
+        <item name="android:textSize">20dp</item><!-- text size in menu-->
+        <item name="android:fontFamily">@font/inter</item><!-- text size in menu-->
+        <item name="android:background">@drawable/hooverffext</item><!-- text size in menu-->
+
+    </style>
 </resources>

@@ -256,7 +256,7 @@ public class LoginScreen extends AppCompatActivity {
     private void LoginInComplete() {
         Toast.makeText(this, "Logged In!", Toast.LENGTH_SHORT).show();
         finish();
-        Intent intent = new Intent(LoginScreen.this, Profile.class);
+        Intent intent = new Intent(LoginScreen.this, MainActivity.class);
         startActivity(intent);
     }
 

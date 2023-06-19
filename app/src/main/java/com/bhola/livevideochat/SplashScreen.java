@@ -276,7 +276,7 @@ public class SplashScreen extends AppCompatActivity {
 
     private void handler_forIntent() {
         if (SplashScreen.userLoggedIn) {
-            Intent intent = new Intent(getApplicationContext(), Profile.class);
+            Intent intent = new Intent(getApplicationContext(), MainActivity.class);
             startActivity(intent);
         } else {
             Intent intent = new Intent(getApplicationContext(), LoginScreen.class);
