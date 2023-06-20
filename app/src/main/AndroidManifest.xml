@@ -30,6 +30,9 @@
             android:name=".VipMembership"
             android:exported="false" />
         <activity
+            android:name=".ChatScreen"
+            android:exported="false" />
+        <activity
             android:name=".LoginScreen"
             android:exported="false" />
         <activity

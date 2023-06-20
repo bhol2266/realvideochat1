@@ -7,21 +7,18 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.View;
 import android.widget.EditText;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -29,119 +26,98 @@ import java.util.Date;
 import de.hdodenhof.circleimageview.CircleImageView;
 
 public class ChatScreen extends AppCompatActivity {
-    String reciverimg, reciverUid,reciverName,SenderUID;
     CircleImageView profile;
     TextView reciverNName;
-    FirebaseDatabase database;
+    DatabaseReference databaseReference;
     FirebaseAuth firebaseAuth;
-    public  static String senderImg;
-    public  static String reciverIImg;
+
     CardView sendbtn;
     EditText textmsg;
 
-    String senderRoom,reciverRoom;
-    RecyclerView messageAdpter;
-    ArrayList<msgModelclass> messagesArrayList;
-    messagesAdpter mmessagesAdpter;
+    String userEmail, reciverRoom;
+    RecyclerView recyclerview;
+    ArrayList<Message_Modelclass> messagesArrayList;
+    MessageAdapter messageAdapter;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat_screen);
-        getSupportActionBar().hide();
-        database = FirebaseDatabase.getInstance();
-        firebaseAuth = FirebaseAuth.getInstance();
 
-        reciverName = getIntent().getStringExtra("nameeee");
-        reciverimg = getIntent().getStringExtra("reciverImg");
-        reciverUid = getIntent().getStringExtra("uid");
 
         messagesArrayList = new ArrayList<>();
+        Date date = new Date();
+        Message_Modelclass messages1 = new Message_Modelclass("preset", date.getTime(), 2); //viewType 1 is sender 2 is receiver
+        messagesArrayList.add(messages1);
 
         sendbtn = findViewById(R.id.sendbtnn);
         textmsg = findViewById(R.id.textmsg);
-        reciverNName = findViewById(R.id.recivername);
-        profile = findViewById(R.id.profileimgg);
-        messageAdpter = findViewById(R.id.msgadpter);
+        recyclerview = findViewById(R.id.recylerview);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
         linearLayoutManager.setStackFromEnd(true);
-        messageAdpter.setLayoutManager(linearLayoutManager);
-        mmessagesAdpter = new messagesAdpter(chatwindo.this,messagesArrayList);
-        messageAdpter.setAdapter(mmessagesAdpter);
+        recyclerview.setLayoutManager(linearLayoutManager);
+        messageAdapter = new MessageAdapter(ChatScreen.this, messagesArrayList);
+        recyclerview.setAdapter(messageAdapter);
 
+        if (SplashScreen.userLoggedIAs.equals("Google")) {
 
-        Picasso.get().load(reciverimg).into(profile);
-        reciverNName.setText(""+reciverName);
-
-        SenderUID =  firebaseAuth.getUid();
-
-        senderRoom = SenderUID+reciverUid;
-        reciverRoom = reciverUid+SenderUID;
-
-
-
-        DatabaseReference  reference = database.getReference().child("user").child(firebaseAuth.getUid());
-        DatabaseReference  chatreference = database.getReference().child("chats").child(senderRoom).child("messages");
-
-
-        chatreference.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                messagesArrayList.clear();
-                for (DataSnapshot dataSnapshot:snapshot.getChildren()){
-                    msgModelclass messages = dataSnapshot.getValue(msgModelclass.class);
-                    messagesArrayList.add(messages);
+            userEmail = FirebaseAuth.getInstance().getCurrentUser().getEmail();
+            databaseReference = FirebaseDatabase.getInstance().getReference().child(userEmail.replace(".", "_")).child("customer_care");
+            databaseReference.addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    messagesArrayList.clear();
+                    for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
+                        Message_Modelclass messages = dataSnapshot.getValue(Message_Modelclass.class);
+                        messagesArrayList.add(messages);
+                    }
+                    messageAdapter.notifyDataSetChanged();
                 }
-                mmessagesAdpter.notifyDataSetChanged();
-            }
 
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
 
-            }
-        });
-        reference.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                senderImg= snapshot.child("profilepic").getValue().toString();
-                reciverIImg=reciverimg;
-            }
+                }
+            });
 
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
+        }
 
-            }
-        });
 
         sendbtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 String message = textmsg.getText().toString();
-                if (message.isEmpty()){
-                    Toast.makeText(chatwindo.this, "Enter The Message First", Toast.LENGTH_SHORT).show();
+                if (message.isEmpty()) {
+                    Toast.makeText(ChatScreen.this, "Enter The Message First", Toast.LENGTH_SHORT).show();
                     return;
                 }
                 textmsg.setText("");
                 Date date = new Date();
-                msgModelclass messagess = new msgModelclass(message,SenderUID,date.getTime());
+                Message_Modelclass messages = new Message_Modelclass(message, date.getTime(), 1); //viewType 1 is sender 2 is receiver
+                if (SplashScreen.userLoggedIAs.equals("Google")) {
+                    databaseReference.push().setValue(messages);
+                }
 
-                database=FirebaseDatabase.getInstance();
-                database.getReference().child("chats")
-                        .child(senderRoom)
-                        .child("messages")
-                        .push().setValue(messagess).addOnCompleteListener(new OnCompleteListener<Void>() {
-                            @Override
-                            public void onComplete(@NonNull Task<Void> task) {
-                                database.getReference().child("chats")
-                                        .child(reciverRoom)
-                                        .child("messages")
-                                        .push().setValue(messagess).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                            @Override
-                                            public void onComplete(@NonNull Task<Void> task) {
+                String[] presetsMsg = {"How to be a member?", "Cancel subscription", "Why am I banned", "Report & Complaints"};
 
-                                            }
-                                        });
-                            }
-                        });
+                messagesArrayList.add(messages);
+                messageAdapter.notifyDataSetChanged();
+
+                new Handler().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        Message_Modelclass messages1 = new Message_Modelclass("preset", date.getTime(), 2); //viewType 1 is sender 2 is receiver
+                        messagesArrayList.add(messages1);
+                        linearLayoutManager.smoothScrollToPosition(recyclerview, null, recyclerview.getAdapter().getItemCount() - 1);
+                        messageAdapter.notifyDataSetChanged();
+
+
+                    }
+                }, 1000);
+
+                textmsg.setText("");
+                linearLayoutManager.smoothScrollToPosition(recyclerview, null, recyclerview.getAdapter().getItemCount() - 1);
+
             }
         });
 
