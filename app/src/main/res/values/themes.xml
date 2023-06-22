@@ -19,14 +19,31 @@
     <style name="Base.Theme.LiveVideoChat" parent="Theme.Material3.DayNight.NoActionBar">
         <!-- Customize your light theme here. -->
         <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+        <item name="bottomSheetDialogTheme">@style/AppBottomSheetDialogTheme</item>
+
     </style>
 
 
     <style name="tabText">
-
         <item name="android:textSize">20dp</item><!-- text size in menu-->
         <item name="android:fontFamily">@font/inter</item><!-- text size in menu-->
         <item name="android:background">@drawable/hooverffext</item><!-- text size in menu-->
+    </style>
 
+    <style name="ThemeOverlay.AppTheme.TextInputEditText.Outlined" parent="">
+        <item name="colorPrimary">@color/themeColor</item>
+    </style>
+
+
+<!--    bottomsheet dialog rounded corners-->
+
+    <style name="AppBottomSheetDialogTheme"
+        parent="Theme.Design.Light.BottomSheetDialog">
+        <item name="bottomSheetStyle">@style/AppModalStyle</item>
+    </style>
+
+    <style name="AppModalStyle"
+        parent="Widget.Design.BottomSheet.Modal">
+        <item name="android:background">@drawable/bg_bottom_sheet_dialog</item>
     </style>
 </resources>

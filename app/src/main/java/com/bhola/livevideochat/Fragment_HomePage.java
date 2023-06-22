@@ -10,7 +10,6 @@ import androidx.recyclerview.widget.LinearSmoothScroller;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.os.Handler;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,7 +20,6 @@ import android.view.animation.TranslateAnimation;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,7 +31,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 
-public class HomePage_fragment extends Fragment {
+public class Fragment_HomePage extends Fragment {
 
     private RecyclerView recyclerView1, recyclerView2, recyclerView3;
     private ImageAdapter imageAdapter, imageAdapter2, imageAdapter3;
@@ -43,7 +41,8 @@ public class HomePage_fragment extends Fragment {
     RelativeLayout btnRelativelayout;
     int randomNumber, current_value;
     TextView onlineCountTextview;
-    public HomePage_fragment() {
+
+    public Fragment_HomePage() {
         // Required empty public constructor
     }
 
@@ -75,7 +74,7 @@ public class HomePage_fragment extends Fragment {
         current_value = randomNumber;
 
 
-         onlineCountTextview = view.findViewById(R.id.onlineCount);
+        onlineCountTextview = view.findViewById(R.id.onlineCount);
         onlineCountTextview.setText(String.valueOf(randomNumber));
         incrementValueSlowly(view, context, onlineCountTextview);
 
@@ -155,7 +154,7 @@ public class HomePage_fragment extends Fragment {
             public void onClick(View view) {
 
                 Intent intent = new Intent(context, BeforeVideoCall.class);
-                intent.putExtra("count",onlineCountTextview.getText().toString());
+                intent.putExtra("count", onlineCountTextview.getText().toString());
                 startActivity(intent);
 
             }
@@ -250,38 +249,16 @@ public class HomePage_fragment extends Fragment {
         imageList.add(R.drawable.mgirl9);
 
         imageList2 = new ArrayList<>();
-        imageList2.add(R.drawable.mgirl10);
-        imageList2.add(R.drawable.mgirl11);
-        imageList2.add(R.drawable.mgirl12);
-        imageList2.add(R.drawable.mgirl13);
-        imageList2.add(R.drawable.mgirl14);
-        imageList2.add(R.drawable.mgirl15);
-        imageList2.add(R.drawable.mgirl16);
-        imageList2.add(R.drawable.mgirl17);
-        imageList2.add(R.drawable.mgirl10);
-        imageList2.add(R.drawable.mgirl11);
-        imageList2.add(R.drawable.mgirl12);
-        imageList2.add(R.drawable.mgirl13);
-        imageList2.add(R.drawable.mgirl14);
-        imageList2.add(R.drawable.mgirl15);
-        imageList2.add(R.drawable.mgirl16);
-        imageList2.add(R.drawable.mgirl17);
-        imageList2.add(R.drawable.mgirl10);
-        imageList2.add(R.drawable.mgirl11);
-        imageList2.add(R.drawable.mgirl12);
-        imageList2.add(R.drawable.mgirl13);
-        imageList2.add(R.drawable.mgirl14);
-        imageList2.add(R.drawable.mgirl15);
-        imageList2.add(R.drawable.mgirl16);
-        imageList2.add(R.drawable.mgirl17);
-        imageList2.add(R.drawable.mgirl10);
-        imageList2.add(R.drawable.mgirl11);
-        imageList2.add(R.drawable.mgirl12);
-        imageList2.add(R.drawable.mgirl13);
-        imageList2.add(R.drawable.mgirl14);
-        imageList2.add(R.drawable.mgirl15);
-        imageList2.add(R.drawable.mgirl16);
-        imageList2.add(R.drawable.mgirl17);
+        for (int i = 0; i < 100; i++) {
+            imageList2.add(R.drawable.mgirl10);
+            imageList2.add(R.drawable.mgirl11);
+            imageList2.add(R.drawable.mgirl12);
+            imageList2.add(R.drawable.mgirl13);
+            imageList2.add(R.drawable.mgirl14);
+            imageList2.add(R.drawable.mgirl15);
+            imageList2.add(R.drawable.mgirl16);
+            imageList2.add(R.drawable.mgirl17);
+        }
 
 
         List<Integer> imageList3 = new ArrayList<>();

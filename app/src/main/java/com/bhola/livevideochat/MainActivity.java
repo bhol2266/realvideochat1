@@ -89,7 +89,9 @@ public class MainActivity extends AppCompatActivity {
                         badge_text.setVisibility(View.VISIBLE);
 
                         break;
-                    case 3:
+
+
+                    case 2:
                         tab.setIcon(R.drawable.info_2);
 
 
@@ -98,9 +100,9 @@ public class MainActivity extends AppCompatActivity {
                         tab.setCustomView(view3);
                         break;
                     default:
-                        tab.setIcon(R.drawable.user);
+                        tab.setIcon(R.drawable.user2);
                         View view4 = getLayoutInflater().inflate(R.layout.customtab, null);
-                        view4.findViewById(R.id.icon).setBackgroundResource(R.drawable.user);
+                        view4.findViewById(R.id.icon).setBackgroundResource(R.drawable.user2);
                         tab.setCustomView(view4);
                         break;
                 }

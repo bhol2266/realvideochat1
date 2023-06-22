@@ -9,13 +9,15 @@
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.ACCESS_NOTIFICATION_POLICY" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
+        android:maxSdkVersion="32" />
 
     <uses-feature android:name="android.hardware.camera.any" />
 
     <uses-permission android:name="android.permission.CAMERA" />
 
     <application
-        android:allowBackup="true"
+        android:allowBackup="false"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
         android:icon="@mipmap/ic_launcher"
@@ -24,13 +26,13 @@
         android:theme="@style/Theme.LiveVideoChat"
         tools:targetApi="31">
         <activity
+            android:name=".Feedback"
+            android:exported="false" />
+        <activity
             android:name=".BeforeVideoCall"
             android:exported="false" />
         <activity
             android:name=".VipMembership"
-            android:exported="false" />
-        <activity
-            android:name=".ChatScreen"
             android:exported="false" />
         <activity
             android:name=".LoginScreen"

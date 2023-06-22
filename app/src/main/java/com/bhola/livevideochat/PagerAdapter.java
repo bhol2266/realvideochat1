@@ -15,13 +15,13 @@ public class PagerAdapter extends FragmentStateAdapter {
     public Fragment createFragment(int position) {
         switch (position) {
             case 0:
-                return new HomePage_fragment();
+                return new Fragment_HomePage();
             case 1:
-                return new Messenger_fragment();
+                return new Fragment_Messenger();
             case 2:
-                return new DesiGirlsTeam_fragment();
+                return new Fragment_CustomerCare();
             default:
-                return new User_Profile_fragment();
+                return new Fragment_UserProfile();
         }
     }
 

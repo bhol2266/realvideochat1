@@ -134,7 +134,7 @@ public class LoginScreen extends AppCompatActivity {
                 editor.putString("gender", gender);
                 editor.putString("loginAs", "Guest");
                 editor.apply();
-                LoginInComplete();
+                LoginInComplete("Guest");
             }
         });
 
@@ -224,7 +224,7 @@ public class LoginScreen extends AppCompatActivity {
                             editor.putString("photoUrl", account.getPhotoUrl().toString());
                             editor.putString("loginAs", "Google");
                             editor.apply();
-                            LoginInComplete();
+                            LoginInComplete("Google");
 
                         } else {
                             Toast.makeText(LoginScreen.this, task.getException().getMessage(), Toast.LENGTH_SHORT).show();
@@ -253,7 +253,9 @@ public class LoginScreen extends AppCompatActivity {
     }
 
 
-    private void LoginInComplete() {
+    private void LoginInComplete(String loggedAs) {
+        SplashScreen.userLoggedIn = true;
+        SplashScreen.userLoggedIAs = loggedAs;
         Toast.makeText(this, "Logged In!", Toast.LENGTH_SHORT).show();
         finish();
         Intent intent = new Intent(LoginScreen.this, MainActivity.class);

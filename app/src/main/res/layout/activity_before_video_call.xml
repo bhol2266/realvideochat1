@@ -18,6 +18,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
+            android:alpha="0.1"
             app:lottie_autoPlay="true"
             app:lottie_rawRes="@raw/pulse_anim"
             app:lottie_repeatCount="20"

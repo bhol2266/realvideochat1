@@ -9,10 +9,10 @@ import android.view.View;
 import android.view.ViewGroup;
 
 
-public class Messenger_fragment extends Fragment {
+public class Fragment_Messenger extends Fragment {
 
 
-    public Messenger_fragment() {
+    public Fragment_Messenger() {
         // Required empty public constructor
     }
 

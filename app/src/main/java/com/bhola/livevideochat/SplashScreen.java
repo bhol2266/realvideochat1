@@ -158,7 +158,7 @@ public class SplashScreen extends AppCompatActivity {
 
             return;
         } else {
-            url_mref = FirebaseDatabase.getInstance().getReference().child("Hindi_desi_Kahani-2");
+            url_mref = FirebaseDatabase.getInstance().getReference().child("LiveVideoChat");
             url_mref.addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -275,8 +275,10 @@ public class SplashScreen extends AppCompatActivity {
 
 
     private void handler_forIntent() {
+        Log.d(TAG, "userLoggedIn: "+userLoggedIn);
+        Log.d(TAG, "userLoggedIAs: "+userLoggedIAs);
         if (SplashScreen.userLoggedIn) {
-            Intent intent = new Intent(getApplicationContext(), ChatScreen.class);
+            Intent intent = new Intent(getApplicationContext(), MainActivity.class);
             startActivity(intent);
         } else {
             Intent intent = new Intent(getApplicationContext(), LoginScreen.class);

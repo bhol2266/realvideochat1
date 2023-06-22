@@ -1,0 +1,19 @@
+<!-- bottom_sheet_dialog.xml -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <!-- Add your desired content for the bottom sheet dialog here -->
+
+    <ListView
+        android:id="@+id/listView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+
+
+
+    <!-- Add additional views or content as needed -->
+
+</LinearLayout>

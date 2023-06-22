@@ -52,7 +52,7 @@
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/rubrik_semibold"
                     android:inputType="textCapSentences"
-                    android:text="bhola gupta"
+                    android:text=""
                     android:textColor="@color/white"
                     android:textSize="20dp" />
 

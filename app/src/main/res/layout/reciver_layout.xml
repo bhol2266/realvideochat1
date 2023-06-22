@@ -17,89 +17,39 @@
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:paddingTop="5dp"
         android:layout_marginLeft="10dp"
         android:layout_toRightOf="@id/profileImage"
         android:orientation="vertical">
 
-        <LinearLayout
+        <TextView
+            android:id="@+id/message"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginStart="1dp"
+            android:layout_gravity="left"
             android:background="@drawable/reciver_shape"
-            android:orientation="vertical">
-
-            <TextView
-                android:id="@+id/message"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="1dp"
-                android:fontFamily="@font/inter"
-                android:padding="7dp"
-                android:text="Welcome to Mirchi Chat! if you have any problem on Mirchi Chat, please report to us through feedback. Have fun on Mirchi Chat!!"
-                android:textColor="@color/black"
-                android:textSize="16dp" />
-
-            <TextView
-                android:id="@+id/msgClick0"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="1dp"
-                android:layout_marginTop="5dp"
-                android:fontFamily="@font/inter"
-                android:padding="7dp"
-                android:text="How to be a member?"
-                android:textColor="@color/themeColor"
-                android:textSize="16dp" />
-
-            <TextView
-                android:id="@+id/msgClick1"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="1dp"
-                android:layout_marginTop="5dp"
-                android:fontFamily="@font/inter"
-                android:padding="7dp"
-                android:text="Cancel subscription"
-                android:textColor="@color/themeColor"
-                android:textSize="16dp" />
-
-            <TextView
-                android:id="@+id/msgClick2"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="1dp"
-                android:layout_marginTop="5dp"
-                android:fontFamily="@font/inter"
-                android:padding="7dp"
-                android:text="Why am I banned?"
-                android:textColor="@color/themeColor"
-                android:textSize="16dp" />
-
-            <TextView
-                android:id="@+id/msgClick3"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="1dp"
-                android:layout_marginTop="5dp"
-                android:layout_marginBottom="5dp"
-                android:fontFamily="@font/inter"
-                android:padding="7dp"
-                android:text="Report &amp; Complaints"
-                android:textColor="@color/themeColor"
-                android:textSize="16dp" />
-        </LinearLayout>
-
+            android:fontFamily="@font/inter"
+            android:padding="7dp"
+            android:text="asdfsda"
+            android:textColorLink="@color/themeColor"
+            android:autoLink="all"
+            android:textSize="15dp"
+            android:textColor="@color/gmts_light_gray"
+            />
 
         <TextView
             android:id="@+id/timeStamp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="left"
-            android:layout_marginStart="1dp"
+            android:paddingRight="10dp"
+            android:layout_gravity="center"
+            android:layout_marginEnd="1dp"
             android:fontFamily="@font/inter"
-            android:paddingLeft="20dp"
-            android:paddingTop="10dp"
+            android:padding="7dp"
+            android:textSize="12dp"
             android:text="07-12-2023"
-            android:textSize="12dp" />
+            />
 
 
     </LinearLayout>

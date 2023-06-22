@@ -10,6 +10,7 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,14 +25,14 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.firebase.auth.FirebaseAuth;
 import com.squareup.picasso.Picasso;
 
-public class User_Profile_fragment extends Fragment {
+public class Fragment_UserProfile extends Fragment {
 
 
     ImageView profileImage;
     TextView name, coins;
     LinearLayout logout;
 
-    public User_Profile_fragment() {
+    public Fragment_UserProfile() {
         // Required empty public constructor
     }
 
@@ -57,6 +58,7 @@ public class User_Profile_fragment extends Fragment {
 
             String fullname = sh.getString("name", "not set");
             name.setText(fullname);
+            Log.d(SplashScreen.TAG, "onCreateView: "+fullname);
 
             if (SplashScreen.userLoggedIAs.equals("Google")) {
                 String urll = sh.getString("photoUrl", "not set");

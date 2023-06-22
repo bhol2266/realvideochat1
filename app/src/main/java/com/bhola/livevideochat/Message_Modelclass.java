@@ -23,8 +23,6 @@ public class Message_Modelclass {
         this.message = message;
     }
 
-
-
     public long getTimeStamp() {
         return timeStamp;
     }
