@@ -60,6 +60,17 @@ public class Feedback extends AppCompatActivity {
         });
         uploadImage();
         submitBtn();
+        actionBar();
+    }
+
+    private void actionBar() {
+        ImageView back_arrow=findViewById(R.id.back_arrow);
+        back_arrow.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                onBackPressed();
+            }
+        });
     }
 
     private void submitBtn() {
@@ -68,7 +79,7 @@ public class Feedback extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 if(problem.getText().equals("The Problem is related with")){
-                    Toast.makeText(Feedback.this, "Please select problem related with option", Toast.LENGTH_SHORT).show();
+                    problemOption.performClick();
                     return;
                 }
                 if (email.getText().toString().length() ==0) {

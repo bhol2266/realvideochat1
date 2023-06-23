@@ -119,7 +119,27 @@ public class Fragment_UserProfile extends Fragment {
             }
         });
 
+        oprnPrivacy_Terms(view,context);
+
 
         return view;
+    }
+
+    private void oprnPrivacy_Terms(View view, Context context) {
+        LinearLayout terms=view.findViewById(R.id.terms);
+        terms.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startActivity(new Intent(context,Terms_Conditions.class));
+            }
+        });
+
+        LinearLayout privacy=view.findViewById(R.id.privacy);
+        privacy.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startActivity(new Intent(context,PrivacyPolicy.class));
+            }
+        });
     }
 }

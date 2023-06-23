@@ -9,7 +9,8 @@
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.ACCESS_NOTIFICATION_POLICY" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
+    <uses-permission
+        android:name="android.permission.READ_EXTERNAL_STORAGE"
         android:maxSdkVersion="32" />
 
     <uses-feature android:name="android.hardware.camera.any" />
@@ -25,6 +26,12 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.LiveVideoChat"
         tools:targetApi="31">
+        <activity
+            android:name=".Terms_Conditions"
+            android:exported="false" />
+        <activity
+            android:name=".PrivacyPolicy"
+            android:exported="false" />
         <activity
             android:name=".Feedback"
             android:exported="false" />

@@ -8,6 +8,7 @@ import static android.content.Context.MODE_PRIVATE;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Paint;
 import android.os.Handler;
 import android.text.Spannable;
 import android.text.SpannableString;
@@ -125,36 +126,28 @@ public class MessageAdapter extends RecyclerView.Adapter {
             reciverTemplateViewHolder.msgClick3.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    optionClicked(reciverTemplateViewHolder.msgClick3.getText(), "In order to solve your problem, we need you to provide more detailed information, please click here to submit feedback.");
+                    optionClicked(reciverTemplateViewHolder.msgClick3.getText(), "In order to solve your problem, we need you to provide more detailed information, ");
 
                 }
             });
         } else {
+
             ReciverViewHolder reciverViewHolder = (MessageAdapter.ReciverViewHolder) holder;
             reciverViewHolder.msgtxt.setText(messages.getMessage());
 
-            if (messages.getMessage().equals("In order to solve your problem, we need you to provide more detailed information, please click here to submit feedback.")) {
-                String fullText =messages.getMessage();
-                int startIndex = fullText.indexOf("please");
-                int endIndex = startIndex + "feedback".length()+29;
-                SpannableString spannableString = new SpannableString(fullText);
-                ClickableSpan clickableSpan = new ClickableSpan() {
+
+            if (messages.getMessage().equals("In order to solve your problem, we need you to provide more detailed information, ")) {
+                reciverViewHolder.submitFeedback.setVisibility(View.VISIBLE);
+                reciverViewHolder.submitFeedback.setPaintFlags(  reciverViewHolder.submitFeedback.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
+
+                reciverViewHolder.submitFeedback.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        // Handle click event here
-                        context.startActivity(new Intent(context,Feedback.class));
+                        context.startActivity(new Intent(context, Feedback.class));
+
                     }
-                };
-
-                spannableString.setSpan(clickableSpan, startIndex, endIndex, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-
-                // Set the modified SpannableString to the TextView
-                reciverViewHolder.msgtxt.setText(spannableString);
-                reciverViewHolder.msgtxt.setMovementMethod(LinkMovementMethod.getInstance());
-
+                });
             }
-
-
         }
     }
 
@@ -255,12 +248,13 @@ public class MessageAdapter extends RecyclerView.Adapter {
     }
 
     static class ReciverViewHolder extends RecyclerView.ViewHolder {
-        TextView msgtxt;
+        TextView msgtxt, submitFeedback;
 
 
         public ReciverViewHolder(@NonNull View itemView) {
             super(itemView);
             msgtxt = itemView.findViewById(R.id.message);
+            submitFeedback = itemView.findViewById(R.id.submitFeedback);
 
 
         }

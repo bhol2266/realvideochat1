@@ -44,7 +44,7 @@ public class Fragment_CustomerCare extends Fragment {
     RecyclerView recyclerview;
     ArrayList<Message_Modelclass> messagesArrayList;
     MessageAdapter messageAdapter;
-    Date date;
+
 
     public Fragment_CustomerCare() {
         // Required empty public constructor
@@ -65,7 +65,7 @@ public class Fragment_CustomerCare extends Fragment {
 
     private void init(View view, Context context) {
 
-        date = new Date();
+        Date date = new Date();
 
         messagesArrayList = new ArrayList<Message_Modelclass>();
         clearMessages = view.findViewById(R.id.clearMessages);
@@ -121,6 +121,8 @@ public class Fragment_CustomerCare extends Fragment {
         sendbtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                Date date = new Date();
+
                 String message = textmsg.getText().toString();
                 if (message.isEmpty()) {
                     Toast.makeText(context, "Enter The Message First", Toast.LENGTH_SHORT).show();
@@ -198,6 +200,8 @@ public class Fragment_CustomerCare extends Fragment {
     }
 
     private void clearMessaage(View view, Context context) {
+        Date    date = new Date();
+
         clearMessages.setVisibility(View.VISIBLE);
         clearMessages.setOnClickListener(new View.OnClickListener() {
             @Override

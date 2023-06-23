@@ -155,17 +155,14 @@ public class LoginScreen extends AppCompatActivity {
         terms.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(Intent.ACTION_VIEW);
-                intent.setData(Uri.parse(getString(R.string.terms_service_link)));
-                startActivity(intent);
+                startActivity(new Intent(LoginScreen.this,Terms_Conditions.class));
             }
         });
         privaciy.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(Intent.ACTION_VIEW);
-                intent.setData(Uri.parse(getString(R.string.privacy_policy_link)));
-                startActivity(intent);
+                startActivity(new Intent(LoginScreen.this,PrivacyPolicy.class));
+
             }
         });
     }

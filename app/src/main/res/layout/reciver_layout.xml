@@ -9,47 +9,51 @@
         android:id="@+id/profileImage"
         android:layout_width="40dp"
         android:layout_height="40dp"
-        android:layout_marginTop="8dp"
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
+        android:layout_marginTop="8dp"
         android:src="@drawable/customer_care" />
 
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:paddingTop="5dp"
         android:layout_marginLeft="10dp"
         android:layout_toRightOf="@id/profileImage"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:paddingTop="5dp">
 
-        <TextView
-            android:id="@+id/message"
+        <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="1dp"
-            android:layout_gravity="left"
             android:background="@drawable/reciver_shape"
-            android:fontFamily="@font/inter"
-            android:padding="7dp"
-            android:text="asdfsda"
-            android:textColorLink="@color/themeColor"
-            android:autoLink="all"
-            android:textSize="15dp"
-            android:textColor="@color/gmts_light_gray"
-            />
+            android:layout_gravity="left"
+            android:layout_marginStart="1dp"
+            android:orientation="vertical"
+            android:padding="7dp">
 
-        <TextView
-            android:id="@+id/timeStamp"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:paddingRight="10dp"
-            android:layout_gravity="center"
-            android:layout_marginEnd="1dp"
-            android:fontFamily="@font/inter"
-            android:padding="7dp"
-            android:textSize="12dp"
-            android:text="07-12-2023"
-            />
+            <TextView
+                android:id="@+id/message"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/inter"
+                android:text="asdfsda"
+                android:textColor="@color/gmts_light_gray"
+                android:textColorLink="@color/themeColor"
+                android:textSize="15dp" />
+
+            <TextView
+                android:id="@+id/submitFeedback"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="left"
+                android:paddingTop="2dp"
+                android:paddingBottom="2dp"
+                android:visibility="gone"
+                android:fontFamily="@font/inter"
+                android:text="please click here to submit feedback."
+                android:textColor="@color/themeColor"
+                android:textSize="15dp" />
+        </LinearLayout>
 
 
     </LinearLayout>

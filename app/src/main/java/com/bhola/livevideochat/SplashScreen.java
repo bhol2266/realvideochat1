@@ -82,6 +82,9 @@ public class SplashScreen extends AppCompatActivity {
     public static boolean homepageAdShown = false;
     boolean animationCompleted = false;
 
+    public static String terms_service_link = "https://sites.google.com/view/desi-girls-live-video-chat/terms_service";
+    public static String privacy_policy_link = "https://sites.google.com/view/desi-girls-live-video-chat/privacypolicy";
+
 
     //Google login
     public static boolean userLoggedIn = false;

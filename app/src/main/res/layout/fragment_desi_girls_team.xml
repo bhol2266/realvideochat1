@@ -17,8 +17,8 @@
 
         <ImageView
             android:id="@+id/profileimgg"
-            android:layout_width="45dp"
-            android:layout_height="45dp"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
             android:src="@drawable/customer_care" />
 
         <LinearLayout
@@ -34,7 +34,7 @@
                 android:fontFamily="@font/rubrik_semibold"
                 android:text="Desi Video Chat Team"
                 android:textColor="@color/black"
-                android:textSize="20dp"
+                android:textSize="18dp"
                 android:textStyle="bold" />
 
             <TextView
