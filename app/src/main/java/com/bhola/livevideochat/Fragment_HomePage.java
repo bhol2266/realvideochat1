@@ -227,13 +227,28 @@ public class Fragment_HomePage extends Fragment {
         recyclerView3 = view.findViewById(R.id.recyclerView3);
 
 
-        LinearLayoutManager layoutManager1 = new LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, true);
+        LinearLayoutManager layoutManager1 = new LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, true) {
+            @Override
+            public boolean canScrollHorizontally() {
+                return false; // Disable horizontal scrolling for recyclerView1
+            }
+        };
         recyclerView1.setLayoutManager(layoutManager1);
 
-        LinearLayoutManager layoutManager2 = new LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, true);
+        LinearLayoutManager layoutManager2 = new LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, true) {
+            @Override
+            public boolean canScrollHorizontally() {
+                return false; // Disable horizontal scrolling for recyclerView2
+            }
+        };
         recyclerView2.setLayoutManager(layoutManager2);
 
-        LinearLayoutManager layoutManager3 = new LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, true);
+        LinearLayoutManager layoutManager3 = new LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, true) {
+            @Override
+            public boolean canScrollHorizontally() {
+                return false; // Disable horizontal scrolling for recyclerView3
+            }
+        };
         recyclerView3.setLayoutManager(layoutManager3);
 
 
