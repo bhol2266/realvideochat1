@@ -2,6 +2,7 @@ package com.bhola.livevideochat;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.media.MediaPlayer;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -9,12 +10,14 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.squareup.picasso.Picasso;
 
@@ -26,14 +29,20 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Map;
+import java.util.Random;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
 
 public class Fragment_Messenger extends Fragment {
     RecyclerView recyclerview;
+    ArrayList<ChatItem_ModelClass> userList;
+    ArrayList<ChatItem_ModelClass> userListTemp;
+    LinearLayoutManager layoutManager;
+    MessengeItemsAdapter adapter;
 
     public Fragment_Messenger() {
         // Required empty public constructor
@@ -61,8 +70,7 @@ public class Fragment_Messenger extends Fragment {
 
     private void setRecyclerView(View view, Context context) {
         recyclerview = view.findViewById(R.id.recyclerview);
-        LinearLayoutManager layoutManager = new LinearLayoutManager(context);
-        recyclerview.setLayoutManager(layoutManager);
+
         readDataFromJson(view, context);
 
 
@@ -83,7 +91,7 @@ public class Fragment_Messenger extends Fragment {
         }
 
 // Parse JSON and create ArrayList of Map objects
-        ArrayList<ChatItem_ModelClass> userList = new ArrayList<>();
+        userList = new ArrayList<>();
         try {
             JSONObject jsonObject = new JSONObject(json);
             JSONArray usersArray = jsonObject.getJSONArray("users");
@@ -133,13 +141,64 @@ public class Fragment_Messenger extends Fragment {
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-        sendDataToRecyclerview(userList, context, view);
+        sendDataToRecyclerview(context, view);
     }
 
-    private void sendDataToRecyclerview(ArrayList<ChatItem_ModelClass> userList, Context context, View view) {
-        MessengeItemsAdapter adapter = new MessengeItemsAdapter(userList, context);
+    private void sendDataToRecyclerview(Context context, View view) {
+
+        Log.d("SplashScreen", "sendDataToRecyclerview: " + userList);
+        userListTemp = new ArrayList<>();
+
+        adapter = new MessengeItemsAdapter(userListTemp, context);
+        layoutManager = new LinearLayoutManager(context);
+        recyclerview.setLayoutManager(layoutManager);
+        layoutManager.setStackFromEnd(true);
         recyclerview.setAdapter(adapter);
+        userListTemp.add(userList.get(0));
+
+        userList.remove(0);
+        Collections.shuffle(userList);
+
+        for (int i = 0; i < 4; i++) {
+
+            int finalI = i;
+//            int[] numbers = {3, 6, 10, 12, 15, 20};
+//            Random random = new Random();
+//            int randomIndex = random.nextInt(numbers.length);
+
+            int delayTime = 0;
+            if (i == 0) {
+                delayTime = 1500;
+            } else if (i == 1 || i == 2) {
+                delayTime = i * 8000;
+            } else {
+                delayTime = 20000;
+            }
+
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    userListTemp.add(0, userList.get(finalI));
+                    adapter.notifyItemInserted(0);
+                }
+            }, delayTime);
+        }
+
+
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+//        if (layoutManager.getChildCount() != 0 && layoutManager.getChildCount()< userList.size()+1) {
+//            new Handler().postDelayed(new Runnable() {
+//                @Override
+//                public void run() {
+//                    userListTemp.add(0, userList.get(layoutManager.getChildCount()));
+//                    adapter.notifyItemInserted(0);
+//                }
+//            }, 1500);
+//        }
 
     }
 
@@ -169,6 +228,10 @@ class MessengeItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, @SuppressLint("RecyclerView") int position) {
 
+
+        MediaPlayer mediaPlayer = MediaPlayer.create(context, R.raw.message_received);
+        mediaPlayer.start();
+
         MessengeItemsAdapter.UserItem_Viewholder userItem_viewholder = (MessengeItemsAdapter.UserItem_Viewholder) holder;
         ChatItem_ModelClass modelClass = userList.get(position);
 
@@ -183,12 +246,13 @@ class MessengeItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
 
         Picasso.get().load(modelClass.getUserProfile()).into(userItem_viewholder.profileUrl);
 
-        if (modelClass.getUserBotMsg().size() != 0) {
-            UserBotMsg userBotMsg = modelClass.getUserBotMsg().get(1);
+        if (modelClass.isContainsQuestion()) {
+            UserQuestionWithAns userQuestionWithAns = modelClass.getQuestionWithAns();
+            userItem_viewholder.lastMessage.setText(userQuestionWithAns.getQuestion());
+        } else {
+            UserBotMsg userBotMsg = modelClass.getUserBotMsg().get(0);
             userItem_viewholder.lastMessage.setText(userBotMsg.getMsg());
         }
-
-
     }
 
 

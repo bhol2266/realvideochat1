@@ -1,6 +1,22 @@
 {
   "users": [
     {
+      "id": 0,
+      "userName": "Team Desi Video Chat",
+      "userProfile": "https://i.ibb.co/sKShSVr/logo-home.png",
+      "containsQuestion": false,
+      "recommendationType": "",
+      "userBotMsg": [
+        {
+          "id": 0,
+          "msg": "Welcome to Desi Video Chat",
+          "mimeType": "mimeType/text",
+          "dateTime": "",
+          "nextMsgDelay": 30000
+        }
+      ]
+    },
+    {
       "id": 2,
       "userName": "Sudha :)",
       "userProfile": "https://p-cdn.telescope.vip/pepper/avatar/0/20210511-1620720723403.jpg",
@@ -260,7 +276,7 @@
       "userProfile": "https://p-cdn.telescope.vip/pepper/avatar/523417673/20211107-1636285299409.jpg",
       "containsQuestion": true,
       "recommendationType": "Popular",
-      "userBotMsg": [ ],
+      "userBotMsg": [],
       "questionWithAns": {
         "question": "Tumhari girlfriend hai kya?",
         "answers": [
