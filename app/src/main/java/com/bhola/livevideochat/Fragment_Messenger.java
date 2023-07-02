@@ -6,18 +6,17 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.media.MediaPlayer;
 import android.os.Bundle;
-
-import androidx.annotation.NonNull;
-import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
 import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
@@ -157,7 +156,7 @@ public class Fragment_Messenger extends Fragment {
         adapter = new MessengeItemsAdapter(userListTemp, context, adapter);
         layoutManager = new LinearLayoutManager(context);
         recyclerview.setLayoutManager(layoutManager);
-        layoutManager.setStackFromEnd(true);
+
         recyclerview.setAdapter(adapter);
 
         if (retreive_sharedPreferences(context)) {
@@ -174,28 +173,22 @@ public class Fragment_Messenger extends Fragment {
         Collections.shuffle(userList);
 
 
-        for (int i = 0; i < 2; i++) {
+        for (int i = 0; i < 4; i++) {
 
             int finalI = i;
 //            int[] numbers = {3, 6, 10, 12, 15, 20};
 //            Random random = new Random();
 //            int randomIndex = random.nextInt(numbers.length);
 
-            int delayTime = 0;
-            if (i == 0) {
-                delayTime = 1500;
-            } else if (i == 1 || i == 2) {
-                delayTime = i * 8000;
-            } else {
-                delayTime = 20000;
-            }
+            int delayTime = finalI * 8000;
+
 
             new Handler().postDelayed(new Runnable() {
                 @Override
                 public void run() {
-                    userListTemp.add(0, userList.get(finalI));
+                    userListTemp.add(0,userList.get(finalI));
                     adapter.notifyItemInserted(0);
-                    save_sharedPrefrence(context);
+//                    save_sharedPrefrence(context);
 
                 }
             }, delayTime);
@@ -280,6 +273,7 @@ class MessengeItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
 
 
         userItem_viewholder.userName.setText(modelClass.getUserName());
+        userItem_viewholder.messageCount.setText(String.valueOf(position));
         userItem_viewholder.recommendationType.setText(modelClass.getRecommendationType());
         SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm");
 
@@ -305,15 +299,12 @@ class MessengeItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
                     @Override
                     public void run() {
 
-                        userList.remove(position);
+                        Log.d(SplashScreen.TAG, modelClass.getUserName() + "run: " + position);
 
-
-                        // Add the item at the top
-                        userList.add(0, modelClass);
-
-                        // Notify the adapter about the data change
-                        notifyDataSetChanged();
-                        userItem_viewholder.lastMessage.setText((CharSequence) modelClass.getUserBotMsg().get(finalI).getMsg());
+                        ChatItem_ModelClass modelClass2 = userList.remove(position);
+                        userList.add(0, modelClass2);
+                        notifyItemMoved(position, 0);
+                        notifyItemChanged(0);
 
 
                     }
