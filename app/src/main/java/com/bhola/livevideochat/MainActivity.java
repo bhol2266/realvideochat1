@@ -1,5 +1,7 @@
 package com.bhola.livevideochat;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
@@ -11,8 +13,11 @@ import androidx.viewpager2.widget.ViewPager2;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.PorterDuff;
+import android.media.MediaPlayer;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
@@ -34,6 +39,8 @@ import io.grpc.Context;
 public class MainActivity extends AppCompatActivity {
 
     private int CAMERA_PERMISSION_REQUEST_CODE = 123;
+    final int NOTIFICATION_REQUEST_CODE = 112;
+    public static TextView badge_text;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,6 +59,8 @@ public class MainActivity extends AppCompatActivity {
         });
 
         initializeBottonFragments();
+        askForNotificationPermission(); //Android 13 and higher
+
     }
 
     private void initializeBottonFragments() {
@@ -84,8 +93,24 @@ public class MainActivity extends AppCompatActivity {
                         view2.findViewById(R.id.icon).setBackgroundResource(R.drawable.chat);
                         tab.setCustomView(view2);
 
-                        TextView badge_text = view2.findViewById(R.id.badge_text);
-                        badge_text.setText("20");
+                        badge_text = view2.findViewById(R.id.badge_text);
+                        badge_text.setVisibility(View.GONE);
+
+                        if (!Fragment_Messenger.retreive_sharedPreferences(MainActivity.this)) {
+                            //logged in first time
+                            new Handler().postDelayed(new Runnable() {
+                                @Override
+                                public void run() {
+                                    badge_text.setVisibility(View.VISIBLE);
+                                    badge_text.setText("1");
+                                    badge_text.setBackgroundResource(R.drawable.badge_background);
+                                    MediaPlayer mediaPlayer = MediaPlayer.create(MainActivity.this, R.raw.message_received);
+                                    mediaPlayer.start();
+                                }
+                            }, 3000);
+
+                        }
+
                         badge_text.setVisibility(View.VISIBLE);
 
                         break;
@@ -156,7 +181,50 @@ public class MainActivity extends AppCompatActivity {
                 Toast.makeText(this, "Camera permission denied", Toast.LENGTH_SHORT).show();
             }
         }
+
+        if (requestCode == NOTIFICATION_REQUEST_CODE) {
+            if (grantResults.length > 0 &&
+                    grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // Permission is granted. Continue the action or workflow
+                // in your app.
+            } else {
+                // Explain to the user that the feature is unavailable because
+                // the feature requires a permission that the user has denied.
+                // At the same time, respect the user's decision. Don't link to
+                // system settings in an effort to convince the user to change
+                // their decision.
+            }
+        }
     }
+
+    private void askForNotificationPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+                requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS);
+
+                new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        Toast.makeText(MainActivity.this, "Allow Notification for Daily new Stories ", Toast.LENGTH_LONG).show();
+                    }
+                }, 1000);
+            }
+        }
+    }
+
+    private final ActivityResultLauncher<String> requestPermissionLauncher =
+            registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
+                if (isGranted) {
+                    // Permission is granted. Continue the action or workflow in your
+                    // app.
+                } else {
+                    // Explain to the user that the feature is unavailable because the
+                    // feature requires a permission that the user has denied. At the
+                    // same time, respect the user's decision. Don't link to system
+                    // settings in an effort to convince the user to change their
+                    // decision.
+                }
+            });
 
 
 }

@@ -78,7 +78,6 @@ public class MessageAdapter extends RecyclerView.Adapter {
         SimpleDateFormat sdf = new SimpleDateFormat("HH:mm dd/MM", Locale.getDefault());
         String formattedDate = sdf.format(date);
 
-        Log.d(SplashScreen.TAG, "onBindViewHolder: " + messages.getMessage() + "  : " + position);
 
         if (messages.getViewType() == 1) {
             SenderVierwHolder senderVierwHolder = (MessageAdapter.SenderVierwHolder) holder;

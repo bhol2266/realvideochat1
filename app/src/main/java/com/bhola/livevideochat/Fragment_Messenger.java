@@ -1,7 +1,9 @@
 package com.bhola.livevideochat;
 
 import android.annotation.SuppressLint;
+import android.app.Dialog;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 
@@ -15,10 +17,10 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
+import com.google.common.reflect.TypeToken;
+import com.google.gson.Gson;
 import com.squareup.picasso.Picasso;
 
 import org.json.JSONArray;
@@ -26,23 +28,26 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
-import java.util.Map;
-import java.util.Random;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
 
 public class Fragment_Messenger extends Fragment {
     RecyclerView recyclerview;
-    ArrayList<ChatItem_ModelClass> userList;
-    ArrayList<ChatItem_ModelClass> userListTemp;
+    public static ArrayList<ChatItem_ModelClass> userList;
+    public static ArrayList<ChatItem_ModelClass> userListTemp;
     LinearLayoutManager layoutManager;
-    MessengeItemsAdapter adapter;
+    public static MessengeItemsAdapter adapter;
+
+    private Dialog alertNotificationDialog;
+    private static final long AUTO_DISMISS_DELAY = 4000; // 4 seconds
+
 
     public Fragment_Messenger() {
         // Required empty public constructor
@@ -67,6 +72,7 @@ public class Fragment_Messenger extends Fragment {
 
 
     }
+
 
     private void setRecyclerView(View view, Context context) {
         recyclerview = view.findViewById(R.id.recyclerview);
@@ -141,25 +147,34 @@ public class Fragment_Messenger extends Fragment {
         } catch (Exception e) {
             e.printStackTrace();
         }
+
         sendDataToRecyclerview(context, view);
     }
 
     private void sendDataToRecyclerview(Context context, View view) {
 
-        Log.d("SplashScreen", "sendDataToRecyclerview: " + userList);
         userListTemp = new ArrayList<>();
-
-        adapter = new MessengeItemsAdapter(userListTemp, context);
+        adapter = new MessengeItemsAdapter(userListTemp, context, adapter);
         layoutManager = new LinearLayoutManager(context);
         recyclerview.setLayoutManager(layoutManager);
         layoutManager.setStackFromEnd(true);
         recyclerview.setAdapter(adapter);
+
+        if (retreive_sharedPreferences(context)) {
+            Log.d(SplashScreen.TAG, "save_sharedPrefrence: " + userListTemp.size());
+            adapter = new MessengeItemsAdapter(userListTemp, context, adapter);
+            recyclerview.setAdapter(adapter);
+            return;
+        }
+
         userListTemp.add(userList.get(0));
+
 
         userList.remove(0);
         Collections.shuffle(userList);
 
-        for (int i = 0; i < 4; i++) {
+
+        for (int i = 0; i < 2; i++) {
 
             int finalI = i;
 //            int[] numbers = {3, 6, 10, 12, 15, 20};
@@ -180,28 +195,54 @@ public class Fragment_Messenger extends Fragment {
                 public void run() {
                     userListTemp.add(0, userList.get(finalI));
                     adapter.notifyItemInserted(0);
+                    save_sharedPrefrence(context);
+
                 }
             }, delayTime);
         }
 
+    }
+
+    private void save_sharedPrefrence(Context context) {
+
+
+        SharedPreferences sharedPreferences = context.getSharedPreferences("messenger_chats", Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+
+// Convert the ArrayList to JSON string
+        Gson gson = new Gson();
+        String json = gson.toJson(userListTemp);
+
+// Save the JSON string to SharedPreferences
+        editor.putString("userListTemp", json);
+        editor.apply();
+
 
     }
 
-    @Override
-    public void onResume() {
-        super.onResume();
-//        if (layoutManager.getChildCount() != 0 && layoutManager.getChildCount()< userList.size()+1) {
-//            new Handler().postDelayed(new Runnable() {
-//                @Override
-//                public void run() {
-//                    userListTemp.add(0, userList.get(layoutManager.getChildCount()));
-//                    adapter.notifyItemInserted(0);
-//                }
-//            }, 1500);
-//        }
+    public static boolean retreive_sharedPreferences(Context context) {
+        SharedPreferences sharedPreferences = context.getSharedPreferences("messenger_chats", Context.MODE_PRIVATE);
+
+// Retrieve the JSON string from SharedPreferences
+        String json = sharedPreferences.getString("userListTemp", null);
+
+
+// Convert the JSON string back to ArrayList
+        Gson gson = new Gson();
+        Type type = new TypeToken<ArrayList<ChatItem_ModelClass>>() {
+        }.getType();
+
+
+        if (json == null) {
+            // Handle case when no ArrayList is saved in SharedPreferences
+            return false;
+        } else {
+            userListTemp = gson.fromJson(json, type);
+            return true;
+        }
+
 
     }
-
 }
 
 
@@ -210,10 +251,12 @@ class MessengeItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
     Context context;
 
     ArrayList<ChatItem_ModelClass> userList;
+    MessengeItemsAdapter adapter;
 
-    public MessengeItemsAdapter(ArrayList<ChatItem_ModelClass> userList, Context context) {
+    public MessengeItemsAdapter(ArrayList<ChatItem_ModelClass> userList, Context context, MessengeItemsAdapter adapter) {
         this.userList = userList;
         this.context = context;
+        this.adapter = adapter;
 
     }
 
@@ -252,6 +295,32 @@ class MessengeItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         } else {
             UserBotMsg userBotMsg = modelClass.getUserBotMsg().get(0);
             userItem_viewholder.lastMessage.setText(userBotMsg.getMsg());
+
+            for (int i = 0; i < modelClass.getUserBotMsg().size() - 1; i++) {
+
+                int nextMegDelay = modelClass.getUserBotMsg().get(i).getNextMsgDelay();
+
+                int finalI = i + 1;
+                new Handler().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+
+                        userList.remove(position);
+
+
+                        // Add the item at the top
+                        userList.add(0, modelClass);
+
+                        // Notify the adapter about the data change
+                        notifyDataSetChanged();
+                        userItem_viewholder.lastMessage.setText((CharSequence) modelClass.getUserBotMsg().get(finalI).getMsg());
+
+
+                    }
+                }, nextMegDelay);
+            }
+
+
         }
     }
 
