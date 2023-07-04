@@ -211,7 +211,6 @@ public class SplashScreen extends AppCompatActivity {
         SharedPreferences.Editor myEdit = sharedPreferences.edit();
         myEdit.putInt("loginTimes", a + 1);
         myEdit.commit();
-        Log.d(TAG, "sharedPrefrences: " + Login_Times);
 
 
     }

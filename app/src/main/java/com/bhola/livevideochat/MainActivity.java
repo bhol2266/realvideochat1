@@ -11,6 +11,7 @@ import androidx.core.view.WindowInsetsControllerCompat;
 import androidx.viewpager2.widget.ViewPager2;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.PorterDuff;
 import android.media.MediaPlayer;
@@ -41,6 +42,7 @@ public class MainActivity extends AppCompatActivity {
     private int CAMERA_PERMISSION_REQUEST_CODE = 123;
     final int NOTIFICATION_REQUEST_CODE = 112;
     public static TextView badge_text;
+    public static int unreadMessage_count;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -92,6 +94,7 @@ public class MainActivity extends AppCompatActivity {
                         View view2 = getLayoutInflater().inflate(R.layout.customtab, null);
                         view2.findViewById(R.id.icon).setBackgroundResource(R.drawable.chat);
                         tab.setCustomView(view2);
+                        unreadMessage_count = getUndreadMessage_Count();
 
                         badge_text = view2.findViewById(R.id.badge_text);
                         badge_text.setVisibility(View.GONE);
@@ -101,17 +104,26 @@ public class MainActivity extends AppCompatActivity {
                             new Handler().postDelayed(new Runnable() {
                                 @Override
                                 public void run() {
-                                    badge_text.setVisibility(View.VISIBLE);
-                                    badge_text.setText("1");
-                                    badge_text.setBackgroundResource(R.drawable.badge_background);
-                                    MediaPlayer mediaPlayer = MediaPlayer.create(MainActivity.this, R.raw.message_received);
-                                    mediaPlayer.start();
+                                    //First time
+                                        badge_text.setVisibility(View.VISIBLE);
+                                        badge_text.setText("1");
+                                        badge_text.setBackgroundResource(R.drawable.badge_background);
+                                        MediaPlayer mediaPlayer = MediaPlayer.create(MainActivity.this, R.raw.message_received);
+                                        mediaPlayer.start();
+
                                 }
                             }, 3000);
 
-                        }
+                        }else{
+                            if (unreadMessage_count != 0) {
+                                badge_text.setVisibility(View.VISIBLE);
+                                badge_text.setText(String.valueOf(unreadMessage_count));
+                                badge_text.setBackgroundResource(R.drawable.badge_background);
 
-                        badge_text.setVisibility(View.VISIBLE);
+                            } else {
+                                badge_text.setVisibility(View.GONE);
+                            }
+                        }
 
                         break;
 
@@ -167,6 +179,12 @@ public class MainActivity extends AppCompatActivity {
                 // Tab reselected, no action needed
             }
         });
+    }
+
+    private int getUndreadMessage_Count() {
+        SharedPreferences sharedPreferences = getSharedPreferences("messenger_chats", MainActivity.this.MODE_PRIVATE);
+        int count = sharedPreferences.getInt("unreadMessage_Count", 0);
+        return count;
     }
 
     @Override

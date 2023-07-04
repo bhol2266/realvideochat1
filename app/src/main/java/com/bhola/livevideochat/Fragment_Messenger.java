@@ -31,7 +31,6 @@ import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 
 import de.hdodenhof.circleimageview.CircleImageView;
@@ -119,8 +118,10 @@ public class Fragment_Messenger extends Fragment {
                     String mimeType = userBotMsgObject.getString("mimeType");
                     String dateTime = userBotMsgObject.getString("dateTime");
                     int nextMsgDelay = userBotMsgObject.getInt("nextMsgDelay");
+                    int read = userBotMsgObject.getInt("read");
+                    int sent = userBotMsgObject.getInt("sent");
 
-                    UserBotMsg userBotMsg = new UserBotMsg(msgId, msg, mimeType, "", dateTime, nextMsgDelay);
+                    UserBotMsg userBotMsg = new UserBotMsg(msgId, msg, mimeType, "", dateTime, nextMsgDelay, read, sent);
                     userBotMsgList.add(userBotMsg);
                 }
 
@@ -130,6 +131,8 @@ public class Fragment_Messenger extends Fragment {
                     String question = questionWithAnsObject.getString("question");
                     JSONArray answersArray = questionWithAnsObject.getJSONArray("answers");
                     String action = questionWithAnsObject.getString("action");
+                    int read = questionWithAnsObject.getInt("read");
+                    int sent = questionWithAnsObject.getInt("sent");
 
                     ArrayList<String> answersList = new ArrayList<>();
                     for (int k = 0; k < answersArray.length(); k++) {
@@ -137,7 +140,7 @@ public class Fragment_Messenger extends Fragment {
                         answersList.add(answer);
                     }
 
-                    questionWithAns = new UserQuestionWithAns(question, answersList, action);
+                    questionWithAns = new UserQuestionWithAns(question, answersList, action, read, sent);
                 }
 
                 ChatItem_ModelClass user = new ChatItem_ModelClass(id, userName, userProfile, containsQuestion, recommendationType, userBotMsgList, questionWithAns);
@@ -153,42 +156,55 @@ public class Fragment_Messenger extends Fragment {
     private void sendDataToRecyclerview(Context context, View view) {
 
         userListTemp = new ArrayList<>();
-        adapter = new MessengeItemsAdapter(userListTemp, context, adapter);
         layoutManager = new LinearLayoutManager(context);
         recyclerview.setLayoutManager(layoutManager);
+        adapter = new MessengeItemsAdapter(userListTemp, context, adapter, recyclerview);
 
         recyclerview.setAdapter(adapter);
 
         if (retreive_sharedPreferences(context)) {
-            Log.d(SplashScreen.TAG, "save_sharedPrefrence: " + userListTemp.size());
-            adapter = new MessengeItemsAdapter(userListTemp, context, adapter);
+            adapter = new MessengeItemsAdapter(userListTemp, context, adapter, recyclerview);
             recyclerview.setAdapter(adapter);
+            userList.remove(0);
+
+            int temp = 1;
+            for (int i = userListTemp.size(); i < userList.size(); i++) {
+
+                int delayTime = temp * 8000;
+                temp++;
+                int finalI = i;
+
+                new Handler().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        userListTemp.add(0, userList.get(finalI));
+                        adapter.notifyItemInserted(0);
+                        Fragment_Messenger.save_sharedPrefrence(context, userListTemp);
+                        updateUnreadmessageCount(context);
+
+                    }
+                }, delayTime);
+            }
+
             return;
         }
 
         userListTemp.add(userList.get(0));
-
-
+        updateUnreadmessageCount(context);
         userList.remove(0);
-        Collections.shuffle(userList);
-
 
         for (int i = 0; i < 4; i++) {
 
             int finalI = i;
-//            int[] numbers = {3, 6, 10, 12, 15, 20};
-//            Random random = new Random();
-//            int randomIndex = random.nextInt(numbers.length);
-
             int delayTime = finalI * 8000;
-
 
             new Handler().postDelayed(new Runnable() {
                 @Override
                 public void run() {
-                    userListTemp.add(0,userList.get(finalI));
+                    userListTemp.add(0, userList.get(finalI));
                     adapter.notifyItemInserted(0);
-//                    save_sharedPrefrence(context);
+                    Fragment_Messenger.save_sharedPrefrence(context, userListTemp);
+                    updateUnreadmessageCount(context);
 
                 }
             }, delayTime);
@@ -196,7 +212,7 @@ public class Fragment_Messenger extends Fragment {
 
     }
 
-    private void save_sharedPrefrence(Context context) {
+    public static void save_sharedPrefrence(Context context, ArrayList<ChatItem_ModelClass> userList) {
 
 
         SharedPreferences sharedPreferences = context.getSharedPreferences("messenger_chats", Context.MODE_PRIVATE);
@@ -236,6 +252,22 @@ public class Fragment_Messenger extends Fragment {
 
 
     }
+
+    public static void updateUnreadmessageCount(Context context) {
+        SharedPreferences sharedPreferences = context.getSharedPreferences("messenger_chats", Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        Log.d(SplashScreen.TAG, "updateUnreadmessageCount: " + MainActivity.unreadMessage_count);
+        int value = MainActivity.unreadMessage_count + 1; // Replace with your desired integer value
+        Log.d(SplashScreen.TAG, "value: " + value);
+
+        editor.putInt("unreadMessage_Count", value);
+        editor.apply();
+        MainActivity.badge_text.setText(String.valueOf(value));
+        MainActivity.badge_text.setVisibility(View.VISIBLE);
+        MainActivity.badge_text.setBackgroundResource(R.drawable.badge_background);
+        MainActivity.unreadMessage_count = value;
+
+    }
 }
 
 
@@ -245,11 +277,13 @@ class MessengeItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
 
     ArrayList<ChatItem_ModelClass> userList;
     MessengeItemsAdapter adapter;
+    RecyclerView recyclerview;
 
-    public MessengeItemsAdapter(ArrayList<ChatItem_ModelClass> userList, Context context, MessengeItemsAdapter adapter) {
+    public MessengeItemsAdapter(ArrayList<ChatItem_ModelClass> userList, Context context, MessengeItemsAdapter adapter, RecyclerView recyclerview) {
         this.userList = userList;
         this.context = context;
         this.adapter = adapter;
+        this.recyclerview = recyclerview;
 
     }
 
@@ -265,15 +299,11 @@ class MessengeItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, @SuppressLint("RecyclerView") int position) {
 
 
-        MediaPlayer mediaPlayer = MediaPlayer.create(context, R.raw.message_received);
-        mediaPlayer.start();
-
         MessengeItemsAdapter.UserItem_Viewholder userItem_viewholder = (MessengeItemsAdapter.UserItem_Viewholder) holder;
         ChatItem_ModelClass modelClass = userList.get(position);
 
 
         userItem_viewholder.userName.setText(modelClass.getUserName());
-        userItem_viewholder.messageCount.setText(String.valueOf(position));
         userItem_viewholder.recommendationType.setText(modelClass.getRecommendationType());
         SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm");
 
@@ -283,35 +313,63 @@ class MessengeItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
 
         Picasso.get().load(modelClass.getUserProfile()).into(userItem_viewholder.profileUrl);
 
+
         if (modelClass.isContainsQuestion()) {
+
             UserQuestionWithAns userQuestionWithAns = modelClass.getQuestionWithAns();
+            if (userQuestionWithAns.getSent() == 0) {
+                Fragment_Messenger.updateUnreadmessageCount(context);
+                MediaPlayer mediaPlayer = MediaPlayer.create(context, R.raw.message_received);
+                mediaPlayer.start();
+            }
+
             userItem_viewholder.lastMessage.setText(userQuestionWithAns.getQuestion());
+            userQuestionWithAns.setSent(1);
+            Fragment_Messenger.save_sharedPrefrence(context, userList);
+
+
         } else {
-            UserBotMsg userBotMsg = modelClass.getUserBotMsg().get(0);
-            userItem_viewholder.lastMessage.setText(userBotMsg.getMsg());
 
             for (int i = 0; i < modelClass.getUserBotMsg().size() - 1; i++) {
 
-                int nextMegDelay = modelClass.getUserBotMsg().get(i).getNextMsgDelay();
+                if (modelClass.getUserBotMsg().get(i).getSent() == 0) {
 
-                int finalI = i + 1;
-                new Handler().postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-
-                        Log.d(SplashScreen.TAG, modelClass.getUserName() + "run: " + position);
-
-                        ChatItem_ModelClass modelClass2 = userList.remove(position);
-                        userList.add(0, modelClass2);
-                        notifyItemMoved(position, 0);
-                        notifyItemChanged(0);
-
-
+                    if (!modelClass.getUserName().equals("Team Desi Video Chat")) {
+                        MediaPlayer mediaPlayer = MediaPlayer.create(context, R.raw.message_received);
+                        mediaPlayer.start();
                     }
-                }, nextMegDelay);
+
+                    userItem_viewholder.lastMessage.setText(modelClass.getUserBotMsg().get(i).getMsg());
+                    modelClass.getUserBotMsg().get(i).setSent(1);
+                    userItem_viewholder.messageCount.setText(String.valueOf(i + 1));
+
+
+                    int nextMegDelay = modelClass.getUserBotMsg().get(i).getNextMsgDelay();
+                    new Handler().postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+
+                            userList.remove(holder.getBindingAdapterPosition());
+                            userList.add(0, modelClass);
+                            notifyItemMoved(holder.getBindingAdapterPosition(), 0);
+                            notifyItemChanged(0);
+                            Fragment_Messenger.save_sharedPrefrence(context, userList);
+                            recyclerview.smoothScrollToPosition(0);
+
+
+                            Fragment_Messenger.updateUnreadmessageCount(context);
+
+                        }
+                    }, nextMegDelay);
+
+                    break;
+                }
+                if (i == modelClass.getUserBotMsg().size() - 2) { //last loop
+                    userItem_viewholder.lastMessage.setText(modelClass.getUserBotMsg().get(i + 1).getMsg());
+                    userItem_viewholder.messageCount.setText(String.valueOf(i + 1));
+
+                }
             }
-
-
         }
     }
 

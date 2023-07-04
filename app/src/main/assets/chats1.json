@@ -12,7 +12,9 @@
           "msg": "Welcome to Desi Video Chat",
           "mimeType": "mimeType/text",
           "dateTime": "",
-          "nextMsgDelay": 30000
+          "nextMsgDelay": 30000,
+          "read": 0,
+          "sent": 0
         }
       ]
     },
@@ -28,28 +30,36 @@
           "msg": "Hi",
           "mimeType": "mimeType/text",
           "dateTime": "",
-          "nextMsgDelay": 30000
+          "nextMsgDelay": 30000,
+          "read": 0,
+          "sent": 0
         },
         {
           "id": 1,
           "msg": "I am Sudha",
           "mimeType": "mimeType/text",
           "dateTime": "",
-          "nextMsgDelay": 30000
+          "nextMsgDelay": 30000,
+          "read": 0,
+          "sent": 0
         },
         {
           "id": 2,
           "msg": "Tumhari height kitni hai?",
           "mimeType": "mimeType/text",
           "dateTime": "",
-          "nextMsgDelay": 30000
+          "nextMsgDelay": 30000,
+          "read": 0,
+          "sent": 0
         },
         {
           "id": 3,
           "msg": "Tumne apni profile mein bhi nahi btaya tumhari height kitni hai bolo na kuch bol kyun nahi rhe ho?",
           "mimeType": "mimeType/text",
           "dateTime": "",
-          "nextMsgDelay": 30000
+          "nextMsgDelay": 30000,
+          "read": 0,
+          "sent": 0
         },
         {
           "id": 4,
@@ -57,21 +67,27 @@
           "mimeType": "mimeType/image",
           "extraMsg": "https://p-cdn.telescope.vip/pepper/avatar/360155010/20211116-1637071085323.jpg",
           "dateTime": "",
-          "nextMsgDelay": 20000
+          "nextMsgDelay": 20000,
+          "read": 0,
+          "sent": 0
         },
         {
           "id": 5,
           "msg": "apni aek photo bhejna",
           "mimeType": "mimeType/text",
           "dateTime": "",
-          "nextMsgDelay": 30000
+          "nextMsgDelay": 30000,
+          "read": 0,
+          "sent": 0
         },
         {
           "id": 6,
           "msg": "kya ho gya bhi.",
           "mimeType": "mimeType/text",
           "dateTime": "",
-          "nextMsgDelay": 300000
+          "nextMsgDelay": 30000,
+          "read": 0,
+          "sent": 0
         },
         {
           "id": 7,
@@ -79,7 +95,9 @@
           "mimeType": "mimeType/audio",
           "extraMsg": "https://aig-upload.s3-accelerate.amazonaws.com/pepper/signature/voive/0/0-08b64710-bbce-47a6-a36d-823ce65c553d.mp3",
           "dateTime": "",
-          "nextMsgDelay": 30000
+          "nextMsgDelay": 30000,
+          "read": 0,
+          "sent": 0
         }
       ]
     },
@@ -96,7 +114,9 @@
           "Hi",
           "Hello"
         ],
-        "action": "chats_update_1.json"
+        "action": "chats_update_1.json",
+        "read": 0,
+        "sent": 0
       }
     },
     {
@@ -111,21 +131,27 @@
           "msg": "Hello",
           "mimeType": "mimeType/text",
           "dateTime": "",
-          "nextMsgDelay": 30000
+          "nextMsgDelay": 30000,
+          "read": 0,
+          "sent": 0
         },
         {
           "id": 1,
           "msg": "tum is app par kab online aate ho?",
           "mimeType": "mimeType/text",
           "dateTime": "",
-          "nextMsgDelay": 30000
+          "nextMsgDelay": 30000,
+          "read": 0,
+          "sent": 0
         },
         {
           "id": 2,
           "msg": "btaao naa. Online hokar bhi bata nahi rhe ho tum 😤",
           "mimeType": "mimeType/text",
           "dateTime": "",
-          "nextMsgDelay": 30000
+          "nextMsgDelay": 30000,
+          "read": 0,
+          "sent": 0
         },
         {
           "id": 3,
@@ -133,21 +159,27 @@
           "mimeType": "mimeType/audio",
           "extraMsg": "https://p-cdn.telescope.vip/pepper/signature/voive/0/0-aa55cef4-1b23-4fc2-b660-9089aa5d2c5c.mp3",
           "dateTime": "",
-          "nextMsgDelay": 30000
+          "nextMsgDelay": 30000,
+          "read": 0,
+          "sent": 0
         },
         {
           "id": 4,
           "msg": "naraz ho kya? meri aawaz kaisi lagi tumhe 🤗",
           "mimeType": "mimeType/text",
           "dateTime": "",
-          "nextMsgDelay": 20000
+          "nextMsgDelay": 20000,
+          "read": 0,
+          "sent": 0
         },
         {
           "id": 5,
           "msg": "pata nahi kis baat ka ghamand hai🙄",
           "mimeType": "mimeType/text",
           "dateTime": "",
-          "nextMsgDelay": 20000
+          "nextMsgDelay": 20000,
+          "read": 0,
+          "sent": 0
         }
       ]
     },
@@ -163,7 +195,9 @@
           "msg": "Hello",
           "mimeType": "mimeType/text",
           "dateTime": "",
-          "nextMsgDelay": 20000
+          "nextMsgDelay": 20000,
+          "read": 0,
+          "sent": 0
         },
         {
           "id": 1,
@@ -171,28 +205,36 @@
           "mimeType": "mimeType/image",
           "extraMsg": "https://p-cdn.telescope.vip/pepper/avatar/564126287/20211218-1639817991985.jpg",
           "dateTime": "",
-          "nextMsgDelay": 20000
+          "nextMsgDelay": 20000,
+          "read": 0,
+          "sent": 0
         },
         {
           "id": 2,
           "msg": "Meri photo kaisi lagi\uD83E\uDD17",
           "mimeType": "mimeType/text",
           "dateTime": "",
-          "nextMsgDelay": 40000
+          "nextMsgDelay": 40000,
+          "read": 0,
+          "sent": 0
         },
         {
           "id": 3,
           "msg": "\uD83D\uDE0A Tum bhi apna photo bhejo na!",
           "mimeType": "mimeType/text",
           "dateTime": "",
-          "nextMsgDelay": 40000
+          "nextMsgDelay": 40000,
+          "read": 0,
+          "sent": 0
         },
         {
           "id": 4,
           "msg": "Aray itna sharmao mat bhejo bhi. Main wait kar rhi hun.",
           "mimeType": "mimeType/text",
           "dateTime": "",
-          "nextMsgDelay": 40000
+          "nextMsgDelay": 40000,
+          "read": 0,
+          "sent": 0
         }
       ]
     },
@@ -208,35 +250,45 @@
           "msg": "Hello ji",
           "mimeType": "mimeType/text",
           "dateTime": "",
-          "nextMsgDelay": 20000
+          "nextMsgDelay": 20000,
+          "read": 0,
+          "sent": 0
         },
         {
           "id": 1,
           "msg": "aek minute earphone laga lun main",
           "mimeType": "mimeType/text",
           "dateTime": "",
-          "nextMsgDelay": 20000
+          "nextMsgDelay": 20000,
+          "read": 0,
+          "sent": 0
         },
         {
           "id": 2,
           "msg": "call par aooge ki nahin?",
           "mimeType": "mimeType/text",
           "dateTime": "",
-          "nextMsgDelay": 5000
+          "nextMsgDelay": 5000,
+          "read": 0,
+          "sent": 0
         },
         {
           "id": 3,
           "msg": "main wait kar rhi hun",
           "mimeType": "mimeType/text",
           "dateTime": "",
-          "nextMsgDelay": 5000
+          "nextMsgDelay": 5000,
+          "read": 0,
+          "sent": 0
         },
         {
           "id": 4,
           "msg": "bolo kuch toh bolo☹️",
           "mimeType": "mimeType/text",
           "dateTime": "",
-          "nextMsgDelay": 7000
+          "nextMsgDelay": 7000,
+          "read": 0,
+          "sent": 0
         }
       ]
     },
@@ -252,21 +304,27 @@
           "msg": "I don't know if we are suitable for eachother!",
           "mimeType": "mimeType/text",
           "dateTime": "",
-          "nextMsgDelay": 20000
+          "nextMsgDelay": 20000,
+          "read": 0,
+          "sent": 0
         },
         {
           "id": 1,
           "msg": "what do you think",
           "mimeType": "mimeType/text",
           "dateTime": "",
-          "nextMsgDelay": 20000
+          "nextMsgDelay": 20000,
+          "read": 0,
+          "sent": 0
         },
         {
           "id": 2,
           "msg": "hey why r u not replying\uD83E\uDDD0",
           "mimeType": "mimeType/text",
           "dateTime": "",
-          "nextMsgDelay": 20000
+          "nextMsgDelay": 20000,
+          "read": 0,
+          "sent": 0
         }
       ]
     },
@@ -283,7 +341,9 @@
           "Haan",
           "Nahi"
         ],
-        "action": "chats_update_1.json"
+        "action": "chats_update_1.json",
+        "read": 0,
+        "sent": 0
       }
     },
     {
@@ -298,21 +358,27 @@
           "msg": "Hi",
           "mimeType": "mimeType/text",
           "dateTime": "",
-          "nextMsgDelay": 20000
+          "nextMsgDelay": 20000,
+          "read": 0,
+          "sent": 0
         },
         {
           "id": 2,
           "msg": "tumhara profile pic kaafi achi hai. ",
           "mimeType": "mimeType/text",
           "dateTime": "",
-          "nextMsgDelay": 5000
+          "nextMsgDelay": 5000,
+          "read": 0,
+          "sent": 0
         },
         {
           "id": 3,
           "msg": "khud ki hai tumhari?",
           "mimeType": "mimeType/text",
           "dateTime": "",
-          "nextMsgDelay": 5000
+          "nextMsgDelay": 5000,
+          "read": 0,
+          "sent": 0
         }
       ]
     },
@@ -328,35 +394,45 @@
           "msg": "hello",
           "mimeType": "mimeType/text",
           "dateTime": "",
-          "nextMsgDelay": 20000
+          "nextMsgDelay": 20000,
+          "read": 0,
+          "sent": 0
         },
         {
           "id": 1,
           "msg": "main pehlle ek baat kehna chahti hoon",
           "mimeType": "mimeType/text",
           "dateTime": "",
-          "nextMsgDelay": 20000
+          "nextMsgDelay": 20000,
+          "read": 0,
+          "sent": 0
         },
         {
           "id": 2,
           "msg": "main divorce hoon",
           "mimeType": "mimeType/text",
           "dateTime": "",
-          "nextMsgDelay": 5000
+          "nextMsgDelay": 5000,
+          "read": 0,
+          "sent": 0
         },
         {
           "id": 3,
           "msg": "kya tumhe is baat se koi problem hai?",
           "mimeType": "mimeType/text",
           "dateTime": "",
-          "nextMsgDelay": 5000
+          "nextMsgDelay": 5000,
+          "read": 0,
+          "sent": 0
         },
         {
           "id": 4,
           "msg": "lagta hai problem hai tumhe\uD83D\uDE24. Rehne do?",
           "mimeType": "mimeType/text",
           "dateTime": "",
-          "nextMsgDelay": 50000
+          "nextMsgDelay": 5000,
+          "read": 0,
+          "sent": 00
         }
       ]
     },
@@ -372,7 +448,9 @@
           "msg": "Mere profile pic kaisi lagi tumhe?",
           "mimeType": "mimeType/text",
           "dateTime": "",
-          "nextMsgDelay": 20000
+          "nextMsgDelay": 20000,
+          "read": 0,
+          "sent": 0
         },
         {
           "id": 1,
@@ -380,28 +458,36 @@
           "mimeType": "mimeType/audio",
           "extraMsg": "https://aig-upload.s3-accelerate.amazonaws.com/pepper/signature/voive/0/0-ecc44d94-cdd1-43f5-ab15-041fa01f09a4.mp3",
           "dateTime": "",
-          "nextMsgDelay": 30000
+          "nextMsgDelay": 30000,
+          "read": 0,
+          "sent": 0
         },
         {
           "id": 2,
           "msg": "Apna camera bhi on karo na?",
           "mimeType": "mimeType/text",
           "dateTime": "",
-          "nextMsgDelay": 20000
+          "nextMsgDelay": 20000,
+          "read": 0,
+          "sent": 0
         },
         {
           "id": 3,
           "msg": "Kya hua\uD83E\uDD28 Reply kyun nahi kar rhe ho?",
           "mimeType": "mimeType/text",
           "dateTime": "",
-          "nextMsgDelay": 20000
+          "nextMsgDelay": 20000,
+          "read": 0,
+          "sent": 0
         },
         {
           "id": 4,
           "msg": "Bade batamez ho\uD83D\uDE12 Message dekh kar bhi reply nahi karte ho",
           "mimeType": "mimeType/text",
           "dateTime": "",
-          "nextMsgDelay": 30000
+          "nextMsgDelay": 30000,
+          "read": 0,
+          "sent": 0
         }
       ]
     }

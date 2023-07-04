@@ -7,18 +7,23 @@ public class UserBotMsg {
     private String extraMsg;
     private String dateTime;
     private int nextMsgDelay;
+    private int read;
+    private int sent;
 
-    // Constructor
-    public UserBotMsg(int id, String msg, String mimeType, String extraMsg, String dateTime, int nextMsgDelay) {
+    public UserBotMsg() {
+    }
+
+    public UserBotMsg(int id, String msg, String mimeType, String extraMsg, String dateTime, int nextMsgDelay, int read, int sent) {
         this.id = id;
         this.msg = msg;
         this.mimeType = mimeType;
         this.extraMsg = extraMsg;
         this.dateTime = dateTime;
         this.nextMsgDelay = nextMsgDelay;
+        this.read = read;
+        this.sent = sent;
     }
 
-    // Getters and Setters
     public int getId() {
         return id;
     }
@@ -65,5 +70,21 @@ public class UserBotMsg {
 
     public void setNextMsgDelay(int nextMsgDelay) {
         this.nextMsgDelay = nextMsgDelay;
+    }
+
+    public int getRead() {
+        return read;
+    }
+
+    public void setRead(int read) {
+        this.read = read;
+    }
+
+    public int getSent() {
+        return sent;
+    }
+
+    public void setSent(int sent) {
+        this.sent = sent;
     }
 }
