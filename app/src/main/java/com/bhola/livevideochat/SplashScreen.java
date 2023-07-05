@@ -123,8 +123,7 @@ public class SplashScreen extends AppCompatActivity {
             @Override
             public void onAnimationEnd(Animator animation) {
                 animationCompleted = true;
-                LinearLayout progressbar = findViewById(R.id.progressbar);
-//                progressbar.setVisibility(View.VISIBLE);
+
                 handler_forIntent();
 
             }
@@ -174,7 +173,7 @@ public class SplashScreen extends AppCompatActivity {
                     Notification_ImageURL = (String) snapshot.child("Notification_ImageURL").getValue();
 
                     if (animationCompleted) {
-                        handler_forIntent();
+//                        handler_forIntent();
                     }
 
                 }

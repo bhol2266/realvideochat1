@@ -32,6 +32,7 @@ import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Random;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
@@ -167,10 +168,9 @@ public class Fragment_Messenger extends Fragment {
             recyclerview.setAdapter(adapter);
             userList.remove(0);
 
-            int temp = 1;
+            int temp = 0;
             for (int i = userListTemp.size(); i < userList.size(); i++) {
-
-                int delayTime = temp * 8000;
+                int delayTime = temp * 120000;
                 temp++;
                 int finalI = i;
 
@@ -196,7 +196,7 @@ public class Fragment_Messenger extends Fragment {
         for (int i = 0; i < 4; i++) {
 
             int finalI = i;
-            int delayTime = finalI * 8000;
+            int delayTime = finalI * 16000;
 
             new Handler().postDelayed(new Runnable() {
                 @Override
@@ -318,7 +318,6 @@ class MessengeItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
 
             UserQuestionWithAns userQuestionWithAns = modelClass.getQuestionWithAns();
             if (userQuestionWithAns.getSent() == 0) {
-                Fragment_Messenger.updateUnreadmessageCount(context);
                 MediaPlayer mediaPlayer = MediaPlayer.create(context, R.raw.message_received);
                 mediaPlayer.start();
             }
@@ -343,24 +342,33 @@ class MessengeItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
                     modelClass.getUserBotMsg().get(i).setSent(1);
                     userItem_viewholder.messageCount.setText(String.valueOf(i + 1));
 
+                    Random random = new Random();
+                    int randomNumber = random.nextInt(1001) + 50; // Generate a random number between 0 and 5000, then add 50
 
-                    int nextMegDelay = modelClass.getUserBotMsg().get(i).getNextMsgDelay();
-                    new Handler().postDelayed(new Runnable() {
+                    int nextMegDelay = modelClass.getUserBotMsg().get(i).getNextMsgDelay() + randomNumber;
+
+
+                    Handler handler = new Handler();
+                    Runnable updateTimeRunnable = new Runnable() {
                         @Override
                         public void run() {
+                            if (holder.getBindingAdapterPosition() == -1) {
+                                Log.d(SplashScreen.TAG, "getBindingAdapterPosition: " + holder.getBindingAdapterPosition());
+                            } else {
 
-                            userList.remove(holder.getBindingAdapterPosition());
-                            userList.add(0, modelClass);
-                            notifyItemMoved(holder.getBindingAdapterPosition(), 0);
-                            notifyItemChanged(0);
-                            Fragment_Messenger.save_sharedPrefrence(context, userList);
-                            recyclerview.smoothScrollToPosition(0);
-
-
-                            Fragment_Messenger.updateUnreadmessageCount(context);
+                                userList.remove(holder.getBindingAdapterPosition());
+                                userList.add(0, modelClass);
+                                notifyItemMoved(holder.getBindingAdapterPosition(), 0);
+                                notifyItemChanged(0);
+                                Fragment_Messenger.save_sharedPrefrence(context, userList);
+                                recyclerview.smoothScrollToPosition(0);
+                                Fragment_Messenger.updateUnreadmessageCount(context);
+                            }
 
                         }
-                    }, nextMegDelay);
+                    };
+                    handler.postDelayed(updateTimeRunnable, nextMegDelay);
+
 
                     break;
                 }
