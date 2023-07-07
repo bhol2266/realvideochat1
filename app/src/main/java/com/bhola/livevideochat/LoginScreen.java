@@ -13,7 +13,6 @@ import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.drawable.ColorDrawable;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
@@ -21,7 +20,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.LinearLayout;
-import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -100,7 +98,7 @@ public class LoginScreen extends AppCompatActivity {
 
         final androidx.appcompat.app.AlertDialog.Builder builder = new androidx.appcompat.app.AlertDialog.Builder(LoginScreen.this);
         LayoutInflater inflater = LayoutInflater.from(getApplicationContext());
-        View promptView = inflater.inflate(R.layout.guestlogin_dialog, null);
+        View promptView = inflater.inflate(R.layout.dialog_guestlogin, null);
         builder.setView(promptView);
         builder.setCancelable(true);
 

@@ -22,7 +22,6 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -189,7 +188,7 @@ public class VipMembership extends AppCompatActivity {
 
         final androidx.appcompat.app.AlertDialog.Builder builder = new androidx.appcompat.app.AlertDialog.Builder(VipMembership.this);
         LayoutInflater inflater = LayoutInflater.from(getApplicationContext());
-        View promptView = inflater.inflate(R.layout.membership_exit_dialog, null);
+        View promptView = inflater.inflate(R.layout.dialog_membership_exit, null);
         builder.setView(promptView);
         builder.setCancelable(true);
 

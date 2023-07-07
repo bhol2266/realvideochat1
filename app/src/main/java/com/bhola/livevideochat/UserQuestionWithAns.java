@@ -5,15 +5,17 @@ public class UserQuestionWithAns {
     private String question;
     private ArrayList<String> answers;
     private String action;
+    private String dateTime;
     private int read,sent;
 
     public UserQuestionWithAns() {
     }
 
-    public UserQuestionWithAns(String question, ArrayList<String> answers, String action, int read, int sent) {
+    public UserQuestionWithAns(String question, ArrayList<String> answers, String action, String dateTime, int read, int sent) {
         this.question = question;
         this.answers = answers;
         this.action = action;
+        this.dateTime = dateTime;
         this.read = read;
         this.sent = sent;
     }
@@ -40,6 +42,14 @@ public class UserQuestionWithAns {
 
     public void setAction(String action) {
         this.action = action;
+    }
+
+    public String getDateTime() {
+        return dateTime;
+    }
+
+    public void setDateTime(String dateTime) {
+        this.dateTime = dateTime;
     }
 
     public int getRead() {

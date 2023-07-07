@@ -3,14 +3,17 @@ package com.bhola.livevideochat;
 import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Parcelable;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -27,6 +30,7 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Serializable;
 import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
@@ -118,11 +122,17 @@ public class Fragment_Messenger extends Fragment {
                     String msg = userBotMsgObject.getString("msg");
                     String mimeType = userBotMsgObject.getString("mimeType");
                     String dateTime = userBotMsgObject.getString("dateTime");
+                    String extraMessage = "";
+                    try {
+                        extraMessage = userBotMsgObject.getString("extraMsg");
+                    } catch (Exception e) {
+                    }
+
                     int nextMsgDelay = userBotMsgObject.getInt("nextMsgDelay");
                     int read = userBotMsgObject.getInt("read");
                     int sent = userBotMsgObject.getInt("sent");
 
-                    UserBotMsg userBotMsg = new UserBotMsg(msgId, msg, mimeType, "", dateTime, nextMsgDelay, read, sent);
+                    UserBotMsg userBotMsg = new UserBotMsg(msgId, msg, mimeType, extraMessage, dateTime, nextMsgDelay, read, sent);
                     userBotMsgList.add(userBotMsg);
                 }
 
@@ -132,6 +142,7 @@ public class Fragment_Messenger extends Fragment {
                     String question = questionWithAnsObject.getString("question");
                     JSONArray answersArray = questionWithAnsObject.getJSONArray("answers");
                     String action = questionWithAnsObject.getString("action");
+                    String dateTime = questionWithAnsObject.getString("dateTime");
                     int read = questionWithAnsObject.getInt("read");
                     int sent = questionWithAnsObject.getInt("sent");
 
@@ -141,7 +152,7 @@ public class Fragment_Messenger extends Fragment {
                         answersList.add(answer);
                     }
 
-                    questionWithAns = new UserQuestionWithAns(question, answersList, action, read, sent);
+                    questionWithAns = new UserQuestionWithAns(question, answersList, dateTime, action, read, sent);
                 }
 
                 ChatItem_ModelClass user = new ChatItem_ModelClass(id, userName, userProfile, containsQuestion, recommendationType, userBotMsgList, questionWithAns);
@@ -313,6 +324,19 @@ class MessengeItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
 
         Picasso.get().load(modelClass.getUserProfile()).into(userItem_viewholder.profileUrl);
 
+        userItem_viewholder.chatItemClick.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+
+                String selectedObjectJson = new Gson().toJson(userList.get(holder.getBindingAdapterPosition()));
+                Intent intent = new Intent(context, ChatScreen_User.class);
+                intent.putExtra("data", selectedObjectJson);
+                intent.putExtra("indexPosition", holder.getBindingAdapterPosition());
+
+                context.startActivity(intent);
+            }
+        });
 
         if (modelClass.isContainsQuestion()) {
 
@@ -324,8 +348,9 @@ class MessengeItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
 
             userItem_viewholder.lastMessage.setText(userQuestionWithAns.getQuestion());
             userQuestionWithAns.setSent(1);
-            Fragment_Messenger.save_sharedPrefrence(context, userList);
+            userQuestionWithAns.setDateTime(String.valueOf(currentTime.getTime()));
 
+            Fragment_Messenger.save_sharedPrefrence(context, userList);
 
         } else {
 
@@ -340,6 +365,7 @@ class MessengeItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
 
                     userItem_viewholder.lastMessage.setText(modelClass.getUserBotMsg().get(i).getMsg());
                     modelClass.getUserBotMsg().get(i).setSent(1);
+                    modelClass.getUserBotMsg().get(i).setDateTime(String.valueOf(currentTime.getTime()));
                     userItem_viewholder.messageCount.setText(String.valueOf(i + 1));
 
                     Random random = new Random();
@@ -353,7 +379,6 @@ class MessengeItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
                         @Override
                         public void run() {
                             if (holder.getBindingAdapterPosition() == -1) {
-                                Log.d(SplashScreen.TAG, "getBindingAdapterPosition: " + holder.getBindingAdapterPosition());
                             } else {
 
                                 userList.remove(holder.getBindingAdapterPosition());
@@ -375,6 +400,10 @@ class MessengeItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
                 if (i == modelClass.getUserBotMsg().size() - 2) { //last loop
                     userItem_viewholder.lastMessage.setText(modelClass.getUserBotMsg().get(i + 1).getMsg());
                     userItem_viewholder.messageCount.setText(String.valueOf(i + 1));
+                    modelClass.getUserBotMsg().get(modelClass.getUserBotMsg().size() - 1).setSent(1);
+                    Date date = new Date();
+                    modelClass.getUserBotMsg().get(modelClass.getUserBotMsg().size() - 1).setDateTime(String.valueOf(currentTime.getTime()));
+
 
                 }
             }
@@ -392,6 +421,7 @@ class MessengeItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
 
         TextView userName, recommendationType, lastMessage, messageTime, messageCount;
         CircleImageView profileUrl;
+        LinearLayout chatItemClick;
 
         public UserItem_Viewholder(@NonNull View itemView) {
             super(itemView);
@@ -402,6 +432,7 @@ class MessengeItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
             messageTime = itemView.findViewById(R.id.messageTime);
             messageCount = itemView.findViewById(R.id.messageCount);
             profileUrl = itemView.findViewById(R.id.profileUrl);
+            chatItemClick = itemView.findViewById(R.id.chatItemClick);
 
         }
     }

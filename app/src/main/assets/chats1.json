@@ -41,6 +41,7 @@
           "dateTime": "",
           "nextMsgDelay": 30000,
           "read": 0,
+          "read": 0,
           "sent": 0
         },
         {
@@ -110,6 +111,7 @@
       "userBotMsg": [],
       "questionWithAns": {
         "question": "Hello ji?",
+        "dateTime": "",
         "answers": [
           "Hi",
           "Hello"
@@ -337,6 +339,7 @@
       "userBotMsg": [],
       "questionWithAns": {
         "question": "Tumhari girlfriend hai kya?",
+        "dateTime": "",
         "answers": [
           "Haan",
           "Nahi"

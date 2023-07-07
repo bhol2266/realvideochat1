@@ -1,33 +1,228 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fitsSystemWindows="true"
-    tools:context=".ChatScreen_User">
+    android:orientation="vertical"
+    android:paddingBottom="10dp">
 
-    <com.google.android.material.appbar.AppBarLayout
+    <RelativeLayout
+        android:id="@+id/ll1"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:fitsSystemWindows="true">
+        android:orientation="horizontal"
+        android:paddingStart="15dp"
+        android:paddingTop="15dp"
+        android:paddingEnd="15dp"
+        android:paddingBottom="5dp">
 
-        <com.google.android.material.appbar.MaterialToolbar
-            android:id="@+id/toolbar"
-            android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize" />
+        <ImageView
+            android:id="@+id/backArrow"
+            android:layout_width="35dp"
+            android:layout_height="35dp"
+            android:layout_alignParentLeft="true"
+            android:layout_centerVertical="true"
+            android:src="@drawable/back_arrow" />
 
-    </com.google.android.material.appbar.AppBarLayout>
+        <TextView
+            android:id="@+id/profileName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true"
+            android:layout_gravity="center"
+            android:fontFamily="@font/rubrik_semibold"
+            android:text="Sunanda"
+            android:textColor="@color/gmts_light_gray"
+            android:textSize="22dp" />
 
-    <include layout="@layout/content_chat_screen_user" />
 
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/fab"
-        android:layout_width="wrap_content"
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:id="@+id/warningSign"
+                android:layout_width="25dp"
+                android:layout_height="30dp"
+                android:layout_gravity="center"
+                android:layout_marginRight="30dp"
+                android:alpha="0.7"
+                android:src="@drawable/warning" />
+
+            <ImageView
+                android:id="@+id/menuDots"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_gravity="center"
+                android:src="@drawable/dots" />
+
+        </LinearLayout>
+
+
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/alertBar"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="bottom|end"
-        android:layout_marginEnd="@dimen/fab_margin"
-        android:layout_marginBottom="16dp"
-        app:srcCompat="@android:drawable/ic_dialog_email" />
+        android:layout_below="@+id/ll1"
+        android:background="#FFDDDA"
+        android:paddingStart="10dp"
+        android:paddingTop="3dp"
+        android:paddingEnd="10dp"
+        android:paddingBottom="3dp">
 
-</androidx.coordinatorlayout.widget.CoordinatorLayout>
+        <ImageView
+            android:layout_width="15dp"
+            android:layout_height="15dp"
+            android:layout_alignParentStart="true"
+            android:layout_centerVertical="true"
+            android:layout_gravity="center"
+            android:src="@drawable/alert" />
+
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true"
+            android:layout_gravity="center"
+            android:fontFamily="@font/rubrik_semibold"
+            android:text="Don't disclose sensitive info while chatting"
+            android:textColor="#929497"
+            android:textSize="10dp" />
+
+        <ImageView
+            android:layout_width="7dp"
+            android:layout_height="7dp"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:layout_gravity="center"
+            android:src="@drawable/x" />
+
+
+    </RelativeLayout>
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@id/ll2"
+        android:layout_below="@id/alertBar">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+
+            <de.hdodenhof.circleimageview.CircleImageView
+                android:id="@+id/profileImage"
+                android:layout_width="150dp"
+                android:layout_height="150dp"
+                android:layout_gravity="center_horizontal"
+                android:layout_margin="20dp"
+                android:src="@drawable/user" />
+
+            <TextView
+                android:id="@+id/viewProfile"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginBottom="20dp"
+                android:fontFamily="@font/inter"
+                android:text="View Profile"
+                android:textColor="@color/themeColor"
+               />
+
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recylerview"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/profileImage"
+                android:padding="10dp"
+                android:paddingBottom="50dp" />
+
+
+        </LinearLayout>
+
+    </androidx.core.widget.NestedScrollView>
+
+
+    <LinearLayout
+        android:id="@+id/ll2"
+        android:layout_width="match_parent"
+        android:layout_height="55dp"
+        android:layout_alignParentBottom="true"
+        android:layout_marginStart="15dp"
+        android:layout_marginEnd="15dp"
+        android:backgroundTint="@color/purple_200"
+        android:orientation="horizontal">
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/micBtn"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_gravity="center"
+            app:cardBackgroundColor="@color/white"
+            app:cardCornerRadius="25dp">
+
+            <ImageView
+                android:layout_width="25dp"
+                android:layout_height="25dp"
+                android:layout_gravity="center"
+                android:background="@drawable/mic" />
+
+        </androidx.cardview.widget.CardView>
+
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_gravity="center"
+            android:layout_marginStart="7dp"
+            android:layout_marginEnd="7dp"
+            android:layout_weight="1"
+            app:cardBackgroundColor="@color/white"
+            app:cardCornerRadius="15dp">
+
+            <EditText
+                android:id="@+id/textmsg"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:background="@null"
+                android:fontFamily="@font/inter"
+                android:hint="Type The Messages..."
+                android:paddingStart="15dp"
+                android:textSize="16dp" />
+
+        </androidx.cardview.widget.CardView>
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/sendbtnn"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_gravity="center"
+            app:cardBackgroundColor="@color/white"
+            app:cardCornerRadius="25dp">
+
+            <ImageView
+                android:layout_width="25dp"
+                android:layout_height="25dp"
+                android:layout_gravity="center"
+                android:layout_marginLeft="2dp"
+                android:background="@drawable/sendbut"
+                android:backgroundTint="@color/gmts_dark_gray" />
+
+        </androidx.cardview.widget.CardView>
+
+
+    </LinearLayout>
+
+
+</RelativeLayout>
