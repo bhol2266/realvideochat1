@@ -5,23 +5,27 @@ import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.InsetDrawable;
+import android.media.AudioAttributes;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 
+import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.cardview.widget.CardView;
+import androidx.core.widget.NestedScrollView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -30,6 +34,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.gson.Gson;
 import com.squareup.picasso.Picasso;
 
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -92,6 +97,25 @@ public class ChatScreen_User extends Activity {
         recylerview.setLayoutManager(linearLayoutManager);
         chatAdapter = new ChatsAdapter(ChatScreen_User.this, chatsArrayList, recylerview, mediaPlayer);
         recylerview.setAdapter(chatAdapter);
+
+
+
+        NestedScrollView nestedScrollview=findViewById(R.id.nestedScrollview);
+
+
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                if(chatsArrayList.size()==0){
+                    return;
+                }
+                final float y = recylerview.getChildAt(chatsArrayList.size()-1).getY();
+
+                nestedScrollview.smoothScrollTo(0, (int) y);
+
+            }
+        },500);
+
 
     }
 
@@ -252,6 +276,14 @@ public class ChatScreen_User extends Activity {
     }
 
 
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (mediaPlayer != null) {
+            mediaPlayer.release();
+            mediaPlayer = null;
+        }
+    }
 }
 
 class ChatsAdapter extends RecyclerView.Adapter {
@@ -312,9 +344,35 @@ class ChatsAdapter extends RecyclerView.Adapter {
                 reciverViewHolder.audioMsg.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        reciverViewHolder.playAudiolottie.playAnimation();
-                        mediaPlayer
+                        try {
+                            reciverViewHolder.audioProgressBar.setVisibility(View.VISIBLE);
+                            mediaPlayer = new MediaPlayer();
+                            mediaPlayer.setAudioAttributes(new AudioAttributes.Builder()
+                                    .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+                                    .setUsage(AudioAttributes.USAGE_MEDIA)
+                                    .build());
+                            mediaPlayer.setDataSource(chats.getExtraMsg());
+                            mediaPlayer.prepareAsync();
+                            mediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+                                @Override
+                                public void onPrepared(MediaPlayer mp) {
+                                    reciverViewHolder.audioProgressBar.setVisibility(View.GONE);
+                                    reciverViewHolder.playAudiolottie.playAnimation();
+                                    mediaPlayer.start();
+                                }
+                            });
+                            mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                                @Override
+                                public void onCompletion(MediaPlayer mediaPlayer) {
+                                    reciverViewHolder.playAudiolottie.cancelAnimation();
 
+                                }
+                            }); // Set the OnCompletionListener
+
+
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
                     }
                 });
                 reciverViewHolder.textMsg.setVisibility(View.GONE);
@@ -371,6 +429,7 @@ class ChatsAdapter extends RecyclerView.Adapter {
         CardView audioMsg;
         FrameLayout picMsgLayout;
         LottieAnimationView playAudiolottie;
+        ProgressBar audioProgressBar;
 
 
         public ReciverViewHolder(@NonNull View itemView) {
@@ -382,6 +441,7 @@ class ChatsAdapter extends RecyclerView.Adapter {
             profileImage = itemView.findViewById(R.id.profileImage);
             picMsgLayout = itemView.findViewById(R.id.picMsgLayout);
             playAudiolottie = itemView.findViewById(R.id.playAudiolottie);
+            audioProgressBar = itemView.findViewById(R.id.audioProgressBar);
 
         }
     }
