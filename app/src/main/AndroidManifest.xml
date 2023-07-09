@@ -85,6 +85,11 @@
             </intent-filter>
         </service>
         <service android:name=".BotMessageService" />
+
+        <service
+            android:name=".Service_UserChats"
+            android:enabled="true"
+            android:exported="false" />
     </application>
 
 </manifest>

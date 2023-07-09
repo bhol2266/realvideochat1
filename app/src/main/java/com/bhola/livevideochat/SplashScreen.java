@@ -105,6 +105,7 @@ public class SplashScreen extends AppCompatActivity {
         }
 //        readJSON();
         sharedPrefrences();
+        clearSharedPrefrence();
 
 
         topAnim = AnimationUtils.loadAnimation(this, R.anim.top_animation);
@@ -143,6 +144,17 @@ public class SplashScreen extends AppCompatActivity {
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         generateNotification();
         generateFCMToken();
+
+
+    }
+
+    private void clearSharedPrefrence() {
+
+
+        SharedPreferences sharedPreferences = getSharedPreferences("messenger_chats", Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.clear(); // Remove all data
+        editor.apply(); // Apply the changes
 
     }
 

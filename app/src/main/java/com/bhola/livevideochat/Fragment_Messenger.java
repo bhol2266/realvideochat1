@@ -8,8 +8,6 @@ import android.content.SharedPreferences;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Parcelable;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -30,7 +28,6 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.Serializable;
 import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
@@ -41,7 +38,7 @@ import java.util.Random;
 import de.hdodenhof.circleimageview.CircleImageView;
 
 
-public class Fragment_Messenger extends Fragment {
+public class Fragment_Messenger extends Fragment   {
     RecyclerView recyclerview;
     public static ArrayList<ChatItem_ModelClass> userList;
     public static ArrayList<ChatItem_ModelClass> userListTemp;
@@ -56,19 +53,21 @@ public class Fragment_Messenger extends Fragment {
         // Required empty public constructor
     }
 
+    View view;
+    Context context;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
 
-        View view = inflater.inflate(R.layout.fragment_messenger, container, false);
+        view = inflater.inflate(R.layout.fragment_messenger, container, false);
 
-        Context context = getContext();
+        context = getContext();
         // Inflate the layout for this fragment
 
 
-        setRecyclerView(view, context);
+        setRecyclerView();
 
 
         return view;
@@ -77,15 +76,15 @@ public class Fragment_Messenger extends Fragment {
     }
 
 
-    private void setRecyclerView(View view, Context context) {
+    private void setRecyclerView() {
         recyclerview = view.findViewById(R.id.recyclerview);
 
-        readDataFromJson(view, context);
+        readDataFromJson();
 
 
     }
 
-    private void readDataFromJson(View view, Context context) {
+    private void readDataFromJson() {
         String json;
         try {
             InputStream is = context.getAssets().open("chats1.json");
@@ -162,10 +161,10 @@ public class Fragment_Messenger extends Fragment {
             e.printStackTrace();
         }
 
-        sendDataToRecyclerview(context, view);
+        sendDataToRecyclerview();
     }
 
-    private void sendDataToRecyclerview(Context context, View view) {
+    private void sendDataToRecyclerview() {
 
         userListTemp = new ArrayList<>();
         layoutManager = new LinearLayoutManager(context);
@@ -175,6 +174,7 @@ public class Fragment_Messenger extends Fragment {
         recyclerview.setAdapter(adapter);
 
         if (retreive_sharedPreferences(context)) {
+
             adapter = new MessengeItemsAdapter(userListTemp, context, adapter, recyclerview);
             recyclerview.setAdapter(adapter);
             userList.remove(0);
@@ -190,8 +190,10 @@ public class Fragment_Messenger extends Fragment {
                     public void run() {
                         userListTemp.add(0, userList.get(finalI));
                         adapter.notifyItemInserted(0);
-                        Fragment_Messenger.save_sharedPrefrence(context, userListTemp);
-                        updateUnreadmessageCount(context);
+                        Fragment_Messenger.save_sharedPrefrence(context);
+                        updateUnreadmessageCount(context, "plus");
+                        playSentAudio();
+
 
                     }
                 }, delayTime);
@@ -201,10 +203,9 @@ public class Fragment_Messenger extends Fragment {
         }
 
         userListTemp.add(userList.get(0));
-        updateUnreadmessageCount(context);
         userList.remove(0);
 
-        for (int i = 0; i < 4; i++) {
+        for (int i = 0; i < 1; i++) {
 
             int finalI = i;
             int delayTime = finalI * 16000;
@@ -214,8 +215,10 @@ public class Fragment_Messenger extends Fragment {
                 public void run() {
                     userListTemp.add(0, userList.get(finalI));
                     adapter.notifyItemInserted(0);
-                    Fragment_Messenger.save_sharedPrefrence(context, userListTemp);
-                    updateUnreadmessageCount(context);
+                    Fragment_Messenger.save_sharedPrefrence(context);
+                    updateUnreadmessageCount(context, "plus");
+                    playSentAudio();
+
 
                 }
             }, delayTime);
@@ -223,11 +226,17 @@ public class Fragment_Messenger extends Fragment {
 
     }
 
-    public static void save_sharedPrefrence(Context context, ArrayList<ChatItem_ModelClass> userList) {
+    private void playSentAudio() {
+        MediaPlayer mediaPlayer = MediaPlayer.create(context, R.raw.message_received);
+        mediaPlayer.start();
+    }
+
+    public static void save_sharedPrefrence(Context context) {
 
 
         SharedPreferences sharedPreferences = context.getSharedPreferences("messenger_chats", Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
+
 
 // Convert the ArrayList to JSON string
         Gson gson = new Gson();
@@ -264,13 +273,15 @@ public class Fragment_Messenger extends Fragment {
 
     }
 
-    public static void updateUnreadmessageCount(Context context) {
+    public static void updateUnreadmessageCount(Context context, String updateType) {
         SharedPreferences sharedPreferences = context.getSharedPreferences("messenger_chats", Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
-        Log.d(SplashScreen.TAG, "updateUnreadmessageCount: " + MainActivity.unreadMessage_count);
-        int value = MainActivity.unreadMessage_count + 1; // Replace with your desired integer value
-        Log.d(SplashScreen.TAG, "value: " + value);
-
+        int value = 0;
+        if (updateType.equals("plus")) {
+            value = MainActivity.unreadMessage_count + 1;
+        } else {
+            value = MainActivity.unreadMessage_count - 1;
+        }
         editor.putInt("unreadMessage_Count", value);
         editor.apply();
         MainActivity.badge_text.setText(String.valueOf(value));
@@ -278,7 +289,16 @@ public class Fragment_Messenger extends Fragment {
         MainActivity.badge_text.setBackgroundResource(R.drawable.badge_background);
         MainActivity.unreadMessage_count = value;
 
+
+        if (value == 0) {
+            MainActivity.badge_text.setVisibility(View.GONE);
+        }
+
     }
+
+
+
+
 }
 
 
@@ -327,13 +347,8 @@ class MessengeItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         userItem_viewholder.chatItemClick.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
-
-                String selectedObjectJson = new Gson().toJson(userList.get(holder.getBindingAdapterPosition()));
                 Intent intent = new Intent(context, ChatScreen_User.class);
-                intent.putExtra("data", selectedObjectJson);
-                intent.putExtra("indexPosition", holder.getBindingAdapterPosition());
-
+                intent.putExtra("userName", modelClass.getUserName());
                 context.startActivity(intent);
             }
         });
@@ -341,16 +356,18 @@ class MessengeItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         if (modelClass.isContainsQuestion()) {
 
             UserQuestionWithAns userQuestionWithAns = modelClass.getQuestionWithAns();
-            if (userQuestionWithAns.getSent() == 0) {
-                MediaPlayer mediaPlayer = MediaPlayer.create(context, R.raw.message_received);
-                mediaPlayer.start();
-            }
+
 
             userItem_viewholder.lastMessage.setText(userQuestionWithAns.getQuestion());
             userQuestionWithAns.setSent(1);
             userQuestionWithAns.setDateTime(String.valueOf(currentTime.getTime()));
 
-            Fragment_Messenger.save_sharedPrefrence(context, userList);
+            Fragment_Messenger.save_sharedPrefrence(context);
+            if (userQuestionWithAns.getRead() == 0) {
+                userItem_viewholder.messageCount.setText(String.valueOf(1));
+            } else {
+                userItem_viewholder.messageCount.setVisibility(View.GONE);
+            }
 
         } else {
 
@@ -358,15 +375,16 @@ class MessengeItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
 
                 if (modelClass.getUserBotMsg().get(i).getSent() == 0) {
 
-                    if (!modelClass.getUserName().equals("Team Desi Video Chat")) {
-                        MediaPlayer mediaPlayer = MediaPlayer.create(context, R.raw.message_received);
-                        mediaPlayer.start();
+                    if (modelClass.getUserName().equals("Team Desi Video Chat")) {
+                        userItem_viewholder.messageCount.setVisibility(View.GONE);
                     }
 
                     userItem_viewholder.lastMessage.setText(modelClass.getUserBotMsg().get(i).getMsg());
                     modelClass.getUserBotMsg().get(i).setSent(1);
                     modelClass.getUserBotMsg().get(i).setDateTime(String.valueOf(currentTime.getTime()));
-                    userItem_viewholder.messageCount.setText(String.valueOf(i + 1));
+
+                    setMessageCount(modelClass.getUserBotMsg(), userItem_viewholder.messageCount);//set messageCount
+
 
                     Random random = new Random();
                     int randomNumber = random.nextInt(1001) + 50; // Generate a random number between 0 and 5000, then add 50
@@ -379,15 +397,19 @@ class MessengeItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
                         @Override
                         public void run() {
                             if (holder.getBindingAdapterPosition() == -1) {
+                                // it means the item in not set in viewholder at this moment of time
                             } else {
 
                                 userList.remove(holder.getBindingAdapterPosition());
                                 userList.add(0, modelClass);
                                 notifyItemMoved(holder.getBindingAdapterPosition(), 0);
                                 notifyItemChanged(0);
-                                Fragment_Messenger.save_sharedPrefrence(context, userList);
+                                Fragment_Messenger.save_sharedPrefrence(context);
                                 recyclerview.smoothScrollToPosition(0);
-                                Fragment_Messenger.updateUnreadmessageCount(context);
+                                Fragment_Messenger.updateUnreadmessageCount(context, "plus");
+                                MediaPlayer mediaPlayer = MediaPlayer.create(context, R.raw.message_received);
+                                mediaPlayer.start();
+
                             }
 
                         }
@@ -399,15 +421,31 @@ class MessengeItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
                 }
                 if (i == modelClass.getUserBotMsg().size() - 2) { //last loop
                     userItem_viewholder.lastMessage.setText(modelClass.getUserBotMsg().get(i + 1).getMsg());
-                    userItem_viewholder.messageCount.setText(String.valueOf(i + 1));
+
+                    setMessageCount(modelClass.getUserBotMsg(), userItem_viewholder.messageCount);//set messageCount
+
                     modelClass.getUserBotMsg().get(modelClass.getUserBotMsg().size() - 1).setSent(1);
-                    Date date = new Date();
                     modelClass.getUserBotMsg().get(modelClass.getUserBotMsg().size() - 1).setDateTime(String.valueOf(currentTime.getTime()));
 
 
                 }
             }
         }
+    }
+
+    private void setMessageCount(ArrayList<UserBotMsg> userBotMsg, TextView messageCount) {
+
+        int count = 0;
+        for (int i = 0; i < userBotMsg.size(); i++) {
+            if (userBotMsg.get(i).getRead() == 0 && userBotMsg.get(i).getSent() == 1) {
+                count = count + 1;
+            }
+        }
+        messageCount.setText(String.valueOf(count));
+        if (count == 0) {
+            messageCount.setVisibility(View.GONE);
+        }
+
     }
 
 

@@ -105,11 +105,11 @@ public class MainActivity extends AppCompatActivity {
                                 @Override
                                 public void run() {
                                     //First time
-                                        badge_text.setVisibility(View.VISIBLE);
-                                        badge_text.setText("1");
-                                        badge_text.setBackgroundResource(R.drawable.badge_background);
-                                        MediaPlayer mediaPlayer = MediaPlayer.create(MainActivity.this, R.raw.message_received);
-                                        mediaPlayer.start();
+//                                        badge_text.setVisibility(View.VISIBLE);
+//                                        badge_text.setText("1");
+//                                        badge_text.setBackgroundResource(R.drawable.badge_background);
+//                                        MediaPlayer mediaPlayer = MediaPlayer.create(MainActivity.this, R.raw.message_received);
+//                                        mediaPlayer.start();
 
                                 }
                             }, 3000);
