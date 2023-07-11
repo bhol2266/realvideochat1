@@ -59,9 +59,8 @@
                     android:id="@+id/picMsg"
                     android:layout_width="150dp"
                     android:layout_height="150dp"
-                    android:background="@color/themeColor"
                     android:scaleType="fitCenter"
-                    android:src="@drawable/user" />
+                />
             </FrameLayout>
 
 

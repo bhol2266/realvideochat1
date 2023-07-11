@@ -2,7 +2,7 @@ package com.bhola.livevideochat;
 
 import android.app.Activity;
 import android.content.Context;
-import android.content.SharedPreferences;
+import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.InsetDrawable;
@@ -58,7 +58,6 @@ public class ChatScreen_User extends Activity {
     DatabaseReference chatRef;
     MediaPlayer mediaPlayer;
 
-    ArrayList<ChatItem_ModelClass> userListTemp2;
     private Handler handler;
     private Runnable myRunnable;
     private Thread myThread;
@@ -69,66 +68,71 @@ public class ChatScreen_User extends Activity {
         setContentView(R.layout.activity_chat_screen_user);
 
 
-        getModelClassFrom_sharedPreference();
+        getModalClass();
         sendDataRecyclerview();
         actionbar();
 
 
     }
 
-    private void getModelClassFrom_sharedPreference() {
-        String userName = getIntent().getStringExtra("userName");
+    private void getModalClass() {
 
-        SharedPreferences sharedPreferences = getSharedPreferences("messenger_chats", Context.MODE_PRIVATE);
+        Intent intent = getIntent();
+        String json = intent.getStringExtra("userList_Json");
 
-// Retrieve the JSON string from SharedPreferences
-        String json = sharedPreferences.getString("userListTemp", null);
-
-
-// Convert the JSON string back to ArrayList
+// Convert the JSON string to ArrayList<MyObject>
         Gson gson = new Gson();
         Type type = new TypeToken<ArrayList<ChatItem_ModelClass>>() {
         }.getType();
+        ArrayList<ChatItem_ModelClass> myObjectList = gson.fromJson(json, type);
 
 
-        if (json == null) {
-            // Handle case when no ArrayList is saved in SharedPreferences
-        } else {
-            userListTemp2 = gson.fromJson(json, type);
-            for (int i = 0; i < userListTemp2.size(); i++) {
-                if (userListTemp2.get(i).getUserName().equals(userName)) {
-                    modelClass = userListTemp2.get(i);
-                }
+        String userName = getIntent().getStringExtra("userName");
+        for (int i = 0; i < myObjectList.size(); i++) {
+            if (myObjectList.get(i).getUserName().equals(userName)) {
+                modelClass = myObjectList.get(i);
             }
-
         }
 
+        Fragment_Messenger.currentActiveUser = modelClass.getUserName();
     }
 
 
     private void sendDataRecyclerview() {
 
         chatsArrayList = new ArrayList<Chats_Modelclass>();
-        if (modelClass.isContainsQuestion()) {
-
+        if (modelClass.getUserName().equals("Team Desi Video Chat")) {
+            Chats_Modelclass chats_modelclass = new Chats_Modelclass(modelClass.getUserName(), "mimeType/text", "", modelClass.getUserProfile(), modelClass.getUserBotMsg().get(0).getDateTime(), 2);
+            chatsArrayList.add(chats_modelclass);
         } else {
-            for (int i = 0; i < modelClass.getUserBotMsg().size(); i++) {
-
-                if (modelClass.getUserBotMsg().get(i).getSent() == 1) {
-                    UserBotMsg userBotMsg = modelClass.getUserBotMsg().get(i);
-                    Chats_Modelclass chats_modelclass = new Chats_Modelclass(userBotMsg.getMsg(), userBotMsg.getMimeType(), userBotMsg.getExtraMsg(), modelClass.getUserProfile(), userBotMsg.getDateTime(), 2);
-                    chatsArrayList.add(chats_modelclass);
-
-                    Log.d(SplashScreen.TAG, "  userBotMsg.getRead() : " + userBotMsg.getRead());
-                    Log.d(SplashScreen.TAG, "  value before: " + MainActivity.unreadMessage_count);
 
 
-                    if (userBotMsg.getRead() == 0) {
-                        userBotMsg.setRead(1);
-                        update_userListTemp();
-                        Fragment_Messenger.updateUnreadmessageCount(ChatScreen_User.this, "minus");
-                        Log.d(SplashScreen.TAG, "  value After: " + MainActivity.unreadMessage_count);
+            if (modelClass.isContainsQuestion()) {
 
+                UserQuestionWithAns userQuestionWithAns = modelClass.getQuestionWithAns();
+                Chats_Modelclass chats_modelclass = new Chats_Modelclass(userQuestionWithAns.getQuestion(), "mimeType/text", "", modelClass.getUserProfile(), userQuestionWithAns.getDateTime(), 2);
+                chatsArrayList.add(chats_modelclass);
+
+                if (modelClass.getQuestionWithAns().getRead() == 0) {
+                    modelClass.getQuestionWithAns().setRead(1);
+                    update_userListTemp(0);
+
+                }
+
+            } else {
+                for (int i = 0; i < modelClass.getUserBotMsg().size(); i++) {
+
+                    if (modelClass.getUserBotMsg().get(i).getSent() == 1) {
+                        UserBotMsg userBotMsg = modelClass.getUserBotMsg().get(i);
+                        Chats_Modelclass chats_modelclass = new Chats_Modelclass(userBotMsg.getMsg(), userBotMsg.getMimeType(), userBotMsg.getExtraMsg(), modelClass.getUserProfile(), userBotMsg.getDateTime(), 2);
+                        chatsArrayList.add(chats_modelclass);
+
+
+                        if (userBotMsg.getRead() == 0) {
+                            userBotMsg.setRead(1);
+                            update_userListTemp(i);
+
+                        }
                     }
                 }
             }
@@ -150,27 +154,20 @@ public class ChatScreen_User extends Activity {
 
     }
 
-    private void update_userListTemp() {
+    private void update_userListTemp(int index) {
 
-        for (int i = 0; i < userListTemp2.size(); i++) {
-            if (userListTemp2.get(i).getUserName().equals(modelClass.getUserName())) {
-                userListTemp2.set(i, modelClass);
+        for (int i = 0; i < Fragment_Messenger.userListTemp.size(); i++) {
+            if (Fragment_Messenger.userListTemp.get(i).getUserName().equals(modelClass.getUserName())) {
+
+                if (Fragment_Messenger.userListTemp.get(i).isContainsQuestion()) {
+                    Fragment_Messenger.userListTemp.get(i).getQuestionWithAns().setRead(1);
+                    Fragment_Messenger.userListTemp.get(i).getQuestionWithAns().setSent(1);
+                } else {
+                    Fragment_Messenger.userListTemp.get(i).getUserBotMsg().get(index).setRead(1);
+                    Fragment_Messenger.userListTemp.get(i).getUserBotMsg().get(index).setSent(1);
+                }
             }
         }
-
-        SharedPreferences sharedPreferences = getSharedPreferences("messenger_chats", Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-
-
-// Convert the ArrayList to JSON string
-        Gson gson = new Gson();
-        String json = gson.toJson(userListTemp2);
-
-// Save the JSON string to SharedPreferences
-        editor.putString("userListTemp", json);
-        editor.apply();
-
-
     }
 
     private void scrollrecycelrvewToBottom() {
@@ -205,7 +202,7 @@ public class ChatScreen_User extends Activity {
             @Override
             public void run() {
                 // Start the task on the new thread
-                handler.post(myRunnable);
+                handler.postDelayed(myRunnable, 500);
             }
         });
 
@@ -214,22 +211,24 @@ public class ChatScreen_User extends Activity {
     }
 
     private void checkForUpdate() {
-
         for (int i = 0; i < Fragment_Messenger.userListTemp.size(); i++) {
             if (Fragment_Messenger.userListTemp.get(i).getUserName().equals(modelClass.getUserName())) {
 
                 for (int j = 0; j < Fragment_Messenger.userListTemp.get(i).getUserBotMsg().size(); j++) {
                     UserBotMsg userBotMsg = Fragment_Messenger.userListTemp.get(i).getUserBotMsg().get(j);
 
+
                     if (userBotMsg.getSent() == 1) {
                         if (modelClass.getUserBotMsg().get(j).getSent() == 0) {
-                            modelClass.getUserBotMsg().get(j).setSent(1);
-                            modelClass.getUserBotMsg().get(j).setRead(1);
 
                             Chats_Modelclass chats_modelclass = new Chats_Modelclass(userBotMsg.getMsg(), userBotMsg.getMimeType(), userBotMsg.getExtraMsg(), modelClass.getUserProfile(), userBotMsg.getDateTime(), 2);
                             chatsArrayList.add(chats_modelclass);
-                            chatAdapter.notifyDataSetChanged();
-                            Fragment_Messenger.updateUnreadmessageCount(ChatScreen_User.this, "minus");
+
+                            modelClass.getUserBotMsg().get(j).setSent(1);
+                            modelClass.getUserBotMsg().get(j).setRead(1);
+                            update_userListTemp(j);
+                            chatAdapter.notifyItemInserted(chatsArrayList.size() - 1);
+                            scrollrecycelrvewToBottom();
 
                         }
                     }
@@ -245,6 +244,12 @@ public class ChatScreen_User extends Activity {
         ImageView menuDots = findViewById(R.id.menuDots);
         RelativeLayout alertBar = findViewById(R.id.alertBar);
         TextView profileName = findViewById(R.id.profileName);
+
+        if(modelClass.getUserName().equals("Team Desi Video Chat")){
+            warningSign.setVisibility(View.GONE);
+            menuDots.setVisibility(View.GONE);
+
+        }
         profileName.setText(modelClass.getUserName());
 
         ImageView profileImage = findViewById(R.id.profileImage);
@@ -653,36 +658,3 @@ class Chats_Modelclass {
     }
 }
 
-class MyThread extends Thread {
-    private Handler handler;
-
-    @Override
-    public void run() {
-        // Prepare the Looper for this thread
-        Looper.prepare();
-
-        // Create the Handler associated with this thread's Looper
-        handler = new Handler();
-
-        // Start the task with a delay of 1 second
-        handler.postDelayed(myRunnable, 1000);
-
-        // Start the Looper loop to process messages
-        Looper.loop();
-    }
-
-    public Handler getHandler() {
-        return handler;
-    }
-
-    private Runnable myRunnable = new Runnable() {
-        @Override
-        public void run() {
-            // Perform your task here
-            Log.d("MyRunnable", "Task is running...");
-
-            // Post the task again after a delay
-            handler.postDelayed(this, 1000);
-        }
-    };
-}

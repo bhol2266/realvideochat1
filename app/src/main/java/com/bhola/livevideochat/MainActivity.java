@@ -10,6 +10,7 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.core.view.WindowInsetsControllerCompat;
 import androidx.viewpager2.widget.ViewPager2;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -33,8 +34,6 @@ import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
 
 import java.util.Objects;
-
-import io.grpc.Context;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -114,7 +113,7 @@ public class MainActivity extends AppCompatActivity {
                                 }
                             }, 3000);
 
-                        }else{
+                        } else {
                             if (unreadMessage_count != 0) {
                                 badge_text.setVisibility(View.VISIBLE);
                                 badge_text.setText(String.valueOf(unreadMessage_count));
@@ -230,6 +229,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+
     private final ActivityResultLauncher<String> requestPermissionLauncher =
             registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
                 if (isGranted) {
@@ -243,6 +243,5 @@ public class MainActivity extends AppCompatActivity {
                     // decision.
                 }
             });
-
 
 }

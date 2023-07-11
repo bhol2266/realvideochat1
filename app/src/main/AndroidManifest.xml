@@ -90,6 +90,8 @@
             android:name=".Service_UserChats"
             android:enabled="true"
             android:exported="false" />
+        <receiver android:name=".MyBroadcastReceiver" />
+
     </application>
 
 </manifest>
