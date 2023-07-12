@@ -105,7 +105,7 @@ public class SplashScreen extends AppCompatActivity {
         }
 //        readJSON();
         sharedPrefrences();
-        clearSharedPrefrence();
+//        clearSharedPrefrence();
 
 
         topAnim = AnimationUtils.loadAnimation(this, R.anim.top_animation);

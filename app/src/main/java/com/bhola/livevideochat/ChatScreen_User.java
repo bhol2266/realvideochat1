@@ -1,8 +1,11 @@
 package com.bhola.livevideochat;
 
+import static android.content.Context.MODE_PRIVATE;
+
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.InsetDrawable;
@@ -14,13 +17,13 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 
 import android.os.Handler;
-import android.os.Looper;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -62,6 +65,9 @@ public class ChatScreen_User extends Activity {
     private Runnable myRunnable;
     private Thread myThread;
 
+    LinearLayout answerslayout, ll2;   //ll2 is message writting box
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -71,8 +77,43 @@ public class ChatScreen_User extends Activity {
         getModalClass();
         sendDataRecyclerview();
         actionbar();
+        bottomBtns();
 
 
+    }
+
+    private void bottomBtns() {
+
+        CardView sendbtnn = findViewById(R.id.sendbtnn);
+        sendbtnn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startActivity(new Intent(ChatScreen_User.this, VipMembership.class));
+            }
+        });
+
+        ImageView sendImage = findViewById(R.id.sendImage);
+        ImageView videoCall = findViewById(R.id.videoCall);
+        ImageView voiceCall = findViewById(R.id.voiceCall);
+
+        sendImage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startActivity(new Intent(ChatScreen_User.this, VipMembership.class));
+            }
+        });
+        videoCall.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startActivity(new Intent(ChatScreen_User.this, VipMembership.class));
+            }
+        });
+        voiceCall.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startActivity(new Intent(ChatScreen_User.this, VipMembership.class));
+            }
+        });
     }
 
     private void getModalClass() {
@@ -102,7 +143,7 @@ public class ChatScreen_User extends Activity {
 
         chatsArrayList = new ArrayList<Chats_Modelclass>();
         if (modelClass.getUserName().equals("Team Desi Video Chat")) {
-            Chats_Modelclass chats_modelclass = new Chats_Modelclass(modelClass.getUserName(), "mimeType/text", "", modelClass.getUserProfile(), modelClass.getUserBotMsg().get(0).getDateTime(), 2);
+            Chats_Modelclass chats_modelclass = new Chats_Modelclass(modelClass.getUserBotMsg().get(0).getMsg(), "mimeType/text", "", modelClass.getUserProfile(), modelClass.getUserBotMsg().get(0).getDateTime(), 2);
             chatsArrayList.add(chats_modelclass);
         } else {
 
@@ -116,6 +157,24 @@ public class ChatScreen_User extends Activity {
                 if (modelClass.getQuestionWithAns().getRead() == 0) {
                     modelClass.getQuestionWithAns().setRead(1);
                     update_userListTemp(0);
+
+                }
+
+                if (userQuestionWithAns.getReply().length() == 0) {
+                    setAnwswerOptions(userQuestionWithAns);
+                } else {
+                    Chats_Modelclass chats_modelclass2 = new Chats_Modelclass(userQuestionWithAns.getReply(), "mimeType/text", "", modelClass.getUserProfile(), userQuestionWithAns.getDateTime(), 1);
+                    chatsArrayList.add(chats_modelclass2);
+
+                    for (int i = 0; i < modelClass.getQuestionWithAns().getReplyToUser().size(); i++) {
+                        UserBotMsg userBotMsg = modelClass.getQuestionWithAns().getReplyToUser().get(i);
+                        if (userBotMsg.getSent() == 1) {
+                            Chats_Modelclass chats_modelclass3 = new Chats_Modelclass(userBotMsg.getMsg(), "mimeType/text", "", modelClass.getUserProfile(), userBotMsg.getDateTime(), 2);
+                            chatsArrayList.add(chats_modelclass3);
+                            update_userListTemp_replyMessage(i);
+                        }
+                    }
+
 
                 }
 
@@ -154,6 +213,73 @@ public class ChatScreen_User extends Activity {
 
     }
 
+    private void setAnwswerOptions(UserQuestionWithAns userQuestionWithAns) {
+        answerslayout = findViewById(R.id.answerslayout);
+        ll2 = findViewById(R.id.ll2);
+
+
+        answerslayout.setVisibility(View.VISIBLE);
+        ll2.setVisibility(View.GONE);
+
+
+        TextView option1, option2;
+        option1 = findViewById(R.id.option1);
+        option2 = findViewById(R.id.option2);
+
+        option1.setText(userQuestionWithAns.getAnswers().get(0));
+        option2.setText(userQuestionWithAns.getAnswers().get(1));
+
+        Date currentTime = new Date();
+
+
+        option1.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Chats_Modelclass chats_modelclass = new Chats_Modelclass(userQuestionWithAns.getAnswers().get(0), "mimeType/text", "", modelClass.getUserProfile(), String.valueOf(currentTime.getTime()), 1);
+                chatsArrayList.add(chats_modelclass);
+                chatAdapter.notifyItemInserted(chatsArrayList.size() - 1);
+
+                modelClass.getQuestionWithAns().setReply(userQuestionWithAns.getAnswers().get(0));
+                update_userListTemp(0);
+
+
+                for (int i = 0; i < Fragment_Messenger.adapter.userList.size(); i++) {
+                    ChatItem_ModelClass modelClass1 = Fragment_Messenger.adapter.userList.get(i);
+                    if (modelClass1.getUserName().equals(modelClass.getUserName())) {
+                        Fragment_Messenger.adapter.notifyItemChanged(i);
+                    }
+                }
+
+                answerslayout.setVisibility(View.GONE);
+                ll2.setVisibility(View.VISIBLE);
+            }
+        });
+
+        option2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Chats_Modelclass chats_modelclass = new Chats_Modelclass(userQuestionWithAns.getAnswers().get(1), "mimeType/text", "", modelClass.getUserProfile(), String.valueOf(currentTime.getTime()), 1);
+                chatsArrayList.add(chats_modelclass);
+                chatAdapter.notifyItemInserted(chatsArrayList.size() - 1);
+
+                modelClass.getQuestionWithAns().setReply(userQuestionWithAns.getAnswers().get(1));
+                update_userListTemp(0);
+
+                for (int i = 0; i < Fragment_Messenger.adapter.userList.size(); i++) {
+                    ChatItem_ModelClass modelClass1 = Fragment_Messenger.adapter.userList.get(i);
+                    if (modelClass1.getUserName().equals(modelClass.getUserName())) {
+                        Fragment_Messenger.adapter.notifyItemChanged(i);
+                    }
+                }
+
+                answerslayout.setVisibility(View.GONE);
+                ll2.setVisibility(View.VISIBLE);
+            }
+        });
+
+
+    }
+
     private void update_userListTemp(int index) {
 
         for (int i = 0; i < Fragment_Messenger.userListTemp.size(); i++) {
@@ -162,13 +288,35 @@ public class ChatScreen_User extends Activity {
                 if (Fragment_Messenger.userListTemp.get(i).isContainsQuestion()) {
                     Fragment_Messenger.userListTemp.get(i).getQuestionWithAns().setRead(1);
                     Fragment_Messenger.userListTemp.get(i).getQuestionWithAns().setSent(1);
+                    Fragment_Messenger.userListTemp.get(i).getQuestionWithAns().setReply(modelClass.getQuestionWithAns().getReply());
                 } else {
                     Fragment_Messenger.userListTemp.get(i).getUserBotMsg().get(index).setRead(1);
                     Fragment_Messenger.userListTemp.get(i).getUserBotMsg().get(index).setSent(1);
                 }
             }
         }
+        Fragment_Messenger.save_sharedPrefrence(ChatScreen_User.this, Fragment_Messenger.userListTemp);
+
     }
+
+    private void update_userListTemp_replyMessage(int index) {
+
+        for (int i = 0; i < Fragment_Messenger.userListTemp.size(); i++) {
+            if (Fragment_Messenger.userListTemp.get(i).getUserName().equals(modelClass.getUserName())) {
+
+                for (int j = 0; j < modelClass.getQuestionWithAns().getReplyToUser().size(); j++) {
+                    if (j == index) {
+                        Fragment_Messenger.userListTemp.get(i).getQuestionWithAns().getReplyToUser().get(index).setRead(1);
+                        Fragment_Messenger.userListTemp.get(i).getQuestionWithAns().getReplyToUser().get(index).setSent(1);
+                    }
+
+                }
+            }
+        }
+        Fragment_Messenger.save_sharedPrefrence(ChatScreen_User.this, Fragment_Messenger.userListTemp);
+
+    }
+
 
     private void scrollrecycelrvewToBottom() {
         NestedScrollView nestedScrollview = findViewById(R.id.nestedScrollview);
@@ -214,25 +362,47 @@ public class ChatScreen_User extends Activity {
         for (int i = 0; i < Fragment_Messenger.userListTemp.size(); i++) {
             if (Fragment_Messenger.userListTemp.get(i).getUserName().equals(modelClass.getUserName())) {
 
-                for (int j = 0; j < Fragment_Messenger.userListTemp.get(i).getUserBotMsg().size(); j++) {
-                    UserBotMsg userBotMsg = Fragment_Messenger.userListTemp.get(i).getUserBotMsg().get(j);
+                if (modelClass.isContainsQuestion()) {
+                    for (int j = 0; j < Fragment_Messenger.userListTemp.get(i).getQuestionWithAns().getReplyToUser().size(); j++) {
+                        UserBotMsg userBotMsg = Fragment_Messenger.userListTemp.get(i).getQuestionWithAns().getReplyToUser().get(j);
+
+                        if (userBotMsg.getSent() == 1) {
+                            if (modelClass.getQuestionWithAns().getReplyToUser().get(j).getSent() == 0) {
+
+                                Chats_Modelclass chats_modelclass = new Chats_Modelclass(userBotMsg.getMsg(), userBotMsg.getMimeType(), userBotMsg.getExtraMsg(), modelClass.getUserProfile(), userBotMsg.getDateTime(), 2);
+                                chatsArrayList.add(chats_modelclass);
+
+                                modelClass.getQuestionWithAns().getReplyToUser().get(j).setSent(1);
+                                modelClass.getQuestionWithAns().getReplyToUser().get(j).setRead(1);
+
+                                update_userListTemp_replyMessage(j);
+                                chatAdapter.notifyItemInserted(chatsArrayList.size() - 1);
+                                scrollrecycelrvewToBottom();
+                            }
+                        }
+                    }
+                } else {
+
+                    for (int j = 0; j < Fragment_Messenger.userListTemp.get(i).getUserBotMsg().size(); j++) {
+                        UserBotMsg userBotMsg = Fragment_Messenger.userListTemp.get(i).getUserBotMsg().get(j);
 
 
-                    if (userBotMsg.getSent() == 1) {
-                        if (modelClass.getUserBotMsg().get(j).getSent() == 0) {
+                        if (userBotMsg.getSent() == 1) {
+                            if (modelClass.getUserBotMsg().get(j).getSent() == 0) {
 
-                            Chats_Modelclass chats_modelclass = new Chats_Modelclass(userBotMsg.getMsg(), userBotMsg.getMimeType(), userBotMsg.getExtraMsg(), modelClass.getUserProfile(), userBotMsg.getDateTime(), 2);
-                            chatsArrayList.add(chats_modelclass);
+                                Chats_Modelclass chats_modelclass = new Chats_Modelclass(userBotMsg.getMsg(), userBotMsg.getMimeType(), userBotMsg.getExtraMsg(), modelClass.getUserProfile(), userBotMsg.getDateTime(), 2);
+                                chatsArrayList.add(chats_modelclass);
 
-                            modelClass.getUserBotMsg().get(j).setSent(1);
-                            modelClass.getUserBotMsg().get(j).setRead(1);
-                            update_userListTemp(j);
-                            chatAdapter.notifyItemInserted(chatsArrayList.size() - 1);
-                            scrollrecycelrvewToBottom();
-
+                                modelClass.getUserBotMsg().get(j).setSent(1);
+                                modelClass.getUserBotMsg().get(j).setRead(1);
+                                update_userListTemp(j);
+                                chatAdapter.notifyItemInserted(chatsArrayList.size() - 1);
+                                scrollrecycelrvewToBottom();
+                            }
                         }
                     }
                 }
+
             }
         }
     }
@@ -244,21 +414,26 @@ public class ChatScreen_User extends Activity {
         ImageView menuDots = findViewById(R.id.menuDots);
         RelativeLayout alertBar = findViewById(R.id.alertBar);
         TextView profileName = findViewById(R.id.profileName);
+        TextView viewProfile = findViewById(R.id.viewProfile);
 
-        if(modelClass.getUserName().equals("Team Desi Video Chat")){
+
+        if (modelClass.getUserName().equals("Team Desi Video Chat")) {
             warningSign.setVisibility(View.GONE);
             menuDots.setVisibility(View.GONE);
+            viewProfile.setVisibility(View.GONE);
+
 
         }
         profileName.setText(modelClass.getUserName());
 
         ImageView profileImage = findViewById(R.id.profileImage);
         Picasso.get().load(modelClass.getUserProfile()).into(profileImage);
-        TextView viewProfile = findViewById(R.id.viewProfile);
         viewProfile.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                // open view profile activity
+                Intent intent = new Intent(ChatScreen_User.this, Profile_girl.class);
+                intent.putExtra("userName", modelClass.getUserName());
+                startActivity(intent);
             }
         });
 
@@ -400,7 +575,6 @@ public class ChatScreen_User extends Activity {
 
     }
 
-
     @Override
     protected void onPause() {
         super.onPause();
@@ -527,6 +701,20 @@ class ChatsAdapter extends RecyclerView.Adapter {
 
         }
 
+        if (chats.getViewType() == 1) {
+            ChatsAdapter.SenderVierwHolder senderVierwHolder = (ChatsAdapter.SenderVierwHolder) holder;
+            senderVierwHolder.msgtxt.setText(chats.getMessage());
+            senderVierwHolder.timeStamp.setText(formattedDate);
+
+
+            if (SplashScreen.userLoggedIAs.equals("Google")) {
+                SharedPreferences sh = context.getSharedPreferences("UserInfo", MODE_PRIVATE);
+                String urll = sh.getString("photoUrl", "not set");
+                Picasso.get()
+                        .load(urll)
+                        .into(senderVierwHolder.profile);
+            }
+        }
 
     }
 

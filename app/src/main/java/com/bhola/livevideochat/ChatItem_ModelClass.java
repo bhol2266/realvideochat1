@@ -2,19 +2,33 @@ package com.bhola.livevideochat;
 
 import java.util.ArrayList;
 
+
+
 public class ChatItem_ModelClass {
     private int id;
     private String userName;
+    private String gender;
+    private String age;
+    private String country;
+    private String users;
+    private String answerRate;
     private String userProfile;
     private boolean containsQuestion;
     private String recommendationType;
     private ArrayList<UserBotMsg> userBotMsg;
     private UserQuestionWithAns questionWithAns;
 
-    // Constructor
-    public ChatItem_ModelClass(int id, String userName, String userProfile, boolean containsQuestion, String recommendationType, ArrayList<UserBotMsg> userBotMsg, UserQuestionWithAns questionWithAns) {
+    public ChatItem_ModelClass() {
+    }
+
+    public ChatItem_ModelClass(int id, String userName, String gender, String age, String country, String users, String answerRate, String userProfile, boolean containsQuestion, String recommendationType, ArrayList<UserBotMsg> userBotMsg, UserQuestionWithAns questionWithAns) {
         this.id = id;
         this.userName = userName;
+        this.gender = gender;
+        this.age = age;
+        this.country = country;
+        this.users = users;
+        this.answerRate = answerRate;
         this.userProfile = userProfile;
         this.containsQuestion = containsQuestion;
         this.recommendationType = recommendationType;
@@ -22,7 +36,6 @@ public class ChatItem_ModelClass {
         this.questionWithAns = questionWithAns;
     }
 
-    // Getters and Setters
     public int getId() {
         return id;
     }
@@ -37,6 +50,46 @@ public class ChatItem_ModelClass {
 
     public void setUserName(String userName) {
         this.userName = userName;
+    }
+
+    public String getGender() {
+        return gender;
+    }
+
+    public void setGender(String gender) {
+        this.gender = gender;
+    }
+
+    public String getAge() {
+        return age;
+    }
+
+    public void setAge(String age) {
+        this.age = age;
+    }
+
+    public String getCountry() {
+        return country;
+    }
+
+    public void setCountry(String country) {
+        this.country = country;
+    }
+
+    public String getUsers() {
+        return users;
+    }
+
+    public void setUsers(String users) {
+        this.users = users;
+    }
+
+    public String getAnswerRate() {
+        return answerRate;
+    }
+
+    public void setAnswerRate(String answerRate) {
+        this.answerRate = answerRate;
     }
 
     public String getUserProfile() {

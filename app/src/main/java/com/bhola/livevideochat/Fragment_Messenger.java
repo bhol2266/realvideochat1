@@ -16,7 +16,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
@@ -65,8 +64,7 @@ public class Fragment_Messenger extends Fragment {
     Context context;
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // Inflate the layout for this fragment
 
         view = inflater.inflate(R.layout.fragment_messenger, container, false);
@@ -116,6 +114,12 @@ public class Fragment_Messenger extends Fragment {
                 JSONObject userObject = usersArray.getJSONObject(i);
                 int id = userObject.getInt("id");
                 String userName = userObject.getString("userName");
+
+                String gender = userObject.getString("gender");
+                String age = userObject.getString("age");
+                String country = userObject.getString("country");
+                String users = userObject.getString("users");
+                String answerRate = userObject.getString("answerRate");
                 String userProfile = userObject.getString("userProfile");
                 boolean containsQuestion = userObject.getBoolean("containsQuestion");
                 String recommendationType = userObject.getString("recommendationType");
@@ -150,6 +154,7 @@ public class Fragment_Messenger extends Fragment {
                     JSONArray answersArray = questionWithAnsObject.getJSONArray("answers");
                     String action = questionWithAnsObject.getString("action");
                     String dateTime = questionWithAnsObject.getString("dateTime");
+                    String reply = questionWithAnsObject.getString("reply");
                     int read = questionWithAnsObject.getInt("read");
                     int sent = questionWithAnsObject.getInt("sent");
 
@@ -159,10 +164,36 @@ public class Fragment_Messenger extends Fragment {
                         answersList.add(answer);
                     }
 
-                    questionWithAns = new UserQuestionWithAns(question, answersList, dateTime, action, read, sent);
+
+                    JSONArray replyToUserArray = questionWithAnsObject.getJSONArray("replyToUser");
+                    ArrayList<UserBotMsg> replyToUserList = new ArrayList<>();
+
+                    for (int j = 0; j < replyToUserArray.length(); j++) {
+                        JSONObject replyToUseObject = replyToUserArray.getJSONObject(j);
+                        int msgId = replyToUseObject.getInt("id");
+                        String msg = replyToUseObject.getString("msg");
+                        String mimeType = replyToUseObject.getString("mimeType");
+                        String dateTime2 = replyToUseObject.getString("dateTime");
+                        String extraMessage = "";
+                        try {
+                            extraMessage = replyToUseObject.getString("extraMsg");
+                        } catch (Exception e) {
+                        }
+
+                        int nextMsgDelay = replyToUseObject.getInt("nextMsgDelay");
+                        int read2 = replyToUseObject.getInt("read");
+                        int sent2 = replyToUseObject.getInt("sent");
+
+                        UserBotMsg userBotMsg = new UserBotMsg(msgId, msg, mimeType, extraMessage, dateTime2, nextMsgDelay, read2, sent2);
+                        replyToUserList.add(userBotMsg);
+                    }
+
+
+                    questionWithAns = new UserQuestionWithAns(question, answersList, dateTime, action, read, sent, reply, replyToUserList);
                 }
 
-                ChatItem_ModelClass user = new ChatItem_ModelClass(id, userName, userProfile, containsQuestion, recommendationType, userBotMsgList, questionWithAns);
+
+                ChatItem_ModelClass user = new ChatItem_ModelClass(id, userName, gender, age, country, users, answerRate, userProfile, containsQuestion, recommendationType, userBotMsgList, questionWithAns);
                 userList.add(user);
             }
         } catch (Exception e) {
@@ -189,7 +220,7 @@ public class Fragment_Messenger extends Fragment {
 
             int temp = 0;
             for (int i = userListTemp.size(); i < userList.size(); i++) {
-                int delayTime = temp * 120000;
+                int delayTime = temp * 180000;
                 temp++;
                 int finalI = i;
 
@@ -218,7 +249,7 @@ public class Fragment_Messenger extends Fragment {
         for (int i = 0; i < 4; i++) {
 
             int finalI = i;
-            int delayTime = finalI * 16000;
+            int delayTime = finalI * 20000;
 
             new Handler().postDelayed(new Runnable() {
                 @Override
@@ -412,10 +443,8 @@ class MessengeItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         });
 
         if (modelClass.getUserName().equals("Team Desi Video Chat")) {
-            Log.d(SplashScreen.TAG, "onBindViewHolder: " + modelClass.getUserName());
             userItem_viewholder.messageCount.setVisibility(View.GONE);
             userItem_viewholder.recommendationTypeCardview.setVisibility(View.GONE);
-
             userItem_viewholder.lastMessage.setText(modelClass.getUserBotMsg().get(0).getMsg());
             modelClass.getUserBotMsg().get(0).setDateTime(String.valueOf(currentTime.getTime()));
             return;
@@ -424,22 +453,8 @@ class MessengeItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
 
         if (modelClass.isContainsQuestion()) {
 
-            UserQuestionWithAns userQuestionWithAns = modelClass.getQuestionWithAns();
+            isContainQuestion(modelClass, userItem_viewholder, holder, currentTime);  //method to handler it chat is question
 
-
-            userItem_viewholder.lastMessage.setText(userQuestionWithAns.getQuestion());
-            userQuestionWithAns.setSent(1);
-            userQuestionWithAns.setDateTime(String.valueOf(currentTime.getTime()));
-
-            setMessageCountQuestion(modelClass.getQuestionWithAns(), userItem_viewholder.messageCount, modelClass.getUserName());//set messageCount method
-            Fragment_Messenger.save_sharedPrefrence(context, userList);
-            Fragment_Messenger.updateUnreadmessageCount(context);
-
-            if (userQuestionWithAns.getRead() == 0) {
-                userItem_viewholder.messageCount.setText(String.valueOf(1));
-            } else {
-                userItem_viewholder.messageCount.setVisibility(View.GONE);
-            }
 
         } else {
 
@@ -515,6 +530,61 @@ class MessengeItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         }
     }
 
+    private void isContainQuestion(ChatItem_ModelClass modelClass, UserItem_Viewholder userItem_viewholder, RecyclerView.ViewHolder holder, Date currentTime) {
+
+
+        UserQuestionWithAns userQuestionWithAns = modelClass.getQuestionWithAns();
+
+        if (userQuestionWithAns.getReply().length() != 0) {
+            int messageIndex = -1;
+            for (int i = 0; i < userQuestionWithAns.getReplyToUser().size(); i++) {
+                UserBotMsg userBotMsg = userQuestionWithAns.getReplyToUser().get(i);
+
+                int delayTime = (i + 1) * userBotMsg.getNextMsgDelay();
+                if (userBotMsg.getSent() == 0) {
+                    new Handler().postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            userBotMsg.setSent(1);
+                            userBotMsg.setDateTime(String.valueOf(currentTime.getTime()));
+
+                            if (holder.getBindingAdapterPosition() == -1) {
+                                // it means the item in not set in viewholder at this moment of time
+                            } else {
+                                userList.remove(holder.getBindingAdapterPosition());
+                                userList.add(0, modelClass);
+                                notifyItemMoved(holder.getBindingAdapterPosition(), 0);
+                                notifyItemChanged(0);
+                                recyclerview.smoothScrollToPosition(0);
+                            }
+                            Fragment_Messenger.updateUnreadmessageCount(context);
+                            Fragment_Messenger.playSentAudio();
+                        }
+                    }, delayTime);
+                } else {
+
+                    messageIndex = i;
+                }
+            }
+            if (messageIndex != -1) {
+                userItem_viewholder.lastMessage.setText(userQuestionWithAns.getReplyToUser().get(messageIndex).getMsg());
+            } else {
+                userItem_viewholder.lastMessage.setText(userQuestionWithAns.getReply());
+
+            }
+        } else {
+
+            userItem_viewholder.lastMessage.setText(userQuestionWithAns.getQuestion());
+            userQuestionWithAns.setSent(1);
+            userQuestionWithAns.setDateTime(String.valueOf(currentTime.getTime()));
+        }
+
+        setMessageCountQuestion(modelClass.getQuestionWithAns(), userItem_viewholder.messageCount, modelClass.getUserName());//set messageCount method
+        Fragment_Messenger.save_sharedPrefrence(context, userList);
+        Fragment_Messenger.updateUnreadmessageCount(context);
+
+    }
+
     private void setMessageCount(ArrayList<UserBotMsg> userBotMsg, TextView messageCount, String userName) {
 
         String activityName = getCurrentlyRunningActivity(context);
@@ -554,9 +624,14 @@ class MessengeItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
             count = count + 1;
         }
 
+        for (int i = 0; i < userQuestionWithAns.getReplyToUser().size(); i++) {
+            UserBotMsg userBotMsg = userQuestionWithAns.getReplyToUser().get(i);
+            if (userBotMsg.getSent() == 1 && userBotMsg.getRead() == 0) {
+                count = count + 1;
+            }
+        }
         messageCount.setText(String.valueOf(count));
         if (count == 0) {
-            Log.d(SplashScreen.TAG, "setMessageCountQuestion: " + count);
             messageCount.setVisibility(View.GONE);
         }
 

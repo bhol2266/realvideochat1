@@ -228,7 +228,7 @@ public class VipMembership extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-//        super.onBackPressed();
-        exit_dialog();
+        super.onBackPressed();
+//        exit_dialog();
     }
 }

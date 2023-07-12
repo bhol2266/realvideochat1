@@ -27,6 +27,9 @@
         android:theme="@style/Theme.LiveVideoChat"
         tools:targetApi="31">
         <activity
+            android:name=".Profile_girl"
+            android:exported="false" />
+        <activity
             android:name=".ChatScreen_User"
             android:exported="false"
             android:label="@string/title_activity_chat_screen_user"
@@ -85,13 +88,12 @@
             </intent-filter>
         </service>
         <service android:name=".BotMessageService" />
-
         <service
             android:name=".Service_UserChats"
             android:enabled="true"
             android:exported="false" />
-        <receiver android:name=".MyBroadcastReceiver" />
 
+        <receiver android:name=".MyBroadcastReceiver" />
     </application>
 
 </manifest>

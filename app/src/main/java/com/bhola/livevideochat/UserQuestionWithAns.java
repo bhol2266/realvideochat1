@@ -7,17 +7,22 @@ public class UserQuestionWithAns {
     private String action;
     private String dateTime;
     private int read,sent;
+    private String reply;
+    private ArrayList<UserBotMsg> replyToUser;
+
 
     public UserQuestionWithAns() {
     }
 
-    public UserQuestionWithAns(String question, ArrayList<String> answers, String action, String dateTime, int read, int sent) {
+    public UserQuestionWithAns(String question, ArrayList<String> answers, String action, String dateTime, int read, int sent, String reply, ArrayList<UserBotMsg> replyToUser) {
         this.question = question;
         this.answers = answers;
         this.action = action;
         this.dateTime = dateTime;
         this.read = read;
         this.sent = sent;
+        this.reply = reply;
+        this.replyToUser = replyToUser;
     }
 
     public String getQuestion() {
@@ -66,5 +71,21 @@ public class UserQuestionWithAns {
 
     public void setSent(int sent) {
         this.sent = sent;
+    }
+
+    public String getReply() {
+        return reply;
+    }
+
+    public void setReply(String reply) {
+        this.reply = reply;
+    }
+
+    public ArrayList<UserBotMsg> getReplyToUser() {
+        return replyToUser;
+    }
+
+    public void setReplyToUser(ArrayList<UserBotMsg> replyToUser) {
+        this.replyToUser = replyToUser;
     }
 }

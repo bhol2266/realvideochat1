@@ -3,6 +3,11 @@
     {
       "id": 0,
       "userName": "Team Desi Video Chat",
+      "gender": "",
+      "age": "",
+      "country": "",
+      "users": "",
+      "answerRate": "",
       "userProfile": "https://i.ibb.co/sKShSVr/logo-home.png",
       "containsQuestion": false,
       "recommendationType": "",
@@ -21,6 +26,11 @@
     {
       "id": 2,
       "userName": "Sudha :)",
+      "gender": "female",
+      "age": "26",
+      "country": "India",
+      "users": "2445",
+      "answerRate": "75",
       "userProfile": "https://p-cdn.telescope.vip/pepper/avatar/0/20210511-1620720723403.jpg",
       "containsQuestion": false,
       "recommendationType": "Recommended",
@@ -104,6 +114,11 @@
     {
       "id": 3,
       "userName": "💋💋Rohini",
+      "gender": "female",
+      "age": "24",
+      "country": "India",
+      "users": "4510",
+      "answerRate": "100",
       "userProfile": "https://aig-upload.s3-accelerate.amazonaws.com/pepper/avatar/0/0-1553530506746.jpg",
       "containsQuestion": true,
       "recommendationType": "Nearby",
@@ -117,12 +132,38 @@
         ],
         "action": "chats_update_1.json",
         "read": 0,
-        "sent": 0
+        "sent": 0,
+        "reply": "",
+        "replyToUser": [
+          {
+            "id": 0,
+            "msg": "Kahan se ho?",
+            "mimeType": "mimeType/text",
+            "dateTime": "",
+            "nextMsgDelay": 80000,
+            "read": 0,
+            "sent": 0
+          },
+          {
+            "id": 1,
+            "msg": "Mujhe video chat request bhejo naa..",
+            "mimeType": "mimeType/text",
+            "dateTime": "",
+            "nextMsgDelay": 10000,
+            "read": 0,
+            "sent": 0
+          }
+        ]
       }
     },
     {
       "id": 4,
       "userName": "Shristi",
+      "gender": "female",
+      "age": "25",
+      "country": "India",
+      "users": "6401",
+      "answerRate": "75",
       "userProfile": "https://p-cdn.telescope.vip/pepper/avatar/507407123/20211210-1639083499871.jpg",
       "containsQuestion": false,
       "recommendationType": "Recommended",
@@ -187,6 +228,11 @@
     {
       "id": 5,
       "userName": "Sunanda",
+      "gender": "female",
+      "age": "28",
+      "country": "India",
+      "users": "3279",
+      "answerRate": "75",
       "userProfile": "https://p-cdn.telescope.vip/pepper/avatar/530490703/20211206-1638767913429.jpg",
       "containsQuestion": false,
       "recommendationType": "Recommended",
@@ -242,6 +288,11 @@
     {
       "id": 8,
       "userName": "\uD83D\uDC44 \uD83D\uDC8B\uD83D\uDC69\uD83C\uDFFB\u200D\uD83E\uDDB0\uD83D\uDE18",
+      "gender": "female",
+      "age": "26",
+      "country": "India",
+      "users": "5000",
+      "answerRate": "60",
       "userProfile": "https://p-cdn.telescope.vip/pepper/avatar/558982029/20211211-1639190513375.jpg",
       "containsQuestion": false,
       "recommendationType": "Nearby",
@@ -296,6 +347,11 @@
     {
       "id": 6,
       "userName": "kiran",
+      "gender": "female",
+      "age": "26",
+      "country": "India",
+      "users": "9200",
+      "answerRate": "100",
       "userProfile": "https://p-cdn.telescope.vip/pepper/avatar/559009389/20211210-1639131242917.jpg",
       "containsQuestion": false,
       "recommendationType": "Nearby",
@@ -332,6 +388,11 @@
     {
       "id": 10,
       "userName": "Priya..",
+      "gender": "female",
+      "age": "23",
+      "country": "India",
+      "users": "510",
+      "answerRate": "75",
       "userProfile": "https://p-cdn.telescope.vip/pepper/avatar/523417673/20211107-1636285299409.jpg",
       "containsQuestion": true,
       "recommendationType": "Popular",
@@ -345,12 +406,47 @@
         ],
         "action": "chats_update_1.json",
         "read": 0,
-        "sent": 0
+        "sent": 0,
+        "reply": "",
+        "replyToUser": [
+          {
+            "id": 0,
+            "msg": "Main sundar hun zyada ya woh?",
+            "mimeType": "mimeType/text",
+            "dateTime": "",
+            "nextMsgDelay": 5000,
+            "read": 0,
+            "sent": 0
+          },
+          {
+            "id": 1,
+            "msg": "What are your hobbies?",
+            "mimeType": "mimeType/text",
+            "dateTime": "",
+            "nextMsgDelay": 15000,
+            "read": 0,
+            "sent": 0
+          },
+          {
+            "id": 1,
+            "msg": "Acha! Fir mujhse dosti karna chahoge?",
+            "mimeType": "mimeType/text",
+            "dateTime": "",
+            "nextMsgDelay": 15000,
+            "read": 0,
+            "sent": 0
+          }
+        ]
       }
     },
     {
       "id": 11,
       "userName": "radhika",
+      "gender": "female",
+      "age": "27",
+      "country": "India",
+      "users": "2380",
+      "answerRate": "75",
       "userProfile": "https://p-cdn.telescope.vip/pepper/avatar/506855803/20211025-1635122385721.jpg",
       "containsQuestion": false,
       "recommendationType": "Nearby",
@@ -387,6 +483,11 @@
     {
       "id": 12,
       "userName": "Charu",
+      "gender": "female",
+      "age": "27",
+      "country": "India",
+      "users": "5380",
+      "answerRate": "100",
       "userProfile": "https://p-cdn.telescope.vip/pepper/avatar/341531472/20211205-1638718797657.jpg",
       "containsQuestion": false,
       "recommendationType": "Recommended",
@@ -441,6 +542,11 @@
     {
       "id": 13,
       "userName": "Sunaina Delhi ;)",
+      "gender": "female",
+      "age": "19",
+      "country": "India",
+      "users": "6010",
+      "answerRate": "100",
       "userProfile": "https://p-cdn.telescope.vip/pepper/avatar/512130787/20211215-1639573396054.jpg",
       "containsQuestion": false,
       "recommendationType": "Nearby",

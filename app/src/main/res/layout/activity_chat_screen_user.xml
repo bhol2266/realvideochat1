@@ -51,8 +51,8 @@
                 android:layout_height="30dp"
                 android:layout_gravity="center"
                 android:layout_marginRight="30dp"
-                android:alpha="0.7"
-                android:src="@drawable/warning" />
+                android:src="@drawable/warning"
+                app:tint="@color/themeColor" />
 
             <ImageView
                 android:id="@+id/menuDots"
@@ -112,9 +112,9 @@
         android:id="@+id/nestedScrollview"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:fillViewport="true"
         android:layout_above="@id/ll2"
-        android:layout_below="@id/alertBar">
+        android:layout_below="@id/alertBar"
+        android:fillViewport="true">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -138,8 +138,7 @@
                 android:layout_marginBottom="20dp"
                 android:fontFamily="@font/inter"
                 android:text="View Profile"
-                android:textColor="@color/themeColor"
-               />
+                android:textColor="@color/themeColor" />
 
 
             <androidx.recyclerview.widget.RecyclerView
@@ -157,10 +156,51 @@
 
 
     <LinearLayout
+        android:id="@+id/answerslayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/bottomNav"
+        android:layout_margin="10dp"
+        android:orientation="vertical"
+        android:visibility="gone">
+
+        <TextView
+            android:id="@+id/option1"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:layout_gravity="center"
+            android:layout_marginLeft="15dp"
+            android:layout_marginRight="15dp"
+            android:background="@drawable/btn_bg"
+            android:fontFamily="@font/rubrik_semibold"
+            android:gravity="center"
+            android:text="haan"
+            android:textColor="#ffffff"
+            android:textSize="18dp" />
+
+
+        <TextView
+            android:id="@+id/option2"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:layout_gravity="center"
+            android:layout_marginLeft="15dp"
+            android:layout_marginTop="10dp"
+            android:layout_marginRight="15dp"
+            android:background="@drawable/btn_bg"
+            android:fontFamily="@font/rubrik_semibold"
+            android:gravity="center"
+            android:text="nahi"
+            android:textColor="#ffffff"
+            android:textSize="18dp" />
+
+    </LinearLayout>
+
+    <LinearLayout
         android:id="@+id/ll2"
         android:layout_width="match_parent"
         android:layout_height="55dp"
-        android:layout_alignParentBottom="true"
+        android:layout_above="@+id/bottomNav"
         android:layout_marginStart="15dp"
         android:layout_marginEnd="15dp"
         android:backgroundTint="@color/purple_200"
@@ -171,7 +211,8 @@
             android:layout_width="50dp"
             android:layout_height="50dp"
             android:layout_gravity="center"
-            app:cardBackgroundColor="@color/white"
+            app:cardElevation="0dp"
+            app:cardBackgroundColor="#F3F3F3"
             app:cardCornerRadius="25dp">
 
             <ImageView
@@ -189,7 +230,8 @@
             android:layout_marginStart="7dp"
             android:layout_marginEnd="7dp"
             android:layout_weight="1"
-            app:cardBackgroundColor="@color/white"
+            app:cardElevation="0dp"
+            app:cardBackgroundColor="#F3F3F3"
             app:cardCornerRadius="15dp">
 
             <EditText
@@ -210,12 +252,13 @@
             android:layout_width="50dp"
             android:layout_height="50dp"
             android:layout_gravity="center"
-            app:cardBackgroundColor="@color/white"
+            app:cardElevation="0dp"
+            app:cardBackgroundColor="#F3F3F3"
             app:cardCornerRadius="25dp">
 
             <ImageView
-                android:layout_width="25dp"
-                android:layout_height="25dp"
+                android:layout_width="28dp"
+                android:layout_height="27dp"
                 android:layout_gravity="center"
                 android:layout_marginLeft="2dp"
                 android:background="@drawable/sendbut"
@@ -225,6 +268,47 @@
 
 
     </LinearLayout>
+
+    <RelativeLayout
+        android:id="@+id/bottomNav"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="7dp"
+        android:paddingLeft="50dp"
+        android:paddingRight="50dp"
+        android:paddingTop="10dp"
+        android:paddingBottom="10dp"
+        android:layout_alignParentBottom="true"
+       >
+
+        <ImageView
+            android:id="@+id/sendImage"
+            android:layout_width="30dp"
+            android:layout_height="27dp"
+            android:layout_alignParentLeft="true"
+            android:layout_centerVertical="true"
+            android:alpha="0.7"
+            android:src="@drawable/picture" />
+
+        <ImageView
+            android:id="@+id/videoCall"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_centerInParent="true"
+            android:alpha="0.7"
+            android:src="@drawable/videocall" />
+
+        <ImageView
+            android:id="@+id/voiceCall"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:alpha="0.7"
+            android:src="@drawable/telephone" />
+
+
+    </RelativeLayout>
 
 
 </RelativeLayout>
