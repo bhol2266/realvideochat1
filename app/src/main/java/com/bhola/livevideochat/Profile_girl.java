@@ -7,7 +7,9 @@ import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.core.view.WindowInsetsControllerCompat;
 
+import android.app.Dialog;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.InsetDrawable;
@@ -19,6 +21,7 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.widget.GridLayout;
 import android.widget.ImageView;
 import android.widget.RatingBar;
 import android.widget.RelativeLayout;
@@ -39,21 +42,25 @@ public class Profile_girl extends AppCompatActivity {
     AlertDialog block_user_dialog = null;
     AlertDialog report_user_dialog = null;
     AlertDialog report_userSucessfully_dialog = null;
+    GridLayout gridLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
+        this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_profile_girl);
-        fullscreenMode();
+//        getSupportActionBar().hide();
+
+//        fullscreenMode();
 
         getModalClass();
 
 
         bindDetails();
         actionbar();
-
+        setImageinGridLayout();
     }
-
 
 
     private void bindDetails() {
@@ -129,7 +136,6 @@ public class Profile_girl extends AppCompatActivity {
                 reportUserDialog();
             }
         });
-
 
 
     }
@@ -240,8 +246,6 @@ public class Profile_girl extends AppCompatActivity {
     }
 
 
-
-
     private void getModalClass() {
 
         String userName = getIntent().getStringExtra("userName");
@@ -266,6 +270,64 @@ public class Profile_girl extends AppCompatActivity {
         answerRatingTextview.setText("AnswerRate: " + modelClass.getAnswerRate() + "%");
     }
 
+    private void setImageinGridLayout() {
+
+        gridLayout = findViewById(R.id.gridLayout);
+        ArrayList<String> imageList = new ArrayList<>();
+        imageList.add(modelClass.getUserProfile());
+        for (int i = 0; i < modelClass.getUserBotMsg().size(); i++) {
+            String extraMsg = "";
+            extraMsg = modelClass.getUserBotMsg().get(i).getExtraMsg();
+            if (extraMsg.length() > 5 && extraMsg.contains(".jpg") || extraMsg.contains(".png")) {
+                imageList.add(extraMsg);
+            }
+        }
+        for (String url : imageList) {
+
+            // Create a new CardView
+            CardView cardView = new CardView(this);
+
+// Set corner radius and elevation for the CardView
+            int cornerRadius = (int) (20 * getResources().getDisplayMetrics().density); // Set the desired corner radius in dp
+            float elevation = 0 * getResources().getDisplayMetrics().density; // Set the desired elevation in dp
+            cardView.setRadius(cornerRadius);
+            cardView.setElevation(elevation);
+
+
+// Create a new ImageView
+            ImageView imageView = new ImageView(this);
+
+// Set the desired image resource or drawable to the ImageView
+            Picasso.get().load(url).into(imageView);
+
+// Set layout parameters for width and height
+            int sizeInPixels = (int) (80 * getResources().getDisplayMetrics().density); // Set the desired size in dp
+            CardView.LayoutParams layoutParams = new CardView.LayoutParams(sizeInPixels, sizeInPixels);
+            layoutParams.setMargins(10, 10, 10, 10);
+
+// Add the ImageView to the CardView
+            cardView.addView(imageView, layoutParams);
+            cardView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+
+//                    Dialog dialog=new Dialog(this,andr)
+
+                    ImageViewerDialog dialog = new ImageViewerDialog(Profile_girl.this, imageList);
+                    dialog.show();
+                }
+            });
+
+
+
+
+// Add the CardView to the GridLayout
+            gridLayout.addView(cardView);
+        }
+
+
+    }
+
 
     private void fullscreenMode() {
 
@@ -287,7 +349,7 @@ public class Profile_girl extends AppCompatActivity {
 //
 
 
-        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
     }
 
