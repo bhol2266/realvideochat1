@@ -17,7 +17,6 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 
 import android.os.Handler;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -204,7 +203,7 @@ public class ChatScreen_User extends Activity {
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(ChatScreen_User.this);
         linearLayoutManager.setStackFromEnd(true);
         recylerview.setLayoutManager(linearLayoutManager);
-        chatAdapter = new ChatsAdapter(ChatScreen_User.this, chatsArrayList, recylerview, mediaPlayer);
+        chatAdapter = new ChatsAdapter(ChatScreen_User.this, chatsArrayList, recylerview, mediaPlayer, modelClass);
         recylerview.setAdapter(chatAdapter);
 
         scrollrecycelrvewToBottom();
@@ -594,18 +593,22 @@ public class ChatScreen_User extends Activity {
 }
 
 class ChatsAdapter extends RecyclerView.Adapter {
+
     Context context;
     ArrayList<Chats_Modelclass> chatsArrayList;
     int SENDER = 1;
     int RECEIVER = 2;
     RecyclerView recyclerview;
     MediaPlayer mediaPlayer;
+    ChatItem_ModelClass modelClass;
 
-    public ChatsAdapter(Context context, ArrayList<Chats_Modelclass> chatsArrayList, RecyclerView recyclerview, MediaPlayer mediaPlayer) {
+    public ChatsAdapter(Context context, ArrayList<Chats_Modelclass> chatsArrayList, RecyclerView recyclerview, MediaPlayer mediaPlayer, ChatItem_ModelClass modelClass) {
         this.context = context;
         this.chatsArrayList = chatsArrayList;
         this.recyclerview = recyclerview;
         this.mediaPlayer = mediaPlayer;
+        this.modelClass = modelClass;
+
     }
 
 
@@ -695,6 +698,33 @@ class ChatsAdapter extends RecyclerView.Adapter {
                         .into(reciverViewHolder.picMsg);
                 reciverViewHolder.textMsg.setVisibility(View.GONE);
                 reciverViewHolder.audioMsg.setVisibility(View.GONE);
+
+                reciverViewHolder.picMsgLayout.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        ArrayList<String> imageList = new ArrayList<>();
+                        imageList.add(modelClass.getUserProfile());
+                        for (int i = 0; i < modelClass.getUserBotMsg().size(); i++) {
+                            String extraMsg = "";
+                            extraMsg = modelClass.getUserBotMsg().get(i).getExtraMsg();
+                            if (extraMsg.length() > 5 && extraMsg.contains(".jpg") || extraMsg.contains(".png")) {
+                                imageList.add(extraMsg);
+                            }
+                        }
+
+                        int index = 0;
+                        for (int i = 0; i < imageList.size(); i++) {
+                            if (imageList.get(i).equals(chats.getExtraMsg())) {
+                                index = i;
+                            }
+
+                        }
+                        ImageViewerDialog dialog = new ImageViewerDialog(context, imageList, index);
+                        dialog.show();
+
+                    }
+                });
+
 
             }
 

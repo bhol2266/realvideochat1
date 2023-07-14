@@ -282,7 +282,10 @@ public class Profile_girl extends AppCompatActivity {
                 imageList.add(extraMsg);
             }
         }
-        for (String url : imageList) {
+
+        for (int i = 0; i <imageList.size() ; i++) {
+
+
 
             // Create a new CardView
             CardView cardView = new CardView(this);
@@ -298,7 +301,7 @@ public class Profile_girl extends AppCompatActivity {
             ImageView imageView = new ImageView(this);
 
 // Set the desired image resource or drawable to the ImageView
-            Picasso.get().load(url).into(imageView);
+            Picasso.get().load(imageList.get(i)).into(imageView);
 
 // Set layout parameters for width and height
             int sizeInPixels = (int) (80 * getResources().getDisplayMetrics().density); // Set the desired size in dp
@@ -307,13 +310,14 @@ public class Profile_girl extends AppCompatActivity {
 
 // Add the ImageView to the CardView
             cardView.addView(imageView, layoutParams);
+            int finalI = i;
             cardView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
 
 //                    Dialog dialog=new Dialog(this,andr)
 
-                    ImageViewerDialog dialog = new ImageViewerDialog(Profile_girl.this, imageList);
+                    ImageViewerDialog dialog = new ImageViewerDialog(Profile_girl.this, imageList, finalI);
                     dialog.show();
                 }
             });

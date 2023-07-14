@@ -3,6 +3,7 @@ import android.app.Dialog;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.net.Uri;
 import android.os.Bundle;
 import androidx.viewpager.widget.ViewPager;
 import android.view.LayoutInflater;
@@ -12,7 +13,10 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ImageView;
 import androidx.viewpager.widget.PagerAdapter;
+
+import com.jsibbold.zoomage.ZoomageView;
 import com.squareup.picasso.Picasso;
+import com.squareup.picasso.Target;
 
 import java.util.ArrayList;
 
@@ -20,11 +24,13 @@ import java.util.ArrayList;
 public class ImageViewerDialog extends Dialog {
     private Context context;
     private ArrayList<String> imageUrls;
+    private int selectedIndex;
 
-    public ImageViewerDialog(Context context, ArrayList<String> imageUrls) {
+    public ImageViewerDialog(Context context, ArrayList<String> imageUrls, int selectedIndex) {
         super(context, android.R.style.Theme_DeviceDefault_Light_NoActionBar_Fullscreen);
         this.context = context;
         this.imageUrls = imageUrls;
+        this.selectedIndex = selectedIndex;
     }
 
     @Override
@@ -46,6 +52,7 @@ public class ImageViewerDialog extends Dialog {
         });
         ImagePagerAdapter pagerAdapter = new ImagePagerAdapter(context, imageUrls);
         viewPager.setAdapter(pagerAdapter);
+        viewPager.setCurrentItem(selectedIndex);
 
         // Add any other logic or UI customization as needed
     }
@@ -75,9 +82,7 @@ class ImagePagerAdapter extends PagerAdapter {
     public Object instantiateItem(ViewGroup container, int position) {
         LayoutInflater inflater = LayoutInflater.from(context);
         View view = inflater.inflate(R.layout.item_image2, container, false);
-        ImageView imageView = view.findViewById(R.id.imageView);
-
-        // Load the image using Picasso or any other image loading library
+        ZoomageView imageView = view.findViewById(R.id.imageView);
         Picasso.get().load(imageUrls.get(position)).into(imageView);
 
         container.addView(view);
