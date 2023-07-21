@@ -1,15 +1,16 @@
 package com.bhola.livevideochat;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
-import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.graphics.SurfaceTexture;
 import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.InsetDrawable;
 import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraCaptureSession;
 import android.hardware.camera2.CameraCharacteristics;
@@ -22,31 +23,51 @@ import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Vibrator;
 import android.util.Log;
 import android.util.Size;
+import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.TextureView;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
+import android.view.Window;
 import android.view.WindowManager;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.VideoView;
 
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.cardview.widget.CardView;
 import androidx.core.app.ActivityCompat;
 import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.core.view.WindowInsetsControllerCompat;
 
+import com.google.common.reflect.TypeToken;
+import com.google.gson.Gson;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.Collections;
 
 
@@ -55,11 +76,11 @@ public class CameraActivity extends Activity {
     CardView textureCardview;
     VideoView videoView;
     int currentSeekPosition = 0;
-    Runnable runnable, runnable2, runnable3;
-    Handler handler, handler2, handler3;
+    Runnable runnable2, runnable3;
+    Handler handler2, handler3;
     MediaPlayer mediaPlayer;
-    MediaPlayer ringtonePlayer;
-    TextView messageTextView;
+
+    int videoView_Height;
 
     //Camera stuffs
     private static final int CAMERA_PERMISSION_REQUEST_CODE = 123;
@@ -70,7 +91,11 @@ public class CameraActivity extends Activity {
     String cameraId;
     Handler backgroundHandler;
     HandlerThread handlerThread;
-
+    private int currentVideoIndex = 0;
+    RelativeLayout progressBarLayout;
+    LinearLayout controlsLayout;
+    ImageView taptoReply;
+    View tapToReplyView;
     CameraCaptureSession cameraCaptureSession;
     CameraDevice cameraDevice;
     CameraDevice.StateCallback stateCallback = new CameraDevice.StateCallback() {
@@ -100,80 +125,66 @@ public class CameraActivity extends Activity {
     };
     String currentCameraSide = "Front";
     private String TAG = "activity_camera";
+    private ArrayList<Girl> girlsList;
+    androidx.appcompat.app.AlertDialog disclaimer_dialog = null;
+    private CountDownTimer countDownTimer;
+
+    androidx.appcompat.app.AlertDialog block_user_dialog = null;
+    androidx.appcompat.app.AlertDialog report_user_dialog = null;
+    AlertDialog report_userSucessfully_dialog = null;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
+        this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_camera);
-//        fullscreenMode();
+//       fullscreenMode();
+        actionbar();
+
+        SharedPreferences sharedPreferences = getSharedPreferences("UserInfo", Context.MODE_PRIVATE);
+        boolean disclaimerAccepted = sharedPreferences.getBoolean("disclaimerAccepted", false);
+        if (!disclaimerAccepted) {
+            disclaimerDialog();
+        }
 
         textureView = findViewById(R.id.textureView);
         textureCardview = findViewById(R.id.draggableView);
-        playRinging();
         controlCamera();
+        likeBtn();
 
 
     }
 
-    private void playRinging() {
-        messageTextView = findViewById(R.id.message);
-        ringtonePlayer = MediaPlayer.create(CameraActivity.this, R.raw.ringback_tone);
+    private void likeBtn() {
+        ImageView heart = findViewById(R.id.heart);
+        taptoReply = findViewById(R.id.taptoReply);
+        tapToReplyView = findViewById(R.id.tapToReplyView);
 
-        handler = new Handler();
-        runnable = new Runnable() {
+        Animation taptoReply_anim = AnimationUtils.loadAnimation(this, R.anim.taptoreply_anim);
+        taptoReply.startAnimation(taptoReply_anim);
+
+
+        Animation pulse = AnimationUtils.loadAnimation(this, R.anim.breathing_anim);
+        heart.startAnimation(pulse);
+
+        heart.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void run() {
-                messageTextView.setText("ringing...");
-                ringtonePlayer.start();
-            }
-        };
-        handler.postDelayed(runnable, 1000);
+            public void onClick(View view) {
 
+            }
+        });
+    }
+
+    private void playRinging() {
+
+        playVideoinTheBackground();
 
         handler2 = new Handler();
         runnable2 = new Runnable() {
             @Override
             public void run() {
-                messageTextView.setVisibility(View.GONE);
-                LinearLayout controlsLayout = findViewById(R.id.controlsLayout);
-                ImageView warningSign = findViewById(R.id.warningSign);
-                warningSign.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        AlertDialog.Builder builder = new AlertDialog.Builder(CameraActivity.this);
-                        builder.setTitle("Report this user");
-                        builder.setMessage("If you want to report and block this user");
-
-// Set up the buttons
-                        builder.setPositiveButton("REPORT", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                // Handle positive button click
-                                Toast.makeText(CameraActivity.this, "Reported", Toast.LENGTH_SHORT).show();
-                                onBackPressed();
-                            }
-                        });
-
-                        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                // Handle negative button click
-                                dialog.cancel();
-                            }
-                        });
-
-// Create and show the alert dialog
-                        AlertDialog dialog = builder.create();
-                        dialog.show();
-
-                    }
-                });
-                VideoView videoView = findViewById(R.id.videoView);
-                videoView.setVisibility(View.VISIBLE);
-                warningSign.setVisibility(View.VISIBLE);
-                controlsLayout.setVisibility(View.VISIBLE);
-                ringtonePlayer.stop();
-                playVideoinTheBackground();
 
 
 // Set desired width and height in dp
@@ -202,11 +213,9 @@ public class CameraActivity extends Activity {
 
                 textureCardview.setVisibility(View.VISIBLE);
 
-
-
             }
         };
-        handler2.postDelayed(runnable2, 8000);
+        handler2.postDelayed(runnable2, 1000);
 
 
     }
@@ -214,8 +223,41 @@ public class CameraActivity extends Activity {
 
     private void playVideoinTheBackground() {
 
+        readGirlsVideo();
+
+
         videoView = findViewById(R.id.videoView);
-        String videoPath = "android.resource://" + getPackageName() + "/" + R.raw.sample_video;
+        controlsLayout.setVisibility(View.GONE);
+
+        LinearLayout playerLayout = findViewById(R.id.player);
+
+        // Get the height of the VideoView area before playing the video
+        playerLayout.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+            @Override
+            public void onGlobalLayout() {
+                int videoViewHeight = playerLayout.getHeight();
+                int videoViewWidth = playerLayout.getWidth();
+
+                // Remove the listener to avoid redundant calls
+                playerLayout.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                videoView_Height = videoViewHeight;
+
+            }
+        });
+        String baseUrl = "https://bucket2266.blr1.cdn.digitaloceanspaces.com/";
+
+        String videoPath = "";
+
+        for (int i = 0; i <girlsList.size() ; i++) {
+            Girl girl=girlsList.get(i);
+            if (!girl.isSeen()) {
+                videoPath = baseUrl + girl.getName() + ".mp4";// Replace with your actual video URL
+                currentVideoIndex=i;
+                break;
+            }
+        }
+
+//        String videoPath = SplashScreen.decryption(girlsList.get(4).getVideoUrl()); // Replace with your actual video URL
         Uri videoUri = Uri.parse(videoPath);
         videoView.setVideoURI(videoUri);
         videoView.start();
@@ -223,11 +265,183 @@ public class CameraActivity extends Activity {
         videoView.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
             @Override
             public void onPrepared(MediaPlayer mp) {
+
+                progressBarLayout = findViewById(R.id.progressBarLayout);
+
+                setTimer();
+
                 mediaPlayer = mp;
                 mp.setVolume(0f, 0f);
                 mp.setLooping(true);
+
+                int viewHeight = videoView.getHeight();
+
+
+                float scale = (float) videoView_Height / viewHeight;
+
+                Log.d(TAG, "onPrepared: " + viewHeight);
+                Log.d(TAG, "videoView_Height: " + videoView_Height);
+                Log.d(TAG, "scale: " + scale);
+
+
+                videoView.setScaleY(scale);
+                videoView.setScaleX(scale);
+
+
+                videoView.start();
+                new Handler().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+
+
+                        progressBarLayout.setVisibility(View.GONE);
+                        TextView profilename = findViewById(R.id.profileName);
+                        profilename.setText(girlsList.get(currentVideoIndex).getName());
+                        controlsLayout.setVisibility(View.VISIBLE);
+                        tapToReplyView.setVisibility(View.GONE);
+                        girlsList.get(currentVideoIndex).setSeen(true);
+                        save_SharedPrefrence();
+
+
+
+                    }
+                }, 500);
+
+
             }
         });
+    }
+
+    private void setTimer() {
+        TextView counterText = findViewById(R.id.counterText);
+        TextView counterTextCircular = findViewById(R.id.counterTextCircular);
+
+        // Set the initial value of the timer in seconds
+        int initialSeconds = 10;
+
+        // Set up the CountDownTimer
+        countDownTimer = new CountDownTimer(initialSeconds * 1000, 1000) {
+            @Override
+            public void onTick(long millisUntilFinished) {
+                // Update the timerTextView with the remaining seconds
+                int seconds = (int) (millisUntilFinished / 1000);
+                counterText.setText("Your dream girl will be gone in " + String.valueOf(seconds) + " seconds");
+                counterTextCircular.setText(String.valueOf(seconds));
+
+                if (seconds == 0 && currentVideoIndex < girlsList.size()) {
+
+                    currentVideoIndex = currentVideoIndex + 1;
+                    videoView.stopPlayback();
+                    progressBarLayout.setVisibility(View.VISIBLE);
+                    controlsLayout.setVisibility(View.GONE);
+                    tapToReplyView.setVisibility(View.VISIBLE);
+                    String baseUrl = "https://bucket2266.blr1.cdn.digitaloceanspaces.com/";
+                    String videoPath = baseUrl + girlsList.get(currentVideoIndex).getName() + ".mp4";// Replace with your actual video URL
+
+
+                    Uri videoUri = Uri.parse(videoPath);
+                    videoView.setVideoURI(videoUri);
+                    // Start playing the new video
+                    videoView.start();
+                    countDownTimer.cancel();
+                }
+                if (currentVideoIndex == girlsList.size() - 1) {
+                    Toast.makeText(CameraActivity.this, "its over", Toast.LENGTH_SHORT).show();
+                    onBackPressed();
+                }
+            }
+
+            @Override
+            public void onFinish() {
+                // Timer has finished, update the UI or perform necessary actions
+            }
+        };
+
+        // Start the timer
+        countDownTimer.start();
+    }
+
+    private void save_SharedPrefrence() {
+
+
+        SharedPreferences preferences = CameraActivity.this.getSharedPreferences("UserInfo", Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = preferences.edit();
+
+        Gson gson = new Gson();
+        // Save the ArrayList of JSON strings to SharedPreferences
+        editor.putString("girlsList", gson.toJson(girlsList));
+        editor.apply();
+
+    }
+
+    private void get_SharedPrefrence() {
+
+
+        SharedPreferences preferences = CameraActivity.this.getSharedPreferences("UserInfo", Context.MODE_PRIVATE);
+        String json = preferences.getString("girlsList", null);
+
+
+        // Convert the JSON string back to ArrayList
+        Gson gson = new Gson();
+        Type type = new TypeToken<ArrayList<Girl>>() {
+        }.getType();
+
+
+        if (json != null) {
+            // Handle case when no ArrayList is saved in SharedPreferences
+
+            girlsList = gson.fromJson(json, type);
+        }
+
+    }
+
+
+    private void readGirlsVideo() {
+        girlsList = new ArrayList<>();
+
+        get_SharedPrefrence();
+        if (girlsList.size() != 0) {
+            return;
+        }
+        // Read and parse the JSON file
+        try {
+            JSONObject jsonObject = new JSONObject(loadJSONFromAsset());
+            JSONArray girlsArray = jsonObject.getJSONArray("girls");
+
+            // Iterate through the girls array
+            for (int i = 0; i < girlsArray.length(); i++) {
+                JSONObject girlObject = girlsArray.getJSONObject(i);
+
+                // Create a Girl object and set its properties
+                Girl girl = new Girl();
+                girl.setName(girlObject.getString("name"));
+                girl.setAge(girlObject.getInt("age"));
+                girl.setVideoUrl(girlObject.getString("videoUrl"));
+                girl.setCensored(girlObject.getBoolean("censored"));
+                girl.setCensored(girlObject.getBoolean("seen"));
+
+                // Add the Girl object to the ArrayList
+                girlsList.add(girl);
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    private String loadJSONFromAsset() {
+        String json = null;
+        try {
+            InputStream inputStream = getAssets().open("girls_video.json");
+            int size = inputStream.available();
+            byte[] buffer = new byte[size];
+            inputStream.read(buffer);
+            inputStream.close();
+            json = new String(buffer, "UTF-8");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return json;
     }
 
 
@@ -383,18 +597,9 @@ public class CameraActivity extends Activity {
                     throw new RuntimeException(e);
                 }
 
-
             }
         });
 
-
-        ImageView end_call = findViewById(R.id.end_call);
-        end_call.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                onBackPressed();
-            }
-        });
 
     }
 
@@ -480,20 +685,66 @@ public class CameraActivity extends Activity {
         }
     }
 
+    private void disclaimerDialog() {
+
+        final androidx.appcompat.app.AlertDialog.Builder builder = new androidx.appcompat.app.AlertDialog.Builder(CameraActivity.this);
+        LayoutInflater inflater = LayoutInflater.from(getApplicationContext());
+        View promptView = inflater.inflate(R.layout.dialog_disclaimer, null);
+        builder.setView(promptView);
+        builder.setCancelable(true);
+
+        TextView confirm = promptView.findViewById(R.id.confirm);
+
+
+        disclaimer_dialog = builder.create();
+        disclaimer_dialog.show();
+
+
+        confirm.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+//                Toast.makeText(CameraActivity.this, "User blocked succesfully", Toast.LENGTH_SHORT).show();
+                disclaimer_dialog.dismiss();
+
+// Get SharedPreferences instance
+                SharedPreferences sharedPreferences = getSharedPreferences("UserInfo", Context.MODE_PRIVATE);
+
+// Obtain the editor to modify SharedPreferences
+                SharedPreferences.Editor editor = sharedPreferences.edit();
+
+// Save the boolean value
+                boolean myBooleanValue = true;
+                editor.putBoolean("disclaimerAccepted", myBooleanValue);
+                editor.apply();
+
+
+            }
+        });
+
+
+        ColorDrawable back = new ColorDrawable(Color.TRANSPARENT);
+        InsetDrawable inset = new InsetDrawable(back, 20);
+        disclaimer_dialog.getWindow().setBackgroundDrawable(inset);
+
+        Window window = disclaimer_dialog.getWindow();
+        WindowManager.LayoutParams wlp = window.getAttributes();
+
+        wlp.gravity = Gravity.BOTTOM;
+        wlp.flags &= ~WindowManager.LayoutParams.FLAG_DIM_BEHIND;
+        window.setAttributes(wlp);
+
+    }
+
+
     @Override
     public void onBackPressed() {
         super.onBackPressed();
-        if (ringtonePlayer != null) {
-            ringtonePlayer.stop();
-        }
+
         if (mediaPlayer != null) {
 
             mediaPlayer.stop();
         }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            if (handler.hasCallbacks(runnable)) {
-                handler.removeCallbacks(runnable);
-            }
             if (handler2.hasCallbacks(runnable2)) {
                 handler2.removeCallbacks(runnable2);
             }
@@ -503,12 +754,12 @@ public class CameraActivity extends Activity {
     @Override
     protected void onResume() {
         super.onResume();
-        Log.d(TAG, "onResume: Im here");
         textureView.setSurfaceTextureListener(new TextureView.SurfaceTextureListener() {
             @Override
             public void onSurfaceTextureAvailable(@NonNull SurfaceTexture surfaceTexture, int width, int height) {
                 Log.d(TAG, "onSurfaceTextureAvailable");
-                textureCardview.setVisibility(View.INVISIBLE);
+                playRinging();
+                textureCardview.setVisibility(View.GONE);
                 openBackgroundHandler();
                 setUpCamera("Front");
                 try {
@@ -562,5 +813,205 @@ public class CameraActivity extends Activity {
         closeBackgroundHandler();
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
 
+        // Cancel the CountDownTimer to prevent memory leaks
+        if (countDownTimer != null) {
+            countDownTimer.cancel();
+        }
+    }
+
+
+    private void actionbar() {
+        controlsLayout = findViewById(R.id.controlsLayout);
+
+        ImageView warningSign = findViewById(R.id.warningSign);
+        ImageView menuDots = findViewById(R.id.menuDots);
+
+
+        warningSign.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                blockUserDialog();
+            }
+        });
+
+        menuDots.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                reportUserDialog();
+            }
+        });
+
+
+    }
+
+
+    private void blockUserDialog() {
+
+        final androidx.appcompat.app.AlertDialog.Builder builder = new androidx.appcompat.app.AlertDialog.Builder(CameraActivity.this);
+        LayoutInflater inflater = LayoutInflater.from(getApplicationContext());
+        View promptView = inflater.inflate(R.layout.dialog_block_user, null);
+        builder.setView(promptView);
+        builder.setCancelable(true);
+
+        TextView confirm = promptView.findViewById(R.id.confirm);
+        TextView cancel = promptView.findViewById(R.id.cancel);
+
+
+        block_user_dialog = builder.create();
+        block_user_dialog.show();
+
+
+        confirm.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Toast.makeText(CameraActivity.this, "User blocked succesfully", Toast.LENGTH_SHORT).show();
+                block_user_dialog.dismiss();
+            }
+        });
+
+        cancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                block_user_dialog.dismiss();
+            }
+        });
+
+        ColorDrawable back = new ColorDrawable(Color.TRANSPARENT);
+        InsetDrawable inset = new InsetDrawable(back, 20);
+        block_user_dialog.getWindow().setBackgroundDrawable(inset);
+
+    }
+
+    private void reportUserDialog() {
+
+        final androidx.appcompat.app.AlertDialog.Builder builder = new androidx.appcompat.app.AlertDialog.Builder(CameraActivity.this);
+        LayoutInflater inflater = LayoutInflater.from(getApplicationContext());
+        View promptView = inflater.inflate(R.layout.dialog_report_user, null);
+        builder.setView(promptView);
+        builder.setCancelable(true);
+
+        TextView report = promptView.findViewById(R.id.reportBtn);
+        ImageView cross = promptView.findViewById(R.id.cross);
+
+
+        report_user_dialog = builder.create();
+        report_user_dialog.show();
+
+
+        report.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                report_user_dialog.dismiss();
+                reportUserSucessfullDialog();
+            }
+        });
+
+        cross.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                report_user_dialog.dismiss();
+            }
+        });
+
+
+        ColorDrawable back = new ColorDrawable(Color.TRANSPARENT);
+        InsetDrawable inset = new InsetDrawable(back, 20);
+        report_user_dialog.getWindow().setBackgroundDrawable(inset);
+
+    }
+
+    private void reportUserSucessfullDialog() {
+
+        final androidx.appcompat.app.AlertDialog.Builder builder = new androidx.appcompat.app.AlertDialog.Builder(CameraActivity.this);
+        LayoutInflater inflater = LayoutInflater.from(getApplicationContext());
+        View promptView = inflater.inflate(R.layout.dialog_report_user_sucessfull, null);
+        builder.setView(promptView);
+        builder.setCancelable(true);
+
+        TextView confirm = promptView.findViewById(R.id.confirm);
+
+
+        report_userSucessfully_dialog = builder.create();
+        report_userSucessfully_dialog.show();
+
+
+        confirm.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Toast.makeText(CameraActivity.this, "User Reported", Toast.LENGTH_SHORT).show();
+                report_userSucessfully_dialog.dismiss();
+            }
+        });
+
+
+        ColorDrawable back = new ColorDrawable(Color.TRANSPARENT);
+        InsetDrawable inset = new InsetDrawable(back, 20);
+        report_userSucessfully_dialog.getWindow().setBackgroundDrawable(inset);
+
+    }
+
+
+}
+
+class Girl {
+    private String name;
+    private int age;
+    private String videoUrl;
+    private boolean censored;
+    private boolean seen;
+
+    public Girl() {
+    }
+
+    public Girl(String name, int age, String videoUrl, boolean censored, boolean seen) {
+        this.name = name;
+        this.age = age;
+        this.videoUrl = videoUrl;
+        this.censored = censored;
+        this.seen = seen;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public int getAge() {
+        return age;
+    }
+
+    public void setAge(int age) {
+        this.age = age;
+    }
+
+    public String getVideoUrl() {
+        return videoUrl;
+    }
+
+    public void setVideoUrl(String videoUrl) {
+        this.videoUrl = videoUrl;
+    }
+
+    public boolean isCensored() {
+        return censored;
+    }
+
+    public void setCensored(boolean censored) {
+        this.censored = censored;
+    }
+
+    public boolean isSeen() {
+        return seen;
+    }
+
+    public void setSeen(boolean seen) {
+        this.seen = seen;
+    }
 }

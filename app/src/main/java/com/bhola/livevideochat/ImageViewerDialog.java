@@ -1,20 +1,29 @@
 package com.bhola.livevideochat;
+
 import android.app.Dialog;
 import android.content.Context;
+import android.content.res.ColorStateList;
+import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
+
 import androidx.viewpager.widget.ViewPager;
+
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ImageView;
+
 import androidx.viewpager.widget.PagerAdapter;
 
-import com.jsibbold.zoomage.ZoomageView;
+import com.davemorrissey.labs.subscaleview.ImageSource;
+import com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView;
+import com.github.chrisbanes.photoview.PhotoView;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Target;
 
@@ -31,6 +40,7 @@ public class ImageViewerDialog extends Dialog {
         this.context = context;
         this.imageUrls = imageUrls;
         this.selectedIndex = selectedIndex;
+
     }
 
     @Override
@@ -82,8 +92,28 @@ class ImagePagerAdapter extends PagerAdapter {
     public Object instantiateItem(ViewGroup container, int position) {
         LayoutInflater inflater = LayoutInflater.from(context);
         View view = inflater.inflate(R.layout.item_image2, container, false);
-        ZoomageView imageView = view.findViewById(R.id.imageView);
-        Picasso.get().load(imageUrls.get(position)).into(imageView);
+        SubsamplingScaleImageView imageView = (SubsamplingScaleImageView) view.findViewById(R.id.imageView);
+
+
+        Picasso.get().load(imageUrls.get(position)).into(new Target() {
+            @Override
+            public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
+                imageView.setImage(ImageSource.bitmap(bitmap));
+            }
+            @Override
+            public void onBitmapFailed(Exception e, Drawable errorDrawable) {
+
+            }
+
+            @Override
+            public void onPrepareLoad(Drawable placeHolderDrawable) {
+                // Optional: You can implement placeholder behavior here
+            }
+        });
+
+
+
+//        Picasso.get().load(imageUrls.get(position)).into(imageView);
 
         container.addView(view);
         return view;

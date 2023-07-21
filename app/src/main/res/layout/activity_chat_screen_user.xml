@@ -127,7 +127,8 @@
                 android:layout_width="150dp"
                 android:layout_height="150dp"
                 android:layout_gravity="center_horizontal"
-                android:layout_margin="20dp"
+                android:layout_marginTop="20dp"
+                android:layout_marginBottom="15dp"
                 android:src="@drawable/user" />
 
             <TextView
@@ -135,10 +136,12 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
-                android:layout_marginBottom="20dp"
+                android:layout_marginBottom="15dp"
                 android:fontFamily="@font/inter"
+                android:padding="5dp"
                 android:text="View Profile"
-                android:textColor="@color/themeColor" />
+                android:textColor="@color/themeColor"
+                android:textSize="18dp" />
 
 
             <androidx.recyclerview.widget.RecyclerView
@@ -148,6 +151,7 @@
                 android:layout_below="@+id/profileImage"
                 android:padding="10dp"
                 android:paddingBottom="50dp" />
+
 
 
         </LinearLayout>
@@ -211,9 +215,9 @@
             android:layout_width="50dp"
             android:layout_height="50dp"
             android:layout_gravity="center"
-            app:cardElevation="0dp"
             app:cardBackgroundColor="#F3F3F3"
-            app:cardCornerRadius="25dp">
+            app:cardCornerRadius="25dp"
+            app:cardElevation="0dp">
 
             <ImageView
                 android:layout_width="25dp"
@@ -230,9 +234,9 @@
             android:layout_marginStart="7dp"
             android:layout_marginEnd="7dp"
             android:layout_weight="1"
-            app:cardElevation="0dp"
             app:cardBackgroundColor="#F3F3F3"
-            app:cardCornerRadius="15dp">
+            app:cardCornerRadius="15dp"
+            app:cardElevation="0dp">
 
             <EditText
                 android:id="@+id/textmsg"
@@ -252,9 +256,9 @@
             android:layout_width="50dp"
             android:layout_height="50dp"
             android:layout_gravity="center"
-            app:cardElevation="0dp"
             app:cardBackgroundColor="#F3F3F3"
-            app:cardCornerRadius="25dp">
+            app:cardCornerRadius="25dp"
+            app:cardElevation="0dp">
 
             <ImageView
                 android:layout_width="28dp"
@@ -273,13 +277,12 @@
         android:id="@+id/bottomNav"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
         android:layout_marginTop="7dp"
         android:paddingLeft="50dp"
-        android:paddingRight="50dp"
         android:paddingTop="10dp"
-        android:paddingBottom="10dp"
-        android:layout_alignParentBottom="true"
-       >
+        android:paddingRight="50dp"
+        android:paddingBottom="10dp">
 
         <ImageView
             android:id="@+id/sendImage"

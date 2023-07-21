@@ -17,6 +17,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 
 import android.os.Handler;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -117,20 +118,10 @@ public class ChatScreen_User extends Activity {
 
     private void getModalClass() {
 
-        Intent intent = getIntent();
-        String json = intent.getStringExtra("userList_Json");
-
-// Convert the JSON string to ArrayList<MyObject>
-        Gson gson = new Gson();
-        Type type = new TypeToken<ArrayList<ChatItem_ModelClass>>() {
-        }.getType();
-        ArrayList<ChatItem_ModelClass> myObjectList = gson.fromJson(json, type);
-
-
         String userName = getIntent().getStringExtra("userName");
-        for (int i = 0; i < myObjectList.size(); i++) {
-            if (myObjectList.get(i).getUserName().equals(userName)) {
-                modelClass = myObjectList.get(i);
+        for (int i = 0; i < Fragment_Messenger.userListTemp.size(); i++) {
+            if (Fragment_Messenger.userListTemp.get(i).getUserName().equals(userName)) {
+                modelClass = Fragment_Messenger.userListTemp.get(i);
             }
         }
 
@@ -141,61 +132,58 @@ public class ChatScreen_User extends Activity {
     private void sendDataRecyclerview() {
 
         chatsArrayList = new ArrayList<Chats_Modelclass>();
-        if (modelClass.getUserName().equals("Team Desi Video Chat")) {
-            Chats_Modelclass chats_modelclass = new Chats_Modelclass(modelClass.getUserBotMsg().get(0).getMsg(), "mimeType/text", "", modelClass.getUserProfile(), modelClass.getUserBotMsg().get(0).getDateTime(), 2);
+
+
+        if (modelClass.isContainsQuestion()) {
+
+
+            UserQuestionWithAns userQuestionWithAns = modelClass.getQuestionWithAns();
+            Log.d(SplashScreen.TAG, "sendDataRecyclerview: "+userQuestionWithAns.getSent());
+            Chats_Modelclass chats_modelclass = new Chats_Modelclass(userQuestionWithAns.getQuestion(), "mimeType/text", "", modelClass.getUserProfile(), userQuestionWithAns.getDateTime(), 2);
             chatsArrayList.add(chats_modelclass);
-        } else {
 
+            if (modelClass.getQuestionWithAns().getRead() == 0) {
+                modelClass.getQuestionWithAns().setRead(1);
+                update_userListTemp(0);
 
-            if (modelClass.isContainsQuestion()) {
+            }
 
-                UserQuestionWithAns userQuestionWithAns = modelClass.getQuestionWithAns();
-                Chats_Modelclass chats_modelclass = new Chats_Modelclass(userQuestionWithAns.getQuestion(), "mimeType/text", "", modelClass.getUserProfile(), userQuestionWithAns.getDateTime(), 2);
-                chatsArrayList.add(chats_modelclass);
-
-                if (modelClass.getQuestionWithAns().getRead() == 0) {
-                    modelClass.getQuestionWithAns().setRead(1);
-                    update_userListTemp(0);
-
-                }
-
-                if (userQuestionWithAns.getReply().length() == 0) {
-                    setAnwswerOptions(userQuestionWithAns);
-                } else {
-                    Chats_Modelclass chats_modelclass2 = new Chats_Modelclass(userQuestionWithAns.getReply(), "mimeType/text", "", modelClass.getUserProfile(), userQuestionWithAns.getDateTime(), 1);
-                    chatsArrayList.add(chats_modelclass2);
-
-                    for (int i = 0; i < modelClass.getQuestionWithAns().getReplyToUser().size(); i++) {
-                        UserBotMsg userBotMsg = modelClass.getQuestionWithAns().getReplyToUser().get(i);
-                        if (userBotMsg.getSent() == 1) {
-                            Chats_Modelclass chats_modelclass3 = new Chats_Modelclass(userBotMsg.getMsg(), "mimeType/text", "", modelClass.getUserProfile(), userBotMsg.getDateTime(), 2);
-                            chatsArrayList.add(chats_modelclass3);
-                            update_userListTemp_replyMessage(i);
-                        }
-                    }
-
-
-                }
-
+            if (userQuestionWithAns.getReply().length() == 0) {
+                setAnwswerOptions(userQuestionWithAns);
             } else {
-                for (int i = 0; i < modelClass.getUserBotMsg().size(); i++) {
+                Chats_Modelclass chats_modelclass2 = new Chats_Modelclass(userQuestionWithAns.getReply(), "mimeType/text", "", modelClass.getUserProfile(), userQuestionWithAns.getDateTime(), 1);
+                chatsArrayList.add(chats_modelclass2);
 
-                    if (modelClass.getUserBotMsg().get(i).getSent() == 1) {
-                        UserBotMsg userBotMsg = modelClass.getUserBotMsg().get(i);
-                        Chats_Modelclass chats_modelclass = new Chats_Modelclass(userBotMsg.getMsg(), userBotMsg.getMimeType(), userBotMsg.getExtraMsg(), modelClass.getUserProfile(), userBotMsg.getDateTime(), 2);
-                        chatsArrayList.add(chats_modelclass);
+                for (int i = 0; i < modelClass.getQuestionWithAns().getReplyToUser().size(); i++) {
+                    UserBotMsg userBotMsg = modelClass.getQuestionWithAns().getReplyToUser().get(i);
+                    if (userBotMsg.getSent() == 1) {
+                        Chats_Modelclass chats_modelclass3 = new Chats_Modelclass(userBotMsg.getMsg(), "mimeType/text", "", modelClass.getUserProfile(), userBotMsg.getDateTime(), 2);
+                        chatsArrayList.add(chats_modelclass3);
+                        update_userListTemp_replyMessage(i);
+                    }
+                }
 
 
-                        if (userBotMsg.getRead() == 0) {
-                            userBotMsg.setRead(1);
-                            update_userListTemp(i);
+            }
 
-                        }
+        } else {
+            for (int i = 0; i < modelClass.getUserBotMsg().size(); i++) {
+
+                if (modelClass.getUserBotMsg().get(i).getSent() == 1) {
+                    UserBotMsg userBotMsg = modelClass.getUserBotMsg().get(i);
+                    Chats_Modelclass chats_modelclass = new Chats_Modelclass(userBotMsg.getMsg(), userBotMsg.getMimeType(), userBotMsg.getExtraMsg(), modelClass.getUserProfile(), userBotMsg.getDateTime(), 2);
+                    chatsArrayList.add(chats_modelclass);
+
+
+                    if (userBotMsg.getRead() == 0) {
+                        userBotMsg.setRead(1);
+                        update_userListTemp(i);
+
                     }
                 }
             }
-
         }
+
 
         recylerview = findViewById(R.id.recylerview);
 
@@ -416,18 +404,20 @@ public class ChatScreen_User extends Activity {
         TextView viewProfile = findViewById(R.id.viewProfile);
 
 
-        if (modelClass.getUserName().equals("Team Desi Video Chat")) {
-            warningSign.setVisibility(View.GONE);
-            menuDots.setVisibility(View.GONE);
-            viewProfile.setVisibility(View.GONE);
 
-
-        }
         profileName.setText(modelClass.getUserName());
 
         ImageView profileImage = findViewById(R.id.profileImage);
         Picasso.get().load(modelClass.getUserProfile()).into(profileImage);
         viewProfile.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(ChatScreen_User.this, Profile_girl.class);
+                intent.putExtra("userName", modelClass.getUserName());
+                startActivity(intent);
+            }
+        });
+        profileImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(ChatScreen_User.this, Profile_girl.class);

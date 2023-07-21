@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:id="@+id/customerCareFragment"
     android:orientation="vertical"
     android:paddingTop="15dp"
     android:paddingBottom="10dp">
@@ -60,15 +60,15 @@
     <TextView
         android:id="@+id/clearMessages"
         android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/ll2"
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="8dp"
-        android:layout_height="wrap_content"
-        android:visibility="gone"
         android:fontFamily="@font/rubrik_semibold"
-        android:textStyle="bold"
-        android:layout_above="@id/ll2"
         android:text="Clear messages"
-        android:textColor="@color/gmts_light_gray" />
+        android:textColor="@color/gmts_light_gray"
+        android:textStyle="bold"
+        android:visibility="gone" />
 
     <LinearLayout
         android:id="@+id/ll2"
@@ -85,8 +85,9 @@
             android:layout_width="50dp"
             android:layout_height="50dp"
             android:layout_gravity="center"
-            app:cardBackgroundColor="@color/white"
-            app:cardCornerRadius="25dp">
+            app:cardBackgroundColor="#F3F3F3"
+            app:cardCornerRadius="25dp"
+            app:cardElevation="0dp">
 
             <ImageView
                 android:layout_width="25dp"
@@ -103,8 +104,9 @@
             android:layout_marginStart="7dp"
             android:layout_marginEnd="7dp"
             android:layout_weight="1"
-            app:cardBackgroundColor="@color/white"
-            app:cardCornerRadius="15dp">
+            app:cardBackgroundColor="#F3F3F3"
+            app:cardCornerRadius="15dp"
+            app:cardElevation="0dp">
 
             <EditText
                 android:id="@+id/textmsg"
@@ -124,16 +126,17 @@
             android:layout_width="50dp"
             android:layout_height="50dp"
             android:layout_gravity="center"
-            app:cardBackgroundColor="@color/white"
-            app:cardCornerRadius="25dp">
+            app:cardBackgroundColor="#F3F3F3"
+            app:cardCornerRadius="25dp"
+            app:cardElevation="0dp">
 
             <ImageView
                 android:layout_width="25dp"
                 android:layout_height="25dp"
-                android:backgroundTint="@color/gmts_dark_gray"
                 android:layout_gravity="center"
                 android:layout_marginLeft="2dp"
-                android:background="@drawable/sendbut" />
+                android:background="@drawable/sendbut"
+                android:backgroundTint="@color/gmts_dark_gray" />
 
         </androidx.cardview.widget.CardView>
 

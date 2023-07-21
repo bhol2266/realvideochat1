@@ -85,6 +85,7 @@ public class Fragment_CustomerCare extends Fragment {
                 if (messagesArrayList.size() == 0) {
                     Message_Modelclass messages1 = new Message_Modelclass("preset", date.getTime(), 3); //viewType 1 is sender 2 is receiver
                     messagesArrayList.add(messages1);
+                    messageAdapter.notifyDataSetChanged();
                 }
             }
         }, 500);

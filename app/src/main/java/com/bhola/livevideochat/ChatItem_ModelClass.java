@@ -3,7 +3,6 @@ package com.bhola.livevideochat;
 import java.util.ArrayList;
 
 
-
 public class ChatItem_ModelClass {
     private int id;
     private String userName;

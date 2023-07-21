@@ -8,6 +8,9 @@ import androidx.core.content.ContextCompat;
 import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.core.view.WindowInsetsControllerCompat;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.viewpager2.widget.ViewPager2;
 
 import android.content.Context;
@@ -36,12 +39,13 @@ import com.google.android.material.tabs.TabLayoutMediator;
 import java.util.Objects;
 
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity  {
 
     private int CAMERA_PERMISSION_REQUEST_CODE = 123;
     final int NOTIFICATION_REQUEST_CODE = 112;
     public static TextView badge_text;
     public static int unreadMessage_count;
+    public static ViewPager2 viewPager2;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,7 +69,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initializeBottonFragments() {
-        ViewPager2 viewPager2 = findViewById(R.id.viewpager);
+        viewPager2 = findViewById(R.id.viewpager);
         viewPager2.setAdapter(new PagerAdapter(MainActivity.this));
         TabLayout tabLayout = findViewById(R.id.tabLayout);
 
@@ -104,11 +108,11 @@ public class MainActivity extends AppCompatActivity {
                                 @Override
                                 public void run() {
                                     //First time
-//                                        badge_text.setVisibility(View.VISIBLE);
-//                                        badge_text.setText("1");
-//                                        badge_text.setBackgroundResource(R.drawable.badge_background);
-//                                        MediaPlayer mediaPlayer = MediaPlayer.create(MainActivity.this, R.raw.message_received);
-//                                        mediaPlayer.start();
+                                        badge_text.setVisibility(View.VISIBLE);
+                                        badge_text.setText("1");
+                                        badge_text.setBackgroundResource(R.drawable.badge_background);
+                                        MediaPlayer mediaPlayer = MediaPlayer.create(MainActivity.this, R.raw.message_received);
+                                        mediaPlayer.start();
 
                                 }
                             }, 3000);

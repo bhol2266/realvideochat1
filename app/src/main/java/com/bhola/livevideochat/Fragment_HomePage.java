@@ -1,25 +1,43 @@
 package com.bhola.livevideochat;
 
+import android.animation.Animator;
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.InsetDrawable;
 import android.os.Bundle;
+import android.Manifest;
 
+import androidx.activity.result.ActivityResultCaller;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.appcompat.app.AlertDialog;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.LinearSmoothScroller;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.os.Handler;
+import android.support.annotation.NonNull;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.animation.TranslateAnimation;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import com.airbnb.lottie.LottieAnimationView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,6 +59,19 @@ public class Fragment_HomePage extends Fragment {
     RelativeLayout btnRelativelayout;
     int randomNumber, current_value;
     TextView onlineCountTextview;
+    Context context;
+    AlertDialog permissionDialog;
+
+
+    ActivityResultLauncher<String[]> mPermissionResultLauncher;
+    private boolean isCameraPermissionGranted;
+    private boolean isMicrophonePermissionGranted;
+    private String[] PERMISSIONS;
+
+
+    private static final int CAMERA_PERMISSION_REQUEST_CODE = 100;
+    private static final int MICROPHONE_PERMISSION_REQUEST_CODE = 101;
+
 
     public Fragment_HomePage() {
         // Required empty public constructor
@@ -52,8 +83,8 @@ public class Fragment_HomePage extends Fragment {
 
         View view = inflater.inflate(R.layout.fragment_home_page, container, false);
 
-        Context context = getContext();
-        // Inflate the layout for this fragment
+        context = getContext();
+        // Inflate the layout for context fragment
 
 
         setimagesScrolling(view, context);
@@ -61,8 +92,15 @@ public class Fragment_HomePage extends Fragment {
         blinkWorldMap(view, context);
         update_onlineCount(view, context);
 
+        PERMISSIONS = new String[]{
+
+                Manifest.permission.CAMERA,
+                Manifest.permission.RECORD_AUDIO,
+        };
+
         return view;
     }
+
 
     private void update_onlineCount(View view, Context context) {
         Random random = new Random();
@@ -153,9 +191,17 @@ public class Fragment_HomePage extends Fragment {
             @Override
             public void onClick(View view) {
 
-                Intent intent = new Intent(context, BeforeVideoCall.class);
-                intent.putExtra("count", onlineCountTextview.getText().toString());
-                startActivity(intent);
+
+                if (!hasPermissions(context, PERMISSIONS)) {
+
+                    checkPermissionDialog();
+
+                } else {
+
+                    Intent intent = new Intent(context, BeforeVideoCall.class);
+                    intent.putExtra("count", onlineCountTextview.getText().toString());
+                    startActivity(intent);
+                }
 
             }
         });
@@ -191,6 +237,47 @@ public class Fragment_HomePage extends Fragment {
         handlerAnimation = new Handler();
 
     }
+
+    public void checkPermissionDialog() {
+
+
+        final androidx.appcompat.app.AlertDialog.Builder builder = new androidx.appcompat.app.AlertDialog.Builder(context);
+        LayoutInflater inflater = LayoutInflater.from(context);
+        View promptView = inflater.inflate(R.layout.dialog_allow_permission, null);
+        builder.setView(promptView);
+        builder.setCancelable(true);
+
+        LinearLayout notificationLayout = promptView.findViewById(R.id.notificationLayout);
+        LinearLayout locationLayout = promptView.findViewById(R.id.locationLayout);
+        LinearLayout storageLayout = promptView.findViewById(R.id.storageLayout);
+
+        notificationLayout.setVisibility(View.GONE);
+        locationLayout.setVisibility(View.GONE);
+        storageLayout.setVisibility(View.GONE);
+
+        TextView allow = promptView.findViewById(R.id.allow);
+        allow.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                permissionDialog.dismiss();
+                ActivityCompat.requestPermissions((Activity) context, PERMISSIONS, 1);
+
+            }
+        });
+
+
+        permissionDialog = builder.create();
+        permissionDialog.show();
+        permissionDialog.getWindow().setLayout(WindowManager.LayoutParams.WRAP_CONTENT, WindowManager.LayoutParams.WRAP_CONTENT); //Controlling width and height.
+
+
+        ColorDrawable back = new ColorDrawable(Color.TRANSPARENT);
+        InsetDrawable inset = new InsetDrawable(back, 20);
+        permissionDialog.getWindow().setBackgroundDrawable(inset);
+        permissionDialog.getWindow().setLayout(750, WindowManager.LayoutParams.WRAP_CONTENT); //Controlling width and height.
+
+    }
+
 
     private void startAnimation(Context context) {
         // Assuming you have a view object, e.g., myView
@@ -344,6 +431,46 @@ public class Fragment_HomePage extends Fragment {
 
     }
 
+
+    private boolean hasPermissions(Context context, String... PERMISSIONS) {
+
+        if (context != null && PERMISSIONS != null) {
+
+            for (String permission : PERMISSIONS) {
+
+                if (ActivityCompat.checkSelfPermission(context, permission) != PackageManager.PERMISSION_GRANTED) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        if (requestCode == 1) {
+            boolean permissionGranted = true;
+            if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                Toast.makeText(context, "Camera Permission is granted", Toast.LENGTH_SHORT).show();
+            } else {
+                permissionGranted = false;
+                Toast.makeText(context, "Camera Permission is denied", Toast.LENGTH_SHORT).show();
+            }
+
+            if (grantResults[1] == PackageManager.PERMISSION_GRANTED) {
+                Toast.makeText(context, "Record Audio is granted", Toast.LENGTH_SHORT).show();
+            } else {
+                permissionGranted = false;
+                Toast.makeText(context, "Record Audio is denied", Toast.LENGTH_SHORT).show();
+            }
+
+
+        }
+    }
 
 }
 

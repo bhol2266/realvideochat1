@@ -20,10 +20,16 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.common.reflect.TypeToken;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.google.gson.Gson;
 import com.squareup.picasso.Picasso;
 
@@ -45,6 +51,8 @@ import de.hdodenhof.circleimageview.CircleImageView;
 
 
 public class Fragment_Messenger extends Fragment {
+
+
     RecyclerView recyclerview;
     public static ArrayList<ChatItem_ModelClass> userList;
     public static ArrayList<ChatItem_ModelClass> userListTemp;
@@ -74,9 +82,36 @@ public class Fragment_Messenger extends Fragment {
 
 
         setRecyclerView();
-
+        setup_CustomerCare_Chat();
 
         return view;
+
+
+    }
+
+    private void setup_CustomerCare_Chat() {
+
+        TextView userName = view.findViewById(R.id.userName);
+        TextView lastMessage = view.findViewById(R.id.lastMessage);
+        TextView messageTime = view.findViewById(R.id.messageTime);
+        TextView messageCount = view.findViewById(R.id.messageCount);
+        CircleImageView profileUrl = view.findViewById(R.id.profileUrl);
+        LinearLayout chatItemClick = view.findViewById(R.id.chatItemClick);
+
+        SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm");
+        Date currentTime = new Date();
+        String formattedTime = dateFormat.format(currentTime);
+        messageTime.setText(formattedTime);
+
+        Picasso.get().load("https://i.ibb.co/sKShSVr/logo-home.png").into(profileUrl);
+
+
+        chatItemClick.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                MainActivity.viewPager2.setCurrentItem(2); // Switch to Fragment B
+            }
+        });
 
 
     }
@@ -91,116 +126,206 @@ public class Fragment_Messenger extends Fragment {
     }
 
     private void readDataFromJson() {
-        String json;
-        try {
-            InputStream is = context.getAssets().open("chats1.json");
-            int size = is.available();
-            byte[] buffer = new byte[size];
-            is.read(buffer);
-            is.close();
-            json = new String(buffer, StandardCharsets.UTF_8);
-        } catch (IOException e) {
-            e.printStackTrace();
-            return;
-        }
 
-// Parse JSON and create ArrayList of Map objects
         userList = new ArrayList<>();
-        try {
-            JSONObject jsonObject = new JSONObject(json);
-            JSONArray usersArray = jsonObject.getJSONArray("users");
+        if (SplashScreen.userLoggedIn && SplashScreen.userLoggedIAs.equals("Google")) {
+            DatabaseReference usersRef = FirebaseDatabase.getInstance().getReference("BotChats/users");
+            usersRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
 
-            for (int i = 0; i < usersArray.length(); i++) {
-                JSONObject userObject = usersArray.getJSONObject(i);
-                int id = userObject.getInt("id");
-                String userName = userObject.getString("userName");
 
-                String gender = userObject.getString("gender");
-                String age = userObject.getString("age");
-                String country = userObject.getString("country");
-                String users = userObject.getString("users");
-                String answerRate = userObject.getString("answerRate");
-                String userProfile = userObject.getString("userProfile");
-                boolean containsQuestion = userObject.getBoolean("containsQuestion");
-                String recommendationType = userObject.getString("recommendationType");
+                    for (DataSnapshot userSnapshot : dataSnapshot.getChildren()) {
 
-                JSONArray userBotMsgArray = userObject.getJSONArray("userBotMsg");
-                ArrayList<UserBotMsg> userBotMsgList = new ArrayList<>();
+                        Long longValue = (Long) userSnapshot.child("id").getValue();
+                        int id = longValue.intValue();
+                        String userName = (String) userSnapshot.child("userName").getValue();
+                        String gender = (String) userSnapshot.child("gender").getValue();
+                        String age = (String) userSnapshot.child("age").getValue();
+                        String country = (String) userSnapshot.child("country").getValue();
+                        String users = (String) userSnapshot.child("users").getValue();
+                        String answerRate = (String) userSnapshot.child("answerRate").getValue();
+                        String userProfile = (String) userSnapshot.child("userProfile").getValue();
 
-                for (int j = 0; j < userBotMsgArray.length(); j++) {
-                    JSONObject userBotMsgObject = userBotMsgArray.getJSONObject(j);
-                    int msgId = userBotMsgObject.getInt("id");
-                    String msg = userBotMsgObject.getString("msg");
-                    String mimeType = userBotMsgObject.getString("mimeType");
-                    String dateTime = userBotMsgObject.getString("dateTime");
-                    String extraMessage = "";
-                    try {
-                        extraMessage = userBotMsgObject.getString("extraMsg");
-                    } catch (Exception e) {
+                        Boolean booleanValue = userSnapshot.child("containsQuestion").getValue(Boolean.class);
+                        boolean containsQuestion = booleanValue.booleanValue();
+
+                        String recommendationType = (String) userSnapshot.child("recommendationType").getValue();
+
+
+                        ArrayList<UserBotMsg> userBotMsgList = new ArrayList<>();
+                        if (!containsQuestion) {
+                            for (DataSnapshot userBotmsq_Snapshot : userSnapshot.child("userBotMsg").getChildren()) {
+                                UserBotMsg userBotMsg = userBotmsq_Snapshot.getValue(UserBotMsg.class);
+                                userBotMsgList.add(userBotMsg);
+                            }
+                        }
+
+                        UserQuestionWithAns questionWithAns = null;
+                        if (containsQuestion) {
+
+                            String action = (String) userSnapshot.child("questionWithAns").child("action").getValue();
+                            String dateTime = (String) userSnapshot.child("questionWithAns").child("dateTime").getValue();
+                            String question = (String) userSnapshot.child("questionWithAns").child("question").getValue();
+                            String reply = (String) userSnapshot.child("questionWithAns").child("reply").getValue();
+
+
+                            Long longValue1 = (Long) userSnapshot.child("questionWithAns").child("read").getValue();
+                            int read = longValue1.intValue();
+                            Long longValue3 = (Long) userSnapshot.child("questionWithAns").child("sent").getValue();
+                            int sent = longValue3.intValue();
+
+                            ArrayList<String> answersList = new ArrayList<>();
+
+
+                            for (DataSnapshot snapshot : userSnapshot.child("questionWithAns").child("answers").getChildren()) {
+                                String value = snapshot.getValue(String.class);
+                                if (value != null) {
+                                    answersList.add(value);
+                                }
+                            }
+
+
+                            ArrayList<UserBotMsg> replyToUserList = new ArrayList<>();
+                            for (DataSnapshot userBotmsq_Snapshot : userSnapshot.child("questionWithAns").child("replyToUser").getChildren()) {
+                                UserBotMsg userBotMsg = userBotmsq_Snapshot.getValue(UserBotMsg.class);
+                                replyToUserList.add(userBotMsg);
+                            }
+
+                            questionWithAns = new UserQuestionWithAns(question, answersList, dateTime, action, read, sent, reply, replyToUserList);
+                        }
+
+
+                        ChatItem_ModelClass user = new ChatItem_ModelClass(id, userName, gender, age, country, users, answerRate, userProfile, containsQuestion, recommendationType, userBotMsgList, questionWithAns);
+
+                        userList.add(user);
+
                     }
 
-                    int nextMsgDelay = userBotMsgObject.getInt("nextMsgDelay");
-                    int read = userBotMsgObject.getInt("read");
-                    int sent = userBotMsgObject.getInt("sent");
 
-                    UserBotMsg userBotMsg = new UserBotMsg(msgId, msg, mimeType, extraMessage, dateTime, nextMsgDelay, read, sent);
-                    userBotMsgList.add(userBotMsg);
+                    sendDataToRecyclerview();
+
                 }
 
-                UserQuestionWithAns questionWithAns = null;
-                if (containsQuestion) {
-                    JSONObject questionWithAnsObject = userObject.getJSONObject("questionWithAns");
-                    String question = questionWithAnsObject.getString("question");
-                    JSONArray answersArray = questionWithAnsObject.getJSONArray("answers");
-                    String action = questionWithAnsObject.getString("action");
-                    String dateTime = questionWithAnsObject.getString("dateTime");
-                    String reply = questionWithAnsObject.getString("reply");
-                    int read = questionWithAnsObject.getInt("read");
-                    int sent = questionWithAnsObject.getInt("sent");
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+                    Log.d(SplashScreen.TAG, " userList.size(): " + databaseError.getMessage());
+                }
+            });
+        } else {
 
-                    ArrayList<String> answersList = new ArrayList<>();
-                    for (int k = 0; k < answersArray.length(); k++) {
-                        String answer = answersArray.getString(k);
-                        answersList.add(answer);
-                    }
+            String json;
+            try {
+                InputStream is = context.getAssets().open("chats1.json");
+                int size = is.available();
+                byte[] buffer = new byte[size];
+                is.read(buffer);
+                is.close();
+                json = new String(buffer, StandardCharsets.UTF_8);
+            } catch (IOException e) {
+                e.printStackTrace();
+                return;
+            }
 
+// Parse JSON and create ArrayList of Map objects
+            try {
+                JSONObject jsonObject = new JSONObject(json);
+                JSONArray usersArray = jsonObject.getJSONArray("users");
 
-                    JSONArray replyToUserArray = questionWithAnsObject.getJSONArray("replyToUser");
-                    ArrayList<UserBotMsg> replyToUserList = new ArrayList<>();
+                for (int i = 0; i < usersArray.length(); i++) {
+                    JSONObject userObject = usersArray.getJSONObject(i);
+                    int id = userObject.getInt("id");
+                    String userName = userObject.getString("userName");
 
-                    for (int j = 0; j < replyToUserArray.length(); j++) {
-                        JSONObject replyToUseObject = replyToUserArray.getJSONObject(j);
-                        int msgId = replyToUseObject.getInt("id");
-                        String msg = replyToUseObject.getString("msg");
-                        String mimeType = replyToUseObject.getString("mimeType");
-                        String dateTime2 = replyToUseObject.getString("dateTime");
+                    String gender = userObject.getString("gender");
+                    String age = userObject.getString("age");
+                    String country = userObject.getString("country");
+                    String users = userObject.getString("users");
+                    String answerRate = userObject.getString("answerRate");
+                    String userProfile = userObject.getString("userProfile");
+                    boolean containsQuestion = userObject.getBoolean("containsQuestion");
+                    String recommendationType = userObject.getString("recommendationType");
+
+                    JSONArray userBotMsgArray = userObject.getJSONArray("userBotMsg");
+                    ArrayList<UserBotMsg> userBotMsgList = new ArrayList<>();
+
+                    for (int j = 0; j < userBotMsgArray.length(); j++) {
+                        JSONObject userBotMsgObject = userBotMsgArray.getJSONObject(j);
+                        int msgId = userBotMsgObject.getInt("id");
+                        String msg = userBotMsgObject.getString("msg");
+                        String mimeType = userBotMsgObject.getString("mimeType");
+                        String dateTime = userBotMsgObject.getString("dateTime");
                         String extraMessage = "";
                         try {
-                            extraMessage = replyToUseObject.getString("extraMsg");
+                            extraMessage = userBotMsgObject.getString("extraMsg");
                         } catch (Exception e) {
                         }
 
-                        int nextMsgDelay = replyToUseObject.getInt("nextMsgDelay");
-                        int read2 = replyToUseObject.getInt("read");
-                        int sent2 = replyToUseObject.getInt("sent");
+                        int nextMsgDelay = userBotMsgObject.getInt("nextMsgDelay");
+                        int read = userBotMsgObject.getInt("read");
+                        int sent = userBotMsgObject.getInt("sent");
 
-                        UserBotMsg userBotMsg = new UserBotMsg(msgId, msg, mimeType, extraMessage, dateTime2, nextMsgDelay, read2, sent2);
-                        replyToUserList.add(userBotMsg);
+                        UserBotMsg userBotMsg = new UserBotMsg(msgId, msg, mimeType, extraMessage, dateTime, nextMsgDelay, read, sent);
+                        userBotMsgList.add(userBotMsg);
+                    }
+
+                    UserQuestionWithAns questionWithAns = null;
+                    if (containsQuestion) {
+                        JSONObject questionWithAnsObject = userObject.getJSONObject("questionWithAns");
+                        String question = questionWithAnsObject.getString("question");
+                        JSONArray answersArray = questionWithAnsObject.getJSONArray("answers");
+                        String action = questionWithAnsObject.getString("action");
+                        String dateTime = questionWithAnsObject.getString("dateTime");
+                        String reply = questionWithAnsObject.getString("reply");
+                        int read = questionWithAnsObject.getInt("read");
+                        int sent = questionWithAnsObject.getInt("sent");
+
+                        ArrayList<String> answersList = new ArrayList<>();
+                        for (int k = 0; k < answersArray.length(); k++) {
+                            String answer = answersArray.getString(k);
+                            answersList.add(answer);
+                        }
+
+
+                        JSONArray replyToUserArray = questionWithAnsObject.getJSONArray("replyToUser");
+                        ArrayList<UserBotMsg> replyToUserList = new ArrayList<>();
+
+                        for (int j = 0; j < replyToUserArray.length(); j++) {
+                            JSONObject replyToUseObject = replyToUserArray.getJSONObject(j);
+                            int msgId = replyToUseObject.getInt("id");
+                            String msg = replyToUseObject.getString("msg");
+                            String mimeType = replyToUseObject.getString("mimeType");
+                            String dateTime2 = replyToUseObject.getString("dateTime");
+                            String extraMessage = "";
+                            try {
+                                extraMessage = replyToUseObject.getString("extraMsg");
+                            } catch (Exception e) {
+                            }
+
+                            int nextMsgDelay = replyToUseObject.getInt("nextMsgDelay");
+                            int read2 = replyToUseObject.getInt("read");
+                            int sent2 = replyToUseObject.getInt("sent");
+
+                            UserBotMsg userBotMsg = new UserBotMsg(msgId, msg, mimeType, extraMessage, dateTime2, nextMsgDelay, read2, sent2);
+                            replyToUserList.add(userBotMsg);
+                        }
+
+
+                        questionWithAns = new UserQuestionWithAns(question, answersList, dateTime, action, read, sent, reply, replyToUserList);
                     }
 
 
-                    questionWithAns = new UserQuestionWithAns(question, answersList, dateTime, action, read, sent, reply, replyToUserList);
+                    ChatItem_ModelClass user = new ChatItem_ModelClass(id, userName, gender, age, country, users, answerRate, userProfile, containsQuestion, recommendationType, userBotMsgList, questionWithAns);
+                    userList.add(user);
+
                 }
+                sendDataToRecyclerview();
 
-
-                ChatItem_ModelClass user = new ChatItem_ModelClass(id, userName, gender, age, country, users, answerRate, userProfile, containsQuestion, recommendationType, userBotMsgList, questionWithAns);
-                userList.add(user);
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-        } catch (Exception e) {
-            e.printStackTrace();
         }
 
-        sendDataToRecyclerview();
     }
 
     private void sendDataToRecyclerview() {
@@ -216,7 +341,6 @@ public class Fragment_Messenger extends Fragment {
 
             adapter = new MessengeItemsAdapter(userListTemp, context, adapter, recyclerview);
             recyclerview.setAdapter(adapter);
-            userList.remove(0);
 
             int temp = 0;
             for (int i = userListTemp.size(); i < userList.size(); i++) {
@@ -243,8 +367,6 @@ public class Fragment_Messenger extends Fragment {
             return;
         }
 
-        userListTemp.add(userList.get(0));
-        userList.remove(0);
 
         for (int i = 0; i < 4; i++) {
 
@@ -328,6 +450,9 @@ public class Fragment_Messenger extends Fragment {
 
     public static void updateUnreadmessageCount(Context context) {
 
+        if (userListTemp == null) {
+            return;
+        }
         int count = 0;
 
         for (int i = 0; i < Fragment_Messenger.userListTemp.size(); i++) {
@@ -442,19 +567,9 @@ class MessengeItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
             }
         });
 
-        if (modelClass.getUserName().equals("Team Desi Video Chat")) {
-            userItem_viewholder.messageCount.setVisibility(View.GONE);
-            userItem_viewholder.recommendationTypeCardview.setVisibility(View.GONE);
-            userItem_viewholder.lastMessage.setText(modelClass.getUserBotMsg().get(0).getMsg());
-            modelClass.getUserBotMsg().get(0).setDateTime(String.valueOf(currentTime.getTime()));
-            return;
-        }
-
-
         if (modelClass.isContainsQuestion()) {
 
             isContainQuestion(modelClass, userItem_viewholder, holder, currentTime);  //method to handler it chat is question
-
 
         } else {
 
@@ -462,9 +577,6 @@ class MessengeItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
 
                 if (modelClass.getUserBotMsg().get(i).getSent() == 0) {
 
-                    if (modelClass.getUserName().equals("Team Desi Video Chat")) {
-                        userItem_viewholder.messageCount.setVisibility(View.GONE);
-                    }
 
                     userItem_viewholder.lastMessage.setText(modelClass.getUserBotMsg().get(i).getMsg());
                     modelClass.getUserBotMsg().get(i).setSent(1);

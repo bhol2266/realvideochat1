@@ -105,6 +105,7 @@ public class SplashScreen extends AppCompatActivity {
         }
 //        readJSON();
         sharedPrefrences();
+
 //        clearSharedPrefrence();
 
 
@@ -291,7 +292,7 @@ public class SplashScreen extends AppCompatActivity {
         Log.d(TAG, "userLoggedIn: "+userLoggedIn);
         Log.d(TAG, "userLoggedIAs: "+userLoggedIAs);
         if (SplashScreen.userLoggedIn) {
-            Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+            Intent intent = new Intent(getApplicationContext(), CameraActivity.class);
             startActivity(intent);
         } else {
             Intent intent = new Intent(getApplicationContext(), LoginScreen.class);
@@ -427,5 +428,8 @@ public class SplashScreen extends AppCompatActivity {
         Log.d(TAG, "GoogleSignInAccount: " + acct);
 
     }
+
+
+
 
 }

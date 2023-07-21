@@ -11,6 +11,8 @@
     <string name="second_fragment_label">Second Fragment</string>
     <string name="next">Next</string>
     <string name="previous">Previous</string>
+    <string name="default_web_client_id" translatable="false">765763370680-0jn8b1vj5pan8mrk3bsr036tqm0gjql0.apps.googleusercontent.com</string>
+
 
     <string name="lorem_ipsum">
         Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam in scelerisque sem. Mauris
