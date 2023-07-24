@@ -292,7 +292,7 @@ public class Fragment_HomePage extends Fragment {
                 Animation animationDown = AnimationUtils.loadAnimation(context, R.anim.bottom_scaledown);
                 btnRelativelayout.startAnimation(animationDown);
             }
-        }, 1200);
+        }, 800);
 
 
     }

@@ -48,7 +48,7 @@
                     android:id="@+id/profileUrl"
                     android:layout_width="70dp"
                     android:layout_height="70dp"
-                    android:src="@drawable/student" />
+                    android:src="@drawable/d" />
 
                 <LinearLayout
                     android:layout_width="0dp"

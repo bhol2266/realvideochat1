@@ -85,6 +85,7 @@ public class BeforeVideoCall extends AppCompatActivity {
             @Override
             public void onAnimationEnd(Animation animation) {
                 startActivity(new Intent(BeforeVideoCall.this, CameraActivity.class));
+                finish();
             }
 
             @Override

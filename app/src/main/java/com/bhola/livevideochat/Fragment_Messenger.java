@@ -95,7 +95,6 @@ public class Fragment_Messenger extends Fragment {
         TextView lastMessage = view.findViewById(R.id.lastMessage);
         TextView messageTime = view.findViewById(R.id.messageTime);
         TextView messageCount = view.findViewById(R.id.messageCount);
-        CircleImageView profileUrl = view.findViewById(R.id.profileUrl);
         LinearLayout chatItemClick = view.findViewById(R.id.chatItemClick);
 
         SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm");
@@ -103,7 +102,6 @@ public class Fragment_Messenger extends Fragment {
         String formattedTime = dateFormat.format(currentTime);
         messageTime.setText(formattedTime);
 
-        Picasso.get().load("https://i.ibb.co/sKShSVr/logo-home.png").into(profileUrl);
 
 
         chatItemClick.setOnClickListener(new View.OnClickListener() {
