@@ -4,8 +4,10 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.graphics.PorterDuff;
 import android.graphics.SurfaceTexture;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
@@ -41,6 +43,7 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -51,12 +54,17 @@ import android.widget.VideoView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
 import androidx.core.app.ActivityCompat;
 import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.core.view.WindowInsetsControllerCompat;
+import androidx.core.widget.ImageViewCompat;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 
+import com.airbnb.lottie.LottieAnimationView;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 
@@ -71,7 +79,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 
-public class CameraActivity extends Activity {
+public class CameraActivity extends AppCompatActivity {
 
     CardView textureCardview;
     VideoView videoView;
@@ -91,7 +99,7 @@ public class CameraActivity extends Activity {
     String cameraId;
     Handler backgroundHandler;
     HandlerThread handlerThread;
-    private int currentVideoIndex = 0;
+    public static int currentVideoIndex = 0;
     RelativeLayout progressBarLayout;
     LinearLayout controlsLayout;
     ImageView taptoReply;
@@ -125,7 +133,7 @@ public class CameraActivity extends Activity {
     };
     String currentCameraSide = "Front";
     private String TAG = "activity_camera";
-    private ArrayList<Girl> girlsList;
+    public static ArrayList<Girl> girlsList;
     androidx.appcompat.app.AlertDialog disclaimer_dialog = null;
     private CountDownTimer countDownTimer;
 
@@ -154,7 +162,6 @@ public class CameraActivity extends Activity {
         controlCamera();
         likeBtn();
 
-
     }
 
     private void likeBtn() {
@@ -172,9 +179,73 @@ public class CameraActivity extends Activity {
         heart.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                if (girlsList.get(currentVideoIndex).isLiked()) {
+                    return;
+                }
+
+
+                ImageViewCompat.setImageTintList(heart, null);
+                taptoReply.setVisibility(View.GONE);
+                heart.setImageResource(R.drawable.heart_liked);
+                heart.clearAnimation();
+                LottieAnimationView heart_lottie = findViewById(R.id.heart_lottie);
+                heart_lottie.setVisibility(View.VISIBLE);
+                heart_lottie.setProgress(0f);
+                heart_lottie.playAnimation();
+                new Handler().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        heart_lottie.cancelAnimation();
+                        heart_lottie.setVisibility(View.GONE);
+
+
+                    }
+                }, 1600);
+
+                getCall();
+                showCustomToast();
 
             }
         });
+    }
+
+    private void showCustomToast() {
+        LayoutInflater inflater = getLayoutInflater();
+        View layout = inflater.inflate(R.layout.custom_toast_layout, null);
+
+        TextView profileName = layout.findViewById(R.id.profileName);
+        profileName.setText(girlsList.get(currentVideoIndex).getName().substring(0, girlsList.get(currentVideoIndex).getName().indexOf(" ")));
+        // You can customize the text and other properties of the view elements here
+
+        Toast toast = new Toast(getApplicationContext());
+        toast.setGravity(Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL, 0, 130); // Adjust the margin (bottom) here
+        toast.setDuration(Toast.LENGTH_LONG);
+        toast.setView(layout);
+        toast.show();
+
+        girlsList.get(currentVideoIndex).setLiked(true);
+        save_SharedPrefrence();
+    }
+
+    private void getCall() {
+        int index = currentVideoIndex;
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+
+                FragmentManager fragmentManager = getSupportFragmentManager();
+                FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+                Fragment_Calling fragment = new Fragment_Calling();
+
+                Bundle args = new Bundle();
+                args.putString("name", girlsList.get(index).getName()); // Replace "key" with an appropriate key and "Your Data" with the data you want to pass
+
+                fragment.setArguments(args);
+                fragmentTransaction.replace(R.id.player, fragment);
+                fragmentTransaction.commit();
+
+            }
+        }, 10000);
     }
 
     private void playRinging() {
@@ -220,8 +291,26 @@ public class CameraActivity extends Activity {
 
     }
 
+    private void resetButtons() {
+        ImageView heart = findViewById(R.id.heart);
+        heart.setImageResource(R.drawable.heart);
+
+        Animation pulse = AnimationUtils.loadAnimation(this, R.anim.breathing_anim);
+        heart.startAnimation(pulse);
+
+        int tintColor = getResources().getColor(R.color.white); // Use the appropriate resource ID for your color
+        ImageViewCompat.setImageTintList(heart, ColorStateList.valueOf(tintColor));
+        ImageViewCompat.setImageTintMode(heart, PorterDuff.Mode.SRC_IN);
+
+        taptoReply.setVisibility(View.VISIBLE);
+        ImageView speaker = findViewById(R.id.speaker);
+        speaker.setImageResource(R.drawable.speaker_off);
+
+    }
+
 
     private void playVideoinTheBackground() {
+
 
         readGirlsVideo();
 
@@ -229,7 +318,7 @@ public class CameraActivity extends Activity {
         videoView = findViewById(R.id.videoView);
         controlsLayout.setVisibility(View.GONE);
 
-        LinearLayout playerLayout = findViewById(R.id.player);
+        FrameLayout playerLayout = findViewById(R.id.player);
 
         // Get the height of the VideoView area before playing the video
         playerLayout.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
@@ -248,11 +337,11 @@ public class CameraActivity extends Activity {
 
         String videoPath = "";
 
-        for (int i = 0; i <girlsList.size() ; i++) {
-            Girl girl=girlsList.get(i);
+        for (int i = 0; i < girlsList.size(); i++) {
+            Girl girl = girlsList.get(i);
             if (!girl.isSeen()) {
                 videoPath = baseUrl + girl.getName() + ".mp4";// Replace with your actual video URL
-                currentVideoIndex=i;
+                currentVideoIndex = i;
                 break;
             }
         }
@@ -279,10 +368,6 @@ public class CameraActivity extends Activity {
 
                 float scale = (float) videoView_Height / viewHeight;
 
-                Log.d(TAG, "onPrepared: " + viewHeight);
-                Log.d(TAG, "videoView_Height: " + videoView_Height);
-                Log.d(TAG, "scale: " + scale);
-
 
                 videoView.setScaleY(scale);
                 videoView.setScaleX(scale);
@@ -301,7 +386,7 @@ public class CameraActivity extends Activity {
                         tapToReplyView.setVisibility(View.GONE);
                         girlsList.get(currentVideoIndex).setSeen(true);
                         save_SharedPrefrence();
-
+                        resetButtons();
 
 
                     }
@@ -317,7 +402,7 @@ public class CameraActivity extends Activity {
         TextView counterTextCircular = findViewById(R.id.counterTextCircular);
 
         // Set the initial value of the timer in seconds
-        int initialSeconds = 10;
+        int initialSeconds = 15;
 
         // Set up the CountDownTimer
         countDownTimer = new CountDownTimer(initialSeconds * 1000, 1000) {
@@ -346,8 +431,15 @@ public class CameraActivity extends Activity {
                     countDownTimer.cancel();
                 }
                 if (currentVideoIndex == girlsList.size() - 1) {
-                    Toast.makeText(CameraActivity.this, "its over", Toast.LENGTH_SHORT).show();
-                    onBackPressed();
+
+                    for (Girl girll : girlsList) {
+                        girll.setSeen(false);
+                        girll.setLiked(false);
+                    }
+                    save_SharedPrefrence();
+                    currentVideoIndex = 0;
+//                    Toast.makeText(CameraActivity.this, "its over", Toast.LENGTH_SHORT).show();
+//                    onBackPressed();
                 }
             }
 
@@ -362,7 +454,6 @@ public class CameraActivity extends Activity {
     }
 
     private void save_SharedPrefrence() {
-
 
         SharedPreferences preferences = CameraActivity.this.getSharedPreferences("UserInfo", Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = preferences.edit();
@@ -418,11 +509,20 @@ public class CameraActivity extends Activity {
                 girl.setAge(girlObject.getInt("age"));
                 girl.setVideoUrl(girlObject.getString("videoUrl"));
                 girl.setCensored(girlObject.getBoolean("censored"));
-                girl.setCensored(girlObject.getBoolean("seen"));
+                girl.setSeen(girlObject.getBoolean("seen"));
+                girl.setLiked(girlObject.getBoolean("liked"));
 
                 // Add the Girl object to the ArrayList
                 girlsList.add(girl);
+
+                if (SplashScreen.App_updating.equals("active")) {
+                    for (int j = girlsList.size() - 1; j > 0; j--) {
+                        girlsList.remove(j);
+                    }
+                }
+
             }
+
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -963,16 +1063,18 @@ class Girl {
     private String videoUrl;
     private boolean censored;
     private boolean seen;
+    private boolean liked;
 
     public Girl() {
     }
 
-    public Girl(String name, int age, String videoUrl, boolean censored, boolean seen) {
+    public Girl(String name, int age, String videoUrl, boolean censored, boolean seen, boolean liked) {
         this.name = name;
         this.age = age;
         this.videoUrl = videoUrl;
         this.censored = censored;
         this.seen = seen;
+        this.liked = liked;
     }
 
     public String getName() {
@@ -1013,5 +1115,13 @@ class Girl {
 
     public void setSeen(boolean seen) {
         this.seen = seen;
+    }
+
+    public boolean isLiked() {
+        return liked;
+    }
+
+    public void setLiked(boolean liked) {
+        this.liked = liked;
     }
 }

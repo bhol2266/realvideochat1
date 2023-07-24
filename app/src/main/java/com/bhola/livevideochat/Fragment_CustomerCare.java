@@ -9,6 +9,7 @@ import android.graphics.Paint;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.cardview.widget.CardView;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -19,7 +20,9 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -59,7 +62,6 @@ public class Fragment_CustomerCare extends Fragment {
         // Required empty public constructor
     }
 
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -69,7 +71,51 @@ public class Fragment_CustomerCare extends Fragment {
         Context context = getContext();
         init(view, context);
 
+        gotoAdminPanel(view,context);
+
         return view;
+    }
+
+    private void gotoAdminPanel(View view, Context context) {
+
+        LinearLayout adminPanel=view.findViewById(R.id.adminPanel);
+        adminPanel.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                EditText passwordEdittext;
+                Button passwordLoginBtn;
+
+
+                AlertDialog dialog;
+
+                final androidx.appcompat.app.AlertDialog.Builder builder = new androidx.appcompat.app.AlertDialog.Builder(v.getContext());
+                LayoutInflater inflater = LayoutInflater.from(context);
+                View promptView = inflater.inflate(R.layout.admin_panel_entry, null);
+                builder.setView(promptView);
+                builder.setCancelable(true);
+
+
+                passwordEdittext = promptView.findViewById(R.id.passwordEdittext);
+                passwordLoginBtn = promptView.findViewById(R.id.passwordLoginBtn);
+
+                passwordLoginBtn.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        if (passwordEdittext.getText().toString().equals("5555")) {
+                            startActivity(new Intent(context, admin_panel.class));
+
+                        } else {
+                            Toast.makeText(v.getContext(), "Enter Password", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
+
+
+                dialog = builder.create();
+                dialog.show();
+                return false;
+            }
+        });
     }
 
     private void init(View view, Context context) {

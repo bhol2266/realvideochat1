@@ -15,11 +15,11 @@
       },
       "oauth_client": [
         {
-          "client_id": "765763370680-p8pu84r8k2n4ign25l0qkrmos984ia9o.apps.googleusercontent.com",
+          "client_id": "765763370680-dsqs0k6kqi99i7qo39abp81gebvutd0j.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.bhola.livevideochat",
-            "certificate_hash": "b4b832f2398d2070f067f578064f6dccf6a9a723"
+            "certificate_hash": "ea9ebb17d0b5b9dbe882c4492b6f40153960aabd"
           }
         },
         {

@@ -67,6 +67,8 @@ public class SplashScreen extends AppCompatActivity {
     public static String Main_App_url1 = "https://play.google.com/store/apps/details?id=com.bhola.HindidesiKahaniya2";
     public static String Refer_App_url2 = "https://play.google.com/store/apps/developer?id=UK+DEVELOPERS";
     public static String Ads_State = "inactive";
+    public static String App_updating = "active";
+
     public static String DB_NAME = "MCB_Story";
     public static String exit_Refer_appNavigation = "inactive";
     public static String Sex_Story = "inactive";
@@ -106,7 +108,7 @@ public class SplashScreen extends AppCompatActivity {
 //        readJSON();
         sharedPrefrences();
 
-//        clearSharedPrefrence();
+        clearSharedPrefrence();
 
 
         topAnim = AnimationUtils.loadAnimation(this, R.anim.top_animation);
@@ -126,7 +128,6 @@ public class SplashScreen extends AppCompatActivity {
             public void onAnimationEnd(Animator animation) {
                 animationCompleted = true;
 
-                handler_forIntent();
 
             }
 
@@ -167,13 +168,18 @@ public class SplashScreen extends AppCompatActivity {
             handler2.postDelayed(new Runnable() {
                 @Override
                 public void run() {
+                    if (Login_Times > 5) {
+                        App_updating = "inactive";
+                        Ads_State = "active";
+                        Ad_Network_Name = "admob";
+                    }
                     handler_forIntent();
                 }
             }, 2000);
 
             return;
         } else {
-            url_mref = FirebaseDatabase.getInstance().getReference().child("LiveVideoChat");
+            url_mref = FirebaseDatabase.getInstance().getReference().child("Desi_Girls_Video_Chat");
             url_mref.addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -183,17 +189,22 @@ public class SplashScreen extends AppCompatActivity {
                     Sex_Story_Switch_Open = (String) snapshot.child("Sex_Story_Switch_Open").getValue();
                     Ads_State = (String) snapshot.child("Ads").getValue();
                     Ad_Network_Name = (String) snapshot.child("Ad_Network").getValue();
+                    App_updating = (String) snapshot.child("App_updating").getValue();
                     Notification_ImageURL = (String) snapshot.child("Notification_ImageURL").getValue();
 
-                    if (animationCompleted) {
-//                        handler_forIntent();
-                    }
+
+                    Log.d(TAG, "exit_Refer_appNavigation: "+exit_Refer_appNavigation);
+                    Log.d(TAG, "Ads_State: "+Ads_State);
+                    Log.d(TAG, "Ad_Network_Name: "+Ad_Network_Name);
+
+                    handler_forIntent();
+
 
                 }
 
                 @Override
                 public void onCancelled(@NonNull DatabaseError error) {
-
+                    Toast.makeText(SplashScreen.this, error.getMessage(), Toast.LENGTH_SHORT).show();
                 }
             });
         }
@@ -292,7 +303,7 @@ public class SplashScreen extends AppCompatActivity {
         Log.d(TAG, "userLoggedIn: "+userLoggedIn);
         Log.d(TAG, "userLoggedIAs: "+userLoggedIAs);
         if (SplashScreen.userLoggedIn) {
-            Intent intent = new Intent(getApplicationContext(), CameraActivity.class);
+            Intent intent = new Intent(getApplicationContext(), MainActivity.class);
             startActivity(intent);
         } else {
             Intent intent = new Intent(getApplicationContext(), LoginScreen.class);

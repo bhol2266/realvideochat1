@@ -349,12 +349,14 @@ public class ChatScreen_User extends Activity {
         for (int i = 0; i < Fragment_Messenger.userListTemp.size(); i++) {
             if (Fragment_Messenger.userListTemp.get(i).getUserName().equals(modelClass.getUserName())) {
 
+
+
                 if (modelClass.isContainsQuestion()) {
                     for (int j = 0; j < Fragment_Messenger.userListTemp.get(i).getQuestionWithAns().getReplyToUser().size(); j++) {
                         UserBotMsg userBotMsg = Fragment_Messenger.userListTemp.get(i).getQuestionWithAns().getReplyToUser().get(j);
 
                         if (userBotMsg.getSent() == 1) {
-                            if (modelClass.getQuestionWithAns().getReplyToUser().get(j).getSent() == 0) {
+                            if (modelClass.getQuestionWithAns().getReplyToUser().get(j).getRead() == 0) {
 
                                 Chats_Modelclass chats_modelclass = new Chats_Modelclass(userBotMsg.getMsg(), userBotMsg.getMimeType(), userBotMsg.getExtraMsg(), modelClass.getUserProfile(), userBotMsg.getDateTime(), 2);
                                 chatsArrayList.add(chats_modelclass);
@@ -370,12 +372,15 @@ public class ChatScreen_User extends Activity {
                     }
                 } else {
 
+
+
                     for (int j = 0; j < Fragment_Messenger.userListTemp.get(i).getUserBotMsg().size(); j++) {
                         UserBotMsg userBotMsg = Fragment_Messenger.userListTemp.get(i).getUserBotMsg().get(j);
 
 
                         if (userBotMsg.getSent() == 1) {
-                            if (modelClass.getUserBotMsg().get(j).getSent() == 0) {
+                            if (modelClass.getUserBotMsg().get(j).getRead() == 0) {
+
 
                                 Chats_Modelclass chats_modelclass = new Chats_Modelclass(userBotMsg.getMsg(), userBotMsg.getMimeType(), userBotMsg.getExtraMsg(), modelClass.getUserProfile(), userBotMsg.getDateTime(), 2);
                                 chatsArrayList.add(chats_modelclass);
