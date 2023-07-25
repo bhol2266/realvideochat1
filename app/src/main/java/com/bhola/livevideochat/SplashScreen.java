@@ -83,6 +83,7 @@ public class SplashScreen extends AppCompatActivity {
     public static int Native_Ad_Interval = 5;
     public static boolean homepageAdShown = false;
     boolean animationCompleted = false;
+    boolean activityChanged = false;
 
     public static String terms_service_link = "https://sites.google.com/view/desi-girls-live-video-chat/terms_service";
     public static String privacy_policy_link = "https://sites.google.com/view/desi-girls-live-video-chat/privacypolicy";
@@ -117,7 +118,7 @@ public class SplashScreen extends AppCompatActivity {
         lottie = findViewById(R.id.lottie);
 
 
-        textView.setAnimation(topAnim);
+//        textView.setAnimation(topAnim);
         lottie.addAnimatorListener(new Animator.AnimatorListener() {
             @Override
             public void onAnimationStart(Animator animation) {
@@ -127,6 +128,11 @@ public class SplashScreen extends AppCompatActivity {
             @Override
             public void onAnimationEnd(Animator animation) {
                 animationCompleted = true;
+
+                if(!activityChanged){
+                handler_forIntent();
+                }
+
 
 
             }
@@ -173,6 +179,7 @@ public class SplashScreen extends AppCompatActivity {
                         Ads_State = "active";
                         Ad_Network_Name = "admob";
                     }
+                    activityChanged=true;
                     handler_forIntent();
                 }
             }, 2000);
@@ -193,11 +200,10 @@ public class SplashScreen extends AppCompatActivity {
                     Notification_ImageURL = (String) snapshot.child("Notification_ImageURL").getValue();
 
 
-                    Log.d(TAG, "exit_Refer_appNavigation: "+exit_Refer_appNavigation);
-                    Log.d(TAG, "Ads_State: "+Ads_State);
-                    Log.d(TAG, "Ad_Network_Name: "+Ad_Network_Name);
-
+                    if(animationCompleted){
+                        activityChanged=true;
                     handler_forIntent();
+                    }
 
 
                 }
