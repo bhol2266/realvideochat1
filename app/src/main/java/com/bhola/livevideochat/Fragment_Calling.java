@@ -31,7 +31,7 @@ public class Fragment_Calling extends Fragment {
     String name;
     MediaPlayer mediaPlayer;
     int videoView_Height;
-
+    ImageView endcall;
     private MediaPlayer mediaPlayer2;
     private Ringtone defaultRingtone;
 
@@ -49,7 +49,7 @@ public class Fragment_Calling extends Fragment {
         view = inflater.inflate(R.layout.fragment_calling, container, false);
         context = getActivity();
 
-        ImageView endcall=view.findViewById(R.id.end_call);
+        endcall = view.findViewById(R.id.end_call);
         endcall.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -60,8 +60,18 @@ public class Fragment_Calling extends Fragment {
 
         init();
 
+        endCallAutomatically();
 
         return view;
+    }
+
+    private void endCallAutomatically() {
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                endcall.performClick();
+            }
+        }, 10000);
     }
 
     private void init() {
@@ -73,7 +83,7 @@ public class Fragment_Calling extends Fragment {
         profileName.setText(name);
 
         TextView message = view.findViewById(R.id.message);
-        message.setText(name.substring(0,name.indexOf(" "))+" invites you for a video call");
+        message.setText(name.substring(0, name.indexOf(" ")) + " invites you for a video call");
 
         FrameLayout playerLayout = view.findViewById(R.id.fragment_container);
         playerLayout.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
@@ -90,7 +100,7 @@ public class Fragment_Calling extends Fragment {
         });
 
         VideoView videoView = view.findViewById(R.id.videoView);
-        String videoPath = "https://bucket2266.blr1.cdn.digitaloceanspaces.com/"+name+ ".mp4";
+        String videoPath = "https://bucket2266.blr1.cdn.digitaloceanspaces.com/" + name + ".mp4";
         Uri videoUri = Uri.parse(videoPath);
         videoView.setVideoURI(videoUri);
         videoView.setBackgroundColor(getResources().getColor(R.color.color_333333));
@@ -125,9 +135,6 @@ public class Fragment_Calling extends Fragment {
 
             }
         });
-
-
-
 
 
     }

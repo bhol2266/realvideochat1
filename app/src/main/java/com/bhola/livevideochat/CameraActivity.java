@@ -415,6 +415,11 @@ public class CameraActivity extends AppCompatActivity {
 
                 if (seconds == 0 && currentVideoIndex < girlsList.size()) {
 
+                    if(SplashScreen.App_updating.equals("active")){
+                        onBackPressed();
+                        return;
+                    }
+
                     currentVideoIndex = currentVideoIndex + 1;
                     videoView.stopPlayback();
                     progressBarLayout.setVisibility(View.VISIBLE);

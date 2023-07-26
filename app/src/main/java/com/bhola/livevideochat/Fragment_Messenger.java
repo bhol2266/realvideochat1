@@ -126,7 +126,7 @@ public class Fragment_Messenger extends Fragment {
     private void readDataFromJson() {
 
         userList = new ArrayList<>();
-        if (SplashScreen.userLoggedIn && SplashScreen.userLoggedIAs.equals("Google")) {
+        if (SplashScreen.userLoggedIn && SplashScreen.userLoggedIAs.equals("Google") && SplashScreen.App_updating.equals("inactive")) {
             DatabaseReference usersRef = FirebaseDatabase.getInstance().getReference("BotChats/users");
             usersRef.addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
@@ -327,6 +327,7 @@ public class Fragment_Messenger extends Fragment {
     }
 
     private void sendDataToRecyclerview() {
+
 
         userListTemp = new ArrayList<>();
         layoutManager = new LinearLayoutManager(context);
