@@ -24,21 +24,12 @@
             android:orientation="horizontal"
             android:paddingLeft="20dp">
 
-            <androidx.cardview.widget.CardView
-                android:id="@+id/view2"
+            <de.hdodenhof.circleimageview.CircleImageView
+                android:id="@+id/profileUrl"
                 android:layout_width="120dp"
                 android:layout_height="120dp"
                 android:layout_centerHorizontal="true"
-                android:elevation="12dp"
-                app:cardCornerRadius="60dp">
-
-                <ImageView
-                    android:id="@+id/profileUrl"
-                    android:layout_width="match_parent"
-                    android:layout_height="120dp"
-                    android:scaleType="centerCrop"
-                    android:src="@drawable/student" />
-            </androidx.cardview.widget.CardView>
+                android:src="@drawable/student" />
 
             <LinearLayout
                 android:layout_width="wrap_content"
@@ -194,6 +185,7 @@
 
             </LinearLayout>
             <LinearLayout
+                android:id="@+id/about"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"

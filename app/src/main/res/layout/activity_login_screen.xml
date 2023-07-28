@@ -7,9 +7,8 @@
     tools:context=".LoginScreen">
 
     <ImageView
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_gravity="left"
         android:scaleType="fitXY"
         android:src="@drawable/live_login_bg" />
 
@@ -37,12 +36,15 @@
             android:layout_alignParentRight="true"
             android:orientation="vertical">
 
-            <ImageView
-                android:layout_width="80dp"
-                android:layout_height="80dp"
-                android:layout_gravity="center"
+
+            <de.hdodenhof.circleimageview.CircleImageView
+                android:layout_width="100dp"
+                android:layout_height="100dp"
                 android:layout_marginTop="150dp"
+                android:layout_gravity="center"
+
                 android:src="@drawable/app_icon" />
+
 
             <TextView
                 android:layout_width="wrap_content"

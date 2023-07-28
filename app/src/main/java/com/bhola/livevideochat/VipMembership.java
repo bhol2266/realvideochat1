@@ -9,21 +9,27 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.graphics.Color;
+import android.graphics.Paint;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.InsetDrawable;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.AppCompatTextView;
+import androidx.cardview.widget.CardView;
+import androidx.core.content.ContextCompat;
 
 import com.airbnb.lottie.LottieAnimationView;
 import com.android.billingclient.api.BillingClient;
@@ -39,6 +45,7 @@ import com.android.billingclient.api.PurchasesResponseListener;
 import com.android.billingclient.api.QueryProductDetailsParams;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.material.snackbar.Snackbar;
 import com.google.common.collect.ImmutableList;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -54,6 +61,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class VipMembership extends AppCompatActivity {
 
@@ -67,6 +76,9 @@ public class VipMembership extends AppCompatActivity {
     private boolean isTimerRunning = false;
     int backpressCount = 0;
     ArrayList<ProductDetails> mlist_offer;
+    final int[] selectedCard = {-1};
+    Button btnContinue;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -76,15 +88,39 @@ public class VipMembership extends AppCompatActivity {
         progressBar = findViewById(R.id.progressBar);
         offerTimer = findViewById(R.id.offerTimer);
 
-
+        addUnderlineTerms_privacy();
         billingClient = BillingClient.newBuilder(this).enablePendingPurchases().setListener((billingResult, list) -> {
 
             if (billingResult.getResponseCode() == BillingClient.BillingResponseCode.OK && list != null) {
                 for (Purchase purchase : list) {
+
+                    //first this is triggerd than onResume is called
+
                     verifyPurchase(purchase);
-                    progressBar.setVisibility(View.GONE);
-                    Toast.makeText(this, "Successfull", Toast.LENGTH_SHORT).show();
-                    startActivity(new Intent(VipMembership.this, SplashScreen.class));
+
+                    new Handler().postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            Snackbar snackbar = Snackbar.make(findViewById(android.R.id.content), "Payment failed. If your money is deducted, it will be reflected back to your Bank Account soon", Snackbar.LENGTH_INDEFINITE);
+                            snackbar.setAction("Dismiss", new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    snackbar.dismiss();
+                                }
+                            });
+
+                            View snackbarView = snackbar.getView();
+                            AppCompatTextView textView = snackbarView.findViewById(com.google.android.material.R.id.snackbar_text);
+                            textView.setMaxLines(5); // Adjust this value as needed
+
+//                            snackbar.show();
+                            progressBar.setVisibility(View.GONE);
+
+                            startActivity(new Intent(VipMembership.this, SplashScreen.class));
+
+                        }
+                    }, 5000);
+
 
                 }
             } else {
@@ -107,12 +143,12 @@ public class VipMembership extends AppCompatActivity {
         });
         checkTimeRunning();
 
+
     }
 
 
     private void checkTimeRunning() {
         isTimerRunning = isServiceRunning(TimerService.class);
-        Log.d(SplashScreen.TAG, "checkTimeRunning: " + isTimerRunning);
         if (isTimerRunning) {
             backpressCount = 1;
             timerUpdateReceiverCheck = new BroadcastReceiver() {
@@ -192,8 +228,8 @@ public class VipMembership extends AppCompatActivity {
                 ((Activity) VipMembership.this).runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        Log.d(SplashScreen.TAG, "productDetailsList: "+productDetailsList.size());
-                        createListView(productDetailsList, offer);
+                        selectCardView(productDetailsList, offer);
+
 
                     }
                 });
@@ -203,64 +239,19 @@ public class VipMembership extends AppCompatActivity {
 
     }
 
-    private void createListView(List<ProductDetails> productDetailsList, String offer) {
-
-
-        ArrayList<ProductDetails> mlist = new ArrayList<ProductDetails>();
-        mlist_offer = new ArrayList<ProductDetails>();
-
-        for (ProductDetails productDetails : productDetailsList) {
-            if (productDetails.getProductId().equals("coins200")) {
-                mlist.add(productDetails);
-            }
-            if (productDetails.getProductId().equals("coins200_offer")) {
-                mlist_offer.add(productDetails);
-            }
-
-        }
-        for (ProductDetails productDetails : productDetailsList) {
-            if (productDetails.getProductId().equals("coins500")) {
-                mlist.add(productDetails);
-            }
-            if (productDetails.getProductId().equals("coins500_offer")) {
-                mlist_offer.add(productDetails);
-            }
-
-        }
-        for (ProductDetails productDetails : productDetailsList) {
-            if (productDetails.getProductId().equals("coins500_offer")) {
-                mlist.add(productDetails);
-            }
-            if (productDetails.getProductId().equals("coins500_offer_offer")) {
-                mlist_offer.add(productDetails);
-            }
-
-        }
-
-
-        ListView listView = findViewById(R.id.listview);
-        Vip_CustomAdapter vipMembershipAdapter = new Vip_CustomAdapter(VipMembership.this, mlist, billingClient, progressBar, offer, mlist_offer);
-        listView.setAdapter(vipMembershipAdapter);
-
-        vipMembershipAdapter.notifyDataSetChanged();
-
-    }
-
 
     private void verifyPurchase(Purchase purchase) {
-
-        int Validity_period = 0;
-
-        if (purchase.getProducts().get(0).equals("vip_1")) {
-            Validity_period = 30;
-        } else if (purchase.getProducts().get(0).equals("vip_3")) {
-            Validity_period = 90;
-        } else {
-            Validity_period = 365;
-
+        int coins = 0;
+        String inputString = purchase.getProducts().get(0);
+        Pattern pattern = Pattern.compile("\\d+");
+        Matcher matcher = pattern.matcher(inputString);
+        while (matcher.find()) {
+            String number = matcher.group();
+            coins = Integer.parseInt(number);
         }
 
-        savePurchaseDetails_inSharedPreference(purchase.getPurchaseToken(), Validity_period, purchase.getPurchaseTime());
+
+        savePurchaseDetails_inSharedPreference(purchase.getPurchaseToken(), coins, purchase.getPurchaseTime());
 
         ConsumeParams consumeParams = ConsumeParams.newBuilder().setPurchaseToken(purchase.getPurchaseToken()).build();
         billingClient.consumeAsync(consumeParams, new ConsumeResponseListener() {
@@ -326,7 +317,7 @@ public class VipMembership extends AppCompatActivity {
 
     }
 
-    private void savePurchaseDetails_inSharedPreference(String purchaseToken, int validity_period, long purchaseTime) {
+    private void savePurchaseDetails_inSharedPreference(String purchaseToken, int coins, long purchaseTime) {
         //Reading purchase Token
         SharedPreferences sh = getSharedPreferences("UserInfo", MODE_PRIVATE);
         String a = sh.getString("purchaseToken", purchaseToken);
@@ -335,7 +326,7 @@ public class VipMembership extends AppCompatActivity {
         SharedPreferences sharedPreferences = getSharedPreferences("UserInfo", MODE_PRIVATE);
         SharedPreferences.Editor myEdit = sharedPreferences.edit();
         myEdit.putString("purchaseToken", purchaseToken);
-        myEdit.putInt("validity_period", validity_period);
+        myEdit.putInt("coins", coins);
 
         Date currentDate = new Date();
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
@@ -348,7 +339,6 @@ public class VipMembership extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-
         billingClient.queryPurchasesAsync(BillingClient.ProductType.INAPP, new PurchasesResponseListener() {
             @Override
             public void onQueryPurchasesResponse(@NonNull BillingResult billingResult, @NonNull List<Purchase> list) {
@@ -356,7 +346,14 @@ public class VipMembership extends AppCompatActivity {
                     for (Purchase purchase : list) {
                         if (purchase.getPurchaseState() == Purchase.PurchaseState.PURCHASED && !purchase.isAcknowledged()) {
                             verifyPurchase(purchase);
-                            progressBar.setVisibility(View.GONE);
+
+                            new Handler().postDelayed(new Runnable() {
+                                @Override
+                                public void run() {
+                                    progressBar.setVisibility(View.GONE);
+
+                                }
+                            }, 5000);
 
                         }
                     }
@@ -400,7 +397,6 @@ public class VipMembership extends AppCompatActivity {
             }
         });
         buyNowTimer = promptView.findViewById(R.id.buyNowTimer);
-
 
 
         dialog = builder.create();
@@ -538,7 +534,7 @@ public class VipMembership extends AppCompatActivity {
 
     private void actionBar() {
 
-        ImageView back_arrow =findViewById(R.id.back_arrow);
+        ImageView back_arrow = findViewById(R.id.back_arrow);
         back_arrow.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -548,20 +544,260 @@ public class VipMembership extends AppCompatActivity {
     }
 
 
-//    @Override
-//    public void onBackPressed() {
-//        if (backpressCount == 0 && mlist_offer.size() != 0) {
-//            exit_dialog();
-//            backpressCount++;
-//        } else {
-//            super.onBackPressed();
-//        }
-//    }
+    private void addUnderlineTerms_privacy() {
+        TextView terms = findViewById(R.id.terms);
+        TextView privaciy = findViewById(R.id.privacy);
+        terms.setPaintFlags(terms.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
+        privaciy.setPaintFlags(privaciy.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
 
+        terms.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startActivity(new Intent(VipMembership.this, Terms_Conditions.class));
+            }
+        });
+        privaciy.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startActivity(new Intent(VipMembership.this, PrivacyPolicy.class));
+
+            }
+        });
+    }
+
+
+    private void selectCardView(List<ProductDetails> productDetailsList, String offer) {
+
+
+        LinearLayout cardsLayout = findViewById(R.id.cardsLayout);
+        cardsLayout.setVisibility(View.VISIBLE);
+
+        CardView cardView1, cardView2, cardView3;
+        TextView price1, price2, price3, mrp1, mrp2, mrp3;
+        cardView1 = findViewById(R.id.cardView1);
+        cardView2 = findViewById(R.id.cardView2);
+        cardView3 = findViewById(R.id.cardView3);
+
+        price1 = findViewById(R.id.price1);
+        price2 = findViewById(R.id.price2);
+        price3 = findViewById(R.id.price3);
+
+        mrp1 = findViewById(R.id.mrp1);
+        mrp2 = findViewById(R.id.mrp2);
+        mrp3 = findViewById(R.id.mrp3);
+
+
+        ArrayList<ProductDetails> mlist = new ArrayList<ProductDetails>();
+        mlist_offer = new ArrayList<ProductDetails>();
+
+        for (ProductDetails productDetails : productDetailsList) {
+            if (productDetails.getProductId().equals("coins200")) {
+                mlist.add(productDetails);
+            }
+            if (productDetails.getProductId().equals("coins200_offer")) {
+                mlist_offer.add(productDetails);
+            }
+
+        }
+        for (ProductDetails productDetails : productDetailsList) {
+            if (productDetails.getProductId().equals("coins500")) {
+                mlist.add(productDetails);
+            }
+            if (productDetails.getProductId().equals("coins500_offer")) {
+                mlist_offer.add(productDetails);
+            }
+
+        }
+        for (ProductDetails productDetails : productDetailsList) {
+            if (productDetails.getProductId().equals("coins3000")) {
+                mlist.add(productDetails);
+            }
+            if (productDetails.getProductId().equals("coins3000_offer")) {
+                mlist_offer.add(productDetails);
+            }
+
+        }
+
+        if (offer.equals("with offer")) {
+
+            TextView discountRate1 = findViewById(R.id.discountRate1);
+            TextView discountRate2 = findViewById(R.id.discountRate2);
+            TextView discountRate3 = findViewById(R.id.discountRate3);
+
+            discountRate1.setVisibility(View.VISIBLE);
+            discountRate2.setVisibility(View.VISIBLE);
+            discountRate3.setVisibility(View.VISIBLE);
+        }
+
+        for (int i = 0; i < mlist.size(); i++) {
+            ProductDetails productDetails;
+            if (offer.equals("with offer")) {
+                productDetails = mlist_offer.get(i);
+            } else {
+                productDetails = mlist.get(i);
+
+            }
+
+            if (i == 0) {
+
+                price1.setText(productDetails.getOneTimePurchaseOfferDetails().getFormattedPrice().replace(".00", ""));
+                mrp1.setText(mlist.get(0).getOneTimePurchaseOfferDetails().getFormattedPrice().replace(".00", ""));
+                mrp1.setPaintFlags(mrp1.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
+                if (offer.equals("with offer")) {
+                    mrp1.setVisibility(View.VISIBLE);
+                }
+            }
+            if (i == 1) {
+
+                price2.setText(productDetails.getOneTimePurchaseOfferDetails().getFormattedPrice().replace(".00", ""));
+                mrp2.setText(mlist.get(1).getOneTimePurchaseOfferDetails().getFormattedPrice().replace(".00", ""));
+                mrp2.setPaintFlags(mrp2.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
+                if (offer.equals("with offer")) {
+                    mrp2.setVisibility(View.VISIBLE);
+                }
+            }
+            if (i == 2) {
+
+                price3.setText(productDetails.getOneTimePurchaseOfferDetails().getFormattedPrice().replace(".00", ""));
+                mrp3.setText(mlist.get(2).getOneTimePurchaseOfferDetails().getFormattedPrice().replace(".00", ""));
+                mrp3.setPaintFlags(mrp3.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
+                if (offer.equals("with offer")) {
+                    mrp3.setVisibility(View.VISIBLE);
+                }
+            }
+
+        }
+
+
+        btnContinue = findViewById(R.id.btnContinue);
+        btnContinue.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (selectedCard[0] == -1) {
+                    Toast.makeText(VipMembership.this, "Please select any card", Toast.LENGTH_SHORT).show();
+                } else {
+                    ProductDetails finalProductDetails;
+                    if (offer.equals("with offer")) {
+                        finalProductDetails = mlist_offer.get(selectedCard[0]);
+                    } else {
+                        finalProductDetails = mlist.get(selectedCard[0]);
+
+                    }
+                    // An activity reference from which the billing flow will be launched.
+                    Activity activity = VipMembership.this;
+
+                    ImmutableList productDetailsParamsList =
+                            ImmutableList.of(
+                                    BillingFlowParams.ProductDetailsParams.newBuilder()
+                                            // retrieve a value for "productDetails" by calling queryProductDetailsAsync()
+                                            .setProductDetails(finalProductDetails)
+                                            // to get an offer token, call ProductDetails.getSubscriptionOfferDetails()
+                                            // for a list of offers that are available to the user
+                                            .build()
+                            );
+
+                    BillingFlowParams billingFlowParams = BillingFlowParams.newBuilder()
+                            .setProductDetailsParamsList(productDetailsParamsList)
+                            .build();
+
+// Launch the billing flow
+                    billingClient.launchBillingFlow(activity, billingFlowParams);
+                    progressBar.setVisibility(View.VISIBLE);
+                }
+            }
+        });
+
+
+        cardView1.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                setOtherCards_BackgroundWhite(cardView1, cardView2, cardView3, price1, price2, price3, mrp1, mrp2, mrp3);
+                int backgroundColor = R.color.themeColor;
+                int color = ContextCompat.getColor(VipMembership.this, backgroundColor);
+                cardView1.setCardBackgroundColor(color);
+
+                int textColor = Color.parseColor("#FFFFFF"); // Replace "#FF0000" with your desired color
+                price1.setTextColor(textColor);
+                mrp1.setTextColor(textColor);
+
+                selectedCard[0] = 0;
+
+
+            }
+        });
+        cardView2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                setOtherCards_BackgroundWhite(cardView1, cardView2, cardView3, price1, price2, price3, mrp1, mrp2, mrp3);
+
+                int backgroundColor = R.color.themeColor;
+                int color = ContextCompat.getColor(VipMembership.this, backgroundColor);
+                cardView2.setCardBackgroundColor(color);
+
+                int textColor = Color.parseColor("#FFFFFF"); // Replace "#FF0000" with your desired color
+                price2.setTextColor(textColor);
+                mrp2.setTextColor(textColor);
+
+                selectedCard[0] = 1;
+
+
+            }
+        });
+
+        cardView3.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                setOtherCards_BackgroundWhite(cardView1, cardView2, cardView3, price1, price2, price3, mrp1, mrp2, mrp3);
+
+                int backgroundColor = R.color.themeColor;
+                int color = ContextCompat.getColor(VipMembership.this, backgroundColor);
+                cardView3.setCardBackgroundColor(color);
+
+                int textColor = Color.parseColor("#FFFFFF"); // Replace "#FF0000" with your desired color
+                price3.setTextColor(textColor);
+                mrp3.setTextColor(textColor);
+
+
+                selectedCard[0] = 2;
+
+
+            }
+        });
+
+
+    }
+
+    private void setOtherCards_BackgroundWhite(CardView cardView1, CardView cardView2, CardView cardView3, TextView price1, TextView price2, TextView price3, TextView mrp1, TextView mrp2, TextView mrp3) {
+        int backgroundColor = R.color.white;
+        int color = ContextCompat.getColor(VipMembership.this, backgroundColor);
+        cardView1.setCardBackgroundColor(color);
+        cardView2.setCardBackgroundColor(color);
+        cardView3.setCardBackgroundColor(color);
+
+        int textColor = Color.parseColor("#000000"); // Replace "#FF0000" with your desired color
+        int textColor2 = Color.parseColor("#BF707070"); // Replace "#FF0000" with your desired color
+        price1.setTextColor(textColor);
+        price2.setTextColor(textColor);
+        price3.setTextColor(textColor);
+
+        mrp1.setTextColor(textColor2);
+        mrp2.setTextColor(textColor2);
+        mrp3.setTextColor(textColor2);
+    }
 
     @Override
     public void onBackPressed() {
-        super.onBackPressed();
+        if (backpressCount == 0) {
+            try {
+                exit_dialog();
+            } catch (Exception e) {
+                super.onBackPressed();
+            }
+            backpressCount++;
+        } else {
+            super.onBackPressed();
+        }
+
     }
 
     @Override

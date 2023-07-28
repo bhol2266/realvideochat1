@@ -228,6 +228,9 @@ public class CameraActivity extends AppCompatActivity {
     }
 
     private void getCall() {
+        if (SplashScreen.App_updating.equals("active")) {
+            return;
+        }
         int index = currentVideoIndex;
         new Handler().postDelayed(new Runnable() {
             @Override
@@ -313,7 +316,11 @@ public class CameraActivity extends AppCompatActivity {
 
 
         readGirlsVideo();
-
+        if (SplashScreen.App_updating.equals("active")) {
+            for (int j = girlsList.size() - 1; j > 0; j--) {
+                girlsList.remove(j);
+            }
+        }
 
         videoView = findViewById(R.id.videoView);
         controlsLayout.setVisibility(View.GONE);
@@ -345,8 +352,17 @@ public class CameraActivity extends AppCompatActivity {
                 break;
             }
         }
+        if (SplashScreen.App_updating.equals("active")) {
+            videoPath = baseUrl + girlsList.get(0).getName()+ ".mp4";
+            currentVideoIndex = 0;
 
-//        String videoPath = SplashScreen.decryption(girlsList.get(4).getVideoUrl()); // Replace with your actual video URL
+        }
+
+        Log.d(SplashScreen.TAG, "playVideoinTheBackground: " + girlsList.get(0).getName());
+        Log.d(SplashScreen.TAG, "currentVideoIndex: " + currentVideoIndex);
+        Log.d(SplashScreen.TAG, "videoPath: " + videoPath);
+
+
         Uri videoUri = Uri.parse(videoPath);
         videoView.setVideoURI(videoUri);
         videoView.start();
@@ -415,7 +431,7 @@ public class CameraActivity extends AppCompatActivity {
 
                 if (seconds == 0 && currentVideoIndex < girlsList.size()) {
 
-                    if(SplashScreen.App_updating.equals("active")){
+                    if (SplashScreen.App_updating.equals("active")) {
                         onBackPressed();
                         return;
                     }
@@ -443,8 +459,7 @@ public class CameraActivity extends AppCompatActivity {
                     }
                     save_SharedPrefrence();
                     currentVideoIndex = 0;
-//                    Toast.makeText(CameraActivity.this, "its over", Toast.LENGTH_SHORT).show();
-//                    onBackPressed();
+
                 }
             }
 
@@ -519,14 +534,8 @@ public class CameraActivity extends AppCompatActivity {
 
                 // Add the Girl object to the ArrayList
                 girlsList.add(girl);
-
-                if (SplashScreen.App_updating.equals("active")) {
-                    for (int j = girlsList.size() - 1; j > 0; j--) {
-                        girlsList.remove(j);
-                    }
-                }
-
             }
+
 
         } catch (JSONException e) {
             e.printStackTrace();
@@ -845,8 +854,7 @@ public class CameraActivity extends AppCompatActivity {
     public void onBackPressed() {
         super.onBackPressed();
 
-        if (mediaPlayer != null) {
-
+        if (mediaPlayer != null && mediaPlayer.isPlaying()) {
             mediaPlayer.stop();
         }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {

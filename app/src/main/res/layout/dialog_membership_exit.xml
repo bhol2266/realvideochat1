@@ -175,6 +175,7 @@
                 android:layout_width="40dp"
                 android:layout_height="40dp"
                 android:layout_gravity="center|bottom"
+                android:visibility="gone"
                 android:layout_marginTop="80dp"
                 android:background="@drawable/cross"
                 android:backgroundTint="@color/white"

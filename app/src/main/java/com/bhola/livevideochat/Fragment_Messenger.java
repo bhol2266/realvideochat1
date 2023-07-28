@@ -608,10 +608,10 @@ class MessengeItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
 
 
                                 String activityName = MessengeItemsAdapter.getCurrentlyRunningActivity(context);
-                                if (activityName.equals("com.bhola.livevideochat.MainActivity")) {
+                                if (activityName != null && activityName.equals("com.bhola.livevideochat.MainActivity")) {
                                     Fragment_Messenger.playSentAudio();
                                 }
-                                if (activityName.equals("com.bhola.livevideochat.ChatScreen_User")) {
+                                if (activityName != null && activityName.equals("com.bhola.livevideochat.ChatScreen_User")) {
                                     if (Fragment_Messenger.currentActiveUser.equals(modelClass.getUserName())) {
                                         Fragment_Messenger.playSentAudio();
                                     }

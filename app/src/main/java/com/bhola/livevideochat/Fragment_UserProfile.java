@@ -50,6 +50,7 @@ public class Fragment_UserProfile extends Fragment {
         profileImage = view.findViewById(R.id.profileUrl);
         name = view.findViewById(R.id.profileName);
         coins = view.findViewById(R.id.coins);
+        coins.setText(String.valueOf("Coins: "+SplashScreen.coins));
         logout = view.findViewById(R.id.logout);
         SharedPreferences sh = context.getSharedPreferences("UserInfo", MODE_PRIVATE);
 
@@ -121,6 +122,13 @@ public class Fragment_UserProfile extends Fragment {
 
         oprnPrivacy_Terms(view,context);
 
+        LinearLayout about=view.findViewById(R.id.about);
+        about.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                context.startActivity(new Intent(context, About.class));
+            }
+        });
 
         return view;
     }

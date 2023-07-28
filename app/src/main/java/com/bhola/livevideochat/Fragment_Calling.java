@@ -1,11 +1,13 @@
 package com.bhola.livevideochat;
 
 import android.content.Context;
+import android.content.Intent;
 import android.media.AudioAttributes;
 import android.media.MediaPlayer;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 
 import android.os.Handler;
@@ -23,6 +25,8 @@ import android.widget.VideoView;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
+import com.airbnb.lottie.LottieAnimationView;
+
 public class Fragment_Calling extends Fragment {
 
 
@@ -34,7 +38,8 @@ public class Fragment_Calling extends Fragment {
     ImageView endcall;
     private MediaPlayer mediaPlayer2;
     private Ringtone defaultRingtone;
-
+    Handler mHandler;
+    Runnable mRunnable;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -53,11 +58,28 @@ public class Fragment_Calling extends Fragment {
         endcall.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                getFragmentManager().beginTransaction().remove(Fragment_Calling.this).commit();
+                if (getFragmentManager() != null) {
+                    getFragmentManager().beginTransaction().remove(Fragment_Calling.this).commit();
+                }
 
             }
         });
+        LottieAnimationView calling_lottie = view.findViewById(R.id.calling_lottie);
+        calling_lottie.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    if (mHandler.hasCallbacks(mRunnable)) {
+                        mHandler.removeCallbacks(mRunnable);
+                    }
+                }
+                if (getFragmentManager() != null) {
+                    getFragmentManager().beginTransaction().remove(Fragment_Calling.this).commit();
+                }
+                context.startActivity(new Intent(context, VipMembership.class));
 
+            }
+        });
         init();
 
         endCallAutomatically();
@@ -66,7 +88,8 @@ public class Fragment_Calling extends Fragment {
     }
 
     private void endCallAutomatically() {
-        new Handler().postDelayed(new Runnable() {
+        mHandler = new Handler();
+        mHandler.postDelayed(new Runnable() {
             @Override
             public void run() {
                 endcall.performClick();

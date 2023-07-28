@@ -25,6 +25,8 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.AppCompatTextView;
+import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.core.view.WindowInsetsControllerCompat;
@@ -34,6 +36,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -91,6 +94,7 @@ public class SplashScreen extends AppCompatActivity {
 
     //Google login
     public static boolean userLoggedIn = false;
+    public static int coins = 0;
     public static String userLoggedIAs = "not set";
     public static String authProviderName = "";
     public static String userEmail = "";
@@ -129,10 +133,9 @@ public class SplashScreen extends AppCompatActivity {
             public void onAnimationEnd(Animator animation) {
                 animationCompleted = true;
 
-                if(!activityChanged){
-                handler_forIntent();
+                if (!activityChanged) {
+                    handler_forIntent();
                 }
-
 
 
             }
@@ -179,7 +182,7 @@ public class SplashScreen extends AppCompatActivity {
                         Ads_State = "active";
                         Ad_Network_Name = "admob";
                     }
-                    activityChanged=true;
+                    activityChanged = true;
                     handler_forIntent();
                 }
             }, 2000);
@@ -200,9 +203,9 @@ public class SplashScreen extends AppCompatActivity {
                     Notification_ImageURL = (String) snapshot.child("Notification_ImageURL").getValue();
 
 
-                    if(animationCompleted){
-                        activityChanged=true;
-                    handler_forIntent();
+                    if (animationCompleted) {
+                        activityChanged = true;
+                        handler_forIntent();
                     }
 
 
@@ -223,6 +226,7 @@ public class SplashScreen extends AppCompatActivity {
         //Reading Login Times and login details
         SharedPreferences sh = getSharedPreferences("UserInfo", MODE_PRIVATE);
         int a = sh.getInt("loginTimes", 0);
+        coins = sh.getInt("coins", 0);
         String loginAs = sh.getString("loginAs", "not set");
         if (!loginAs.equals("not set")) {
             userLoggedIn = true;
@@ -306,8 +310,13 @@ public class SplashScreen extends AppCompatActivity {
 
 
     private void handler_forIntent() {
-        Log.d(TAG, "userLoggedIn: "+userLoggedIn);
-        Log.d(TAG, "userLoggedIAs: "+userLoggedIAs);
+
+        if (!isInternetAvailable(SplashScreen.this)) {
+            createSnackBar();
+            return;
+        }
+        Log.d(TAG, "userLoggedIn: " + userLoggedIn);
+        Log.d(TAG, "userLoggedIAs: " + userLoggedIAs);
         if (SplashScreen.userLoggedIn) {
             Intent intent = new Intent(getApplicationContext(), MainActivity.class);
             startActivity(intent);
@@ -318,6 +327,19 @@ public class SplashScreen extends AppCompatActivity {
         overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
 
         finish();
+    }
+
+    private void createSnackBar() {
+
+        Snackbar snackbar = Snackbar.make(findViewById(android.R.id.content), "No Internet Connection!", Snackbar.LENGTH_INDEFINITE);
+        snackbar.setAction("Retry", new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(SplashScreen.this, SplashScreen.class));
+                snackbar.dismiss();
+            }
+        });
+        snackbar.show();
     }
 
 
@@ -445,8 +467,6 @@ public class SplashScreen extends AppCompatActivity {
         Log.d(TAG, "GoogleSignInAccount: " + acct);
 
     }
-
-
 
 
 }
