@@ -3,6 +3,7 @@ package com.bhola.livevideochat;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import androidx.core.view.WindowCompat;
@@ -17,13 +18,18 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.graphics.PorterDuff;
+import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.InsetDrawable;
 import android.media.MediaPlayer;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
@@ -39,7 +45,7 @@ import com.google.android.material.tabs.TabLayoutMediator;
 import java.util.Objects;
 
 
-public class MainActivity extends AppCompatActivity  {
+public class MainActivity extends AppCompatActivity {
 
     private int CAMERA_PERMISSION_REQUEST_CODE = 123;
     final int NOTIFICATION_REQUEST_CODE = 112;
@@ -108,11 +114,11 @@ public class MainActivity extends AppCompatActivity  {
                                 @Override
                                 public void run() {
                                     //First time
-                                        badge_text.setVisibility(View.VISIBLE);
-                                        badge_text.setText("1");
-                                        badge_text.setBackgroundResource(R.drawable.badge_background);
-                                        MediaPlayer mediaPlayer = MediaPlayer.create(MainActivity.this, R.raw.message_received);
-                                        mediaPlayer.start();
+                                    badge_text.setVisibility(View.VISIBLE);
+                                    badge_text.setText("1");
+                                    badge_text.setBackgroundResource(R.drawable.badge_background);
+                                    MediaPlayer mediaPlayer = MediaPlayer.create(MainActivity.this, R.raw.message_received);
+                                    mediaPlayer.start();
 
                                 }
                             }, 3000);
@@ -247,5 +253,73 @@ public class MainActivity extends AppCompatActivity  {
                     // decision.
                 }
             });
+
+
+    @Override
+    public void onBackPressed() {
+        exit_dialog();
+
+    }
+
+    private void exit_dialog() {
+
+        final androidx.appcompat.app.AlertDialog.Builder builder = new androidx.appcompat.app.AlertDialog.Builder(MainActivity.this);
+        LayoutInflater inflater = LayoutInflater.from(getApplicationContext());
+        View promptView = inflater.inflate(R.layout.dialog_exit_app, null);
+        builder.setView(promptView);
+        builder.setCancelable(true);
+
+        TextView exit = promptView.findViewById(R.id.confirm);
+        TextView cancel = promptView.findViewById(R.id.cancel);
+
+
+        AlertDialog exitDialog = builder.create();
+        exitDialog.show();
+
+
+        exit.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                if (SplashScreen.exit_Refer_appNavigation.equals("active") && SplashScreen.Login_Times < 2 && SplashScreen.Refer_App_url2.length() > 10) {
+
+                    Intent j = new Intent(Intent.ACTION_VIEW);
+                    j.setData(Uri.parse(SplashScreen.Refer_App_url2));
+                    try {
+                        startActivity(j);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    finishAffinity();
+                    System.exit(0);
+                    finish();
+                    exitDialog.dismiss();
+
+                } else {
+
+                    finishAffinity();
+                    finish();
+                    System.exit(0);
+                    finish();
+                    exitDialog.dismiss();
+
+                }
+            }
+        });
+
+        cancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                exitDialog.cancel();
+            }
+        });
+
+
+        ColorDrawable back = new ColorDrawable(Color.TRANSPARENT);
+        InsetDrawable inset = new InsetDrawable(back, 20);
+        exitDialog.getWindow().setBackgroundDrawable(inset);
+
+    }
+
 
 }
