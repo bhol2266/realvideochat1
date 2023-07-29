@@ -73,6 +73,9 @@ public class ChatScreen_User extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat_screen_user);
 
+        if (SplashScreen.Ads_State.equals("active")) {
+            showAds();
+        }
 
         getModalClass();
         sendDataRecyclerview();
@@ -80,6 +83,15 @@ public class ChatScreen_User extends Activity {
         bottomBtns();
 
 
+    }
+
+    private void showAds() {
+        if (SplashScreen.Ad_Network_Name.equals("admob")) {
+            ADS_ADMOB.Interstitial_Ad(this);
+        } else {
+            com.facebook.ads.InterstitialAd facebook_IntertitialAds = null;
+            ADS_FACEBOOK.interstitialAd(this, facebook_IntertitialAds, getString(R.string.Facebook_InterstitialAdUnit));
+        }
     }
 
     private void bottomBtns() {

@@ -34,6 +34,7 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.Manifest;
@@ -52,11 +53,19 @@ public class MainActivity extends AppCompatActivity {
     public static TextView badge_text;
     public static int unreadMessage_count;
     public static ViewPager2 viewPager2;
+    com.facebook.ads.InterstitialAd facebook_IntertitialAds;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        if (SplashScreen.Ads_State.equals("active")) {
+            showAds();
+        }
+
+
         Button startVideoBtn = findViewById(R.id.startVideoBtn);
         startVideoBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -71,6 +80,8 @@ public class MainActivity extends AppCompatActivity {
 
         initializeBottonFragments();
         askForNotificationPermission(); //Android 13 and higher
+
+
 
     }
 
@@ -258,7 +269,9 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onBackPressed() {
         exit_dialog();
-
+        if (SplashScreen.Ads_State.equals("active")) {
+            showAds();
+        }
     }
 
     private void exit_dialog() {
@@ -319,6 +332,25 @@ public class MainActivity extends AppCompatActivity {
         InsetDrawable inset = new InsetDrawable(back, 20);
         exitDialog.getWindow().setBackgroundDrawable(inset);
 
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+    }
+
+    private void showAds() {
+        if (SplashScreen.Ad_Network_Name.equals("admob")) {
+            if (!SplashScreen.homepageAdShown) {
+                ADS_ADMOB.Interstitial_Ad(this);
+                SplashScreen.homepageAdShown = true;
+            }
+        } else {
+            if (!SplashScreen.homepageAdShown) {
+                ADS_FACEBOOK.interstitialAd(this, facebook_IntertitialAds, getString(R.string.Facebook_InterstitialAdUnit));
+                SplashScreen.homepageAdShown = true;
+            }
+        }
     }
 
 

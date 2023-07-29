@@ -140,6 +140,8 @@ public class CameraActivity extends AppCompatActivity {
     androidx.appcompat.app.AlertDialog block_user_dialog = null;
     androidx.appcompat.app.AlertDialog report_user_dialog = null;
     AlertDialog report_userSucessfully_dialog = null;
+    Handler callhandler;
+    Runnable callRunnable;
 
 
     @Override
@@ -149,10 +151,15 @@ public class CameraActivity extends AppCompatActivity {
         this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_camera);
 //       fullscreenMode();
+
+        if (SplashScreen.Ads_State.equals("active")) {
+            showAds();
+        }
         actionbar();
 
         SharedPreferences sharedPreferences = getSharedPreferences("UserInfo", Context.MODE_PRIVATE);
         boolean disclaimerAccepted = sharedPreferences.getBoolean("disclaimerAccepted", false);
+        currentVideoIndex = sharedPreferences.getInt("currentVideoIndex", 0);
         if (!disclaimerAccepted) {
             disclaimerDialog();
         }
@@ -232,10 +239,10 @@ public class CameraActivity extends AppCompatActivity {
             return;
         }
         int index = currentVideoIndex;
-        new Handler().postDelayed(new Runnable() {
+        callhandler = new Handler();
+        callRunnable = new Runnable() {
             @Override
             public void run() {
-
                 FragmentManager fragmentManager = getSupportFragmentManager();
                 FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
                 Fragment_Calling fragment = new Fragment_Calling();
@@ -246,9 +253,10 @@ public class CameraActivity extends AppCompatActivity {
                 fragment.setArguments(args);
                 fragmentTransaction.replace(R.id.player, fragment);
                 fragmentTransaction.commit();
-
             }
-        }, 10000);
+        };
+        callhandler.postDelayed(callRunnable, 10000);
+
     }
 
     private void playRinging() {
@@ -342,18 +350,10 @@ public class CameraActivity extends AppCompatActivity {
         });
         String baseUrl = "https://bucket2266.blr1.cdn.digitaloceanspaces.com/";
 
-        String videoPath = "";
+        String videoPath = baseUrl + girlsList.get(currentVideoIndex).getName() + ".mp4";
 
-        for (int i = 0; i < girlsList.size(); i++) {
-            Girl girl = girlsList.get(i);
-            if (!girl.isSeen()) {
-                videoPath = baseUrl + girl.getName() + ".mp4";// Replace with your actual video URL
-                currentVideoIndex = i;
-                break;
-            }
-        }
         if (SplashScreen.App_updating.equals("active")) {
-            videoPath = baseUrl + girlsList.get(0).getName()+ ".mp4";
+            videoPath = baseUrl + girlsList.get(0).getName() + ".mp4";
             currentVideoIndex = 0;
 
         }
@@ -390,6 +390,13 @@ public class CameraActivity extends AppCompatActivity {
 
 
                 videoView.start();
+
+                SharedPreferences sharedPreferences = getSharedPreferences("UserInfo", MODE_PRIVATE);
+                SharedPreferences.Editor editor = sharedPreferences.edit();
+                editor.putInt("currentVideoIndex", currentVideoIndex);
+                editor.apply(); // Apply the changes to SharedPreferences
+
+
                 new Handler().postDelayed(new Runnable() {
                     @Override
                     public void run() {
@@ -400,7 +407,6 @@ public class CameraActivity extends AppCompatActivity {
                         profilename.setText(girlsList.get(currentVideoIndex).getName());
                         controlsLayout.setVisibility(View.VISIBLE);
                         tapToReplyView.setVisibility(View.GONE);
-                        girlsList.get(currentVideoIndex).setSeen(true);
                         save_SharedPrefrence();
                         resetButtons();
 
@@ -454,7 +460,6 @@ public class CameraActivity extends AppCompatActivity {
                 if (currentVideoIndex == girlsList.size() - 1) {
 
                     for (Girl girll : girlsList) {
-                        girll.setSeen(false);
                         girll.setLiked(false);
                     }
                     save_SharedPrefrence();
@@ -512,7 +517,11 @@ public class CameraActivity extends AppCompatActivity {
 
         get_SharedPrefrence();
         if (girlsList.size() != 0) {
-            return;
+            if (girlsList.size() == 1 && SplashScreen.App_updating.equals("inactive")) {
+                girlsList.clear();
+            } else {
+                return;
+            }
         }
         // Read and parse the JSON file
         try {
@@ -858,9 +867,24 @@ public class CameraActivity extends AppCompatActivity {
             mediaPlayer.stop();
         }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            if (handler2.hasCallbacks(runnable2)) {
+            if (handler2 != null && handler2.hasCallbacks(runnable2)) {
                 handler2.removeCallbacks(runnable2);
             }
+            if (callhandler != null && callhandler.hasCallbacks(callRunnable)) {
+                callhandler.removeCallbacks(callRunnable);
+            }
+
+        }
+
+
+    }
+
+    private void showAds() {
+        if (SplashScreen.Ad_Network_Name.equals("admob")) {
+            ADS_ADMOB.Interstitial_Ad(this);
+        } else {
+            com.facebook.ads.InterstitialAd facebook_IntertitialAds = null;
+            ADS_FACEBOOK.interstitialAd(this, facebook_IntertitialAds, getString(R.string.Facebook_InterstitialAdUnit));
         }
     }
 
