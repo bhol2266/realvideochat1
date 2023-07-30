@@ -393,7 +393,11 @@ public class CameraActivity extends AppCompatActivity {
 
                 SharedPreferences sharedPreferences = getSharedPreferences("UserInfo", MODE_PRIVATE);
                 SharedPreferences.Editor editor = sharedPreferences.edit();
-                editor.putInt("currentVideoIndex", currentVideoIndex);
+                if (currentVideoIndex == girlsList.size() - 1) {
+                    editor.putInt("currentVideoIndex", 0);
+                } else {
+                    editor.putInt("currentVideoIndex", currentVideoIndex + 1);
+                }
                 editor.apply(); // Apply the changes to SharedPreferences
 
 
@@ -863,9 +867,6 @@ public class CameraActivity extends AppCompatActivity {
     public void onBackPressed() {
         super.onBackPressed();
 
-        if (mediaPlayer != null && mediaPlayer.isPlaying()) {
-            mediaPlayer.stop();
-        }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             if (handler2 != null && handler2.hasCallbacks(runnable2)) {
                 handler2.removeCallbacks(runnable2);
@@ -943,10 +944,15 @@ public class CameraActivity extends AppCompatActivity {
     protected void onPause() {
 
         super.onPause();
-        if (mediaPlayer != null && mediaPlayer.isPlaying()) {
-            currentSeekPosition = videoView.getCurrentPosition();
-            videoView.pause();
+        try {
+            if (mediaPlayer != null && mediaPlayer.isPlaying()) {
+                currentSeekPosition = videoView.getCurrentPosition();
+                videoView.pause();
+            }
+        } catch (Exception e) {
+
         }
+
         closeBackgroundHandler();
     }
 

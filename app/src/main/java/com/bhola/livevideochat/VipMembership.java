@@ -787,12 +787,9 @@ public class VipMembership extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
+        Log.d(SplashScreen.TAG, "backpressCount: "+backpressCount);
         if (backpressCount == 0) {
-            try {
-                exit_dialog();
-            } catch (Exception e) {
-                super.onBackPressed();
-            }
+            exit_dialog();
             backpressCount++;
         } else {
             super.onBackPressed();
@@ -800,11 +797,7 @@ public class VipMembership extends AppCompatActivity {
 
     }
 
-    @Override
-    protected void onPause() {
-        super.onPause();
 
-    }
 
     @Override
     protected void onDestroy() {

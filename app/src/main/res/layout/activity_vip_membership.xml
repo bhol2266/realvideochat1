@@ -202,7 +202,7 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="15dp"
             android:orientation="horizontal"
-            android:visibility="invisible"
+            android:visibility="gone"
             android:padding="5dp">
 
 
@@ -210,9 +210,9 @@
                 android:id="@+id/cardView1"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="10dp"
+                android:layout_marginLeft="5dp"
                 android:layout_marginTop="10dp"
-                android:layout_marginRight="10dp"
+                android:layout_marginRight="5dp"
                 android:layout_marginBottom="20dp"
                 android:layout_weight="1"
                 app:cardBackgroundColor="@color/white"
@@ -244,7 +244,7 @@
                             android:fontFamily="@font/inter"
                             android:text="200"
                             android:textColor="@color/black"
-                            android:textSize="30dp"
+                            android:textSize="27dp"
                             android:textStyle="bold" />
 
                         <TextView
@@ -298,7 +298,7 @@
                             android:text="$99"
                             android:visibility="gone"
                             android:textColor="@color/grey"
-                            android:textSize="16dp" />
+                            android:textSize="15dp" />
 
                         <TextView
                             android:id="@+id/price1"
@@ -311,7 +311,7 @@
                             android:fontFamily="@font/inter"
                             android:text="$99"
                             android:textColor="@color/black"
-                            android:textSize="18dp" />
+                            android:textSize="16dp" />
 
 
                     </LinearLayout>
@@ -325,9 +325,9 @@
                 android:id="@+id/cardView2"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="10dp"
+                android:layout_marginLeft="5dp"
                 android:layout_marginTop="10dp"
-                android:layout_marginRight="10dp"
+                android:layout_marginRight="5dp"
                 android:layout_marginBottom="20dp"
                 android:layout_weight="1"
                 app:cardCornerRadius="10dp"
@@ -357,7 +357,7 @@
                             android:fontFamily="@font/inter"
                             android:text="500"
                             android:textColor="@color/black"
-                            android:textSize="30dp"
+                            android:textSize="27dp"
                             android:textStyle="bold" />
 
                         <TextView
@@ -412,7 +412,7 @@
                             android:text="$99"
                             android:visibility="gone"
                             android:textColor="@color/grey"
-                            android:textSize="16dp" />
+                            android:textSize="15dp" />
 
                         <TextView
                             android:id="@+id/price2"
@@ -425,7 +425,7 @@
                             android:fontFamily="@font/inter"
                             android:text="$99"
                             android:textColor="@color/black"
-                            android:textSize="18dp" />
+                            android:textSize="16dp" />
 
 
 
@@ -441,9 +441,9 @@
                 android:id="@+id/cardView3"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="10dp"
+                android:layout_marginLeft="5dp"
                 android:layout_marginTop="10dp"
-                android:layout_marginRight="10dp"
+                android:layout_marginRight="5dp"
                 android:layout_marginBottom="20dp"
                 android:layout_weight="1"
                 app:cardCornerRadius="10dp"
@@ -473,7 +473,7 @@
                             android:fontFamily="@font/inter"
                             android:text="3000"
                             android:textColor="@color/black"
-                            android:textSize="30dp"
+                            android:textSize="27dp"
                             android:textStyle="bold" />
 
                         <TextView
@@ -528,7 +528,7 @@
                             android:text="$99"
                             android:visibility="gone"
                             android:textColor="@color/grey"
-                            android:textSize="16dp" />
+                            android:textSize="15dp" />
 
                         <TextView
                             android:id="@+id/price3"
@@ -541,7 +541,7 @@
                             android:fontFamily="@font/inter"
                             android:text="$99"
                             android:textColor="@color/black"
-                            android:textSize="18dp" />
+                            android:textSize="16dp" />
 
 
                     </LinearLayout>

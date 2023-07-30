@@ -46,13 +46,16 @@
                 <FrameLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_margin="12dp">
+                    android:layout_marginTop="12dp"
+                    android:layout_marginLeft="12dp"
+                    android:layout_marginRight="12dp">
 
                     <androidx.cardview.widget.CardView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_gravity="bottom"
-                        android:elevation="20dp"
+                        app:elevation="20dp"
+                        android:layout_marginBottom="10dp"
                         app:cardCornerRadius="15dp">
 
                         <LinearLayout
@@ -117,10 +120,9 @@
                         android:layout_width="70dp"
                         android:layout_height="40dp"
                         android:layout_gravity="top|right"
-                        android:layout_marginBottom="35dp"
+                        android:layout_marginBottom="45dp"
                         android:elevation="10dp"
                         android:src="@drawable/off" />
-
 
                 </FrameLayout>
 
@@ -130,7 +132,7 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
                     android:layout_marginLeft="15dp"
-                    android:layout_marginTop="20dp"
+                    android:layout_marginTop="10dp"
                     android:layout_marginRight="15dp"
                     android:background="@drawable/btn_bg"
                     android:fontFamily="@font/inter"
