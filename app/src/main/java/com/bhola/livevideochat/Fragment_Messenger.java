@@ -1,5 +1,7 @@
 package com.bhola.livevideochat;
 
+import static android.content.Context.MODE_PRIVATE;
+
 import android.annotation.SuppressLint;
 import android.app.ActivityManager;
 import android.app.Dialog;
@@ -101,7 +103,6 @@ public class Fragment_Messenger extends Fragment {
         Date currentTime = new Date();
         String formattedTime = dateFormat.format(currentTime);
         messageTime.setText(formattedTime);
-
 
 
         chatItemClick.setOnClickListener(new View.OnClickListener() {
@@ -354,7 +355,7 @@ public class Fragment_Messenger extends Fragment {
                         adapter.notifyItemInserted(0);
 
                         String activityName = MessengeItemsAdapter.getCurrentlyRunningActivity(context);
-                        if (activityName.equals("com.bhola.livevideochat.MainActivity")) {
+                        if (activityName != null && activityName.equals("com.bhola.livevideochat.MainActivity")) {
                             playSentAudio();
                         }
 
@@ -367,7 +368,7 @@ public class Fragment_Messenger extends Fragment {
         }
 
 
-        for (int i = 0; i < 4; i++) {
+        for (int i = 0; i < 3; i++) {
 
             int finalI = i;
             int delayTime = finalI * 20000;
@@ -379,7 +380,7 @@ public class Fragment_Messenger extends Fragment {
                     adapter.notifyItemInserted(0);
 
                     String activityName = MessengeItemsAdapter.getCurrentlyRunningActivity(context);
-                    if (activityName.equals("com.bhola.livevideochat.MainActivity")) {
+                    if (activityName != null && activityName.equals("com.bhola.livevideochat.MainActivity")) {
                         playSentAudio();
                     }
 
@@ -408,7 +409,7 @@ public class Fragment_Messenger extends Fragment {
     public static void save_sharedPrefrence(Context context, ArrayList<ChatItem_ModelClass> userList) {
 
 
-        SharedPreferences sharedPreferences = context.getSharedPreferences("messenger_chats", Context.MODE_PRIVATE);
+        SharedPreferences sharedPreferences = context.getSharedPreferences("messenger_chats", MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
 
 
@@ -417,18 +418,25 @@ public class Fragment_Messenger extends Fragment {
         String json = gson.toJson(userList);
 
 // Save the JSON string to SharedPreferences
-        editor.putString("userListTemp", json);
+        if (SplashScreen.userLoggedIn && SplashScreen.userLoggedIAs.equals("Google")) {
+            editor.putString("userListTemp_Google", json);
+        } else {
+            editor.putString("userListTemp_Guest", json);
+        }
         editor.apply();
-        //JHGJHJHGGHJ
 
     }
 
     public static boolean retreive_sharedPreferences(Context context) {
-        SharedPreferences sharedPreferences = context.getSharedPreferences("messenger_chats", Context.MODE_PRIVATE);
+        SharedPreferences sharedPreferences = context.getSharedPreferences("messenger_chats", MODE_PRIVATE);
 
 // Retrieve the JSON string from SharedPreferences
-        String json = sharedPreferences.getString("userListTemp", null);
-
+        String json = "";
+        if (SplashScreen.userLoggedIn && SplashScreen.userLoggedIAs.equals("Google")) {
+            json = sharedPreferences.getString("userListTemp_Google", null);
+        } else {
+            json = sharedPreferences.getString("userListTemp_Guest", null);
+        }
 
 // Convert the JSON string back to ArrayList
         Gson gson = new Gson();
@@ -470,11 +478,6 @@ public class Fragment_Messenger extends Fragment {
                 }
             }
         }
-
-        SharedPreferences sharedPreferences = context.getSharedPreferences("messenger_chats", Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putInt("unreadMessage_Count", count);
-        editor.apply();
 
         MainActivity.badge_text.setText(String.valueOf(count));
         MainActivity.badge_text.setVisibility(View.VISIBLE);
@@ -551,18 +554,13 @@ class MessengeItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
                     }
                 }, 500);
 
-                Gson gson = new Gson();
-                String json = gson.toJson(userList);
-
+                SharedPreferences sharedPreferences = view.getContext().getSharedPreferences("UserInfo", MODE_PRIVATE);
+                SharedPreferences.Editor editor = sharedPreferences.edit();
+                editor.putString("userName", modelClass.getUserName());
+                editor.apply(); // Apply the changes to SharedPreferences
 
                 Intent intent = new Intent(context, ChatScreen_User.class);
-                intent.putExtra("userName", modelClass.getUserName());
-                intent.putExtra("userList_Json", json);
-
-
                 context.startActivity(intent);
-
-
             }
         });
 
@@ -594,31 +592,41 @@ class MessengeItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
                     Runnable updateTimeRunnable = new Runnable() {
                         @Override
                         public void run() {
-                            if (holder.getBindingAdapterPosition() == -1) {
-                                // it means the item in not set in viewholder at this moment of time
-                            } else {
+
+                            
+                            int time = 0;
+                            if (holder.getAbsoluteAdapterPosition() == -1) {
+                                time = 100000;
+                            }
+                            new Handler().postDelayed(new Runnable() {
+                                @Override
+                                public void run() {
+                                    int currentPostion = -1;
+                                    for (int j = 0; j < userList.size(); j++) {
+                                        if (userList.get(j).getUserName().equals(modelClass.getUserName())) {
+                                            currentPostion = j;
+                                        }
+                                    }
+                                    userList.remove(currentPostion);
+                                    userList.add(0, modelClass);
+                                    notifyItemMoved(currentPostion, 0);
+                                    notifyItemChanged(0);
+                                    recyclerview.smoothScrollToPosition(0);
+                                    Fragment_Messenger.updateUnreadmessageCount(context);
 
 
-                                userList.remove(holder.getBindingAdapterPosition());
-                                userList.add(0, modelClass);
-                                notifyItemMoved(holder.getBindingAdapterPosition(), 0);
-                                notifyItemChanged(0);
-                                recyclerview.smoothScrollToPosition(0);
-                                Fragment_Messenger.updateUnreadmessageCount(context);
-
-
-                                String activityName = MessengeItemsAdapter.getCurrentlyRunningActivity(context);
-                                if (activityName != null && activityName.equals("com.bhola.livevideochat.MainActivity")) {
-                                    Fragment_Messenger.playSentAudio();
-                                }
-                                if (activityName != null && activityName.equals("com.bhola.livevideochat.ChatScreen_User")) {
-                                    if (Fragment_Messenger.currentActiveUser.equals(modelClass.getUserName())) {
+                                    String activityName = MessengeItemsAdapter.getCurrentlyRunningActivity(context);
+                                    if (activityName != null && activityName.equals("com.bhola.livevideochat.MainActivity")) {
                                         Fragment_Messenger.playSentAudio();
                                     }
+                                    if (activityName != null && activityName.equals("com.bhola.livevideochat.ChatScreen_User")) {
+                                        if (Fragment_Messenger.currentActiveUser.equals(modelClass.getUserName())) {
+                                            Fragment_Messenger.playSentAudio();
+                                        }
+                                    }
                                 }
+                            }, time);
 
-
-                            }
 
                         }
                     };
@@ -656,20 +664,39 @@ class MessengeItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
                     new Handler().postDelayed(new Runnable() {
                         @Override
                         public void run() {
-                            userBotMsg.setSent(1);
-                            userBotMsg.setDateTime(String.valueOf(currentTime.getTime()));
 
-                            if (holder.getBindingAdapterPosition() == -1) {
-                                // it means the item in not set in viewholder at this moment of time
-                            } else {
-                                userList.remove(holder.getBindingAdapterPosition());
-                                userList.add(0, modelClass);
-                                notifyItemMoved(holder.getBindingAdapterPosition(), 0);
-                                notifyItemChanged(0);
-                                recyclerview.smoothScrollToPosition(0);
+                            int time = 0;
+                            if (holder.getAbsoluteAdapterPosition() == -1) {
+                                time = 100000;
                             }
-                            Fragment_Messenger.updateUnreadmessageCount(context);
-                            Fragment_Messenger.playSentAudio();
+
+                            new Handler().postDelayed(new Runnable() {
+                                @Override
+                                public void run() {
+                                    userBotMsg.setSent(1);
+                                    userBotMsg.setDateTime(String.valueOf(currentTime.getTime()));
+
+                                    
+
+                                    int currentPostion = -1;
+                                    for (int j = 0; j < userList.size(); j++) {
+                                        if (userList.get(j).getUserName().equals(modelClass.getUserName())) {
+                                            currentPostion = j;
+                                        }
+                                    }
+
+                                    userList.remove(currentPostion);
+                                    userList.add(0, modelClass);
+                                    notifyItemMoved(currentPostion, 0);
+                                    notifyItemChanged(0);
+
+                                    recyclerview.smoothScrollToPosition(0);
+                                    Fragment_Messenger.updateUnreadmessageCount(context);
+                                    Fragment_Messenger.playSentAudio();
+                                }
+                            }, time);
+
+
                         }
                     }, delayTime);
                 } else {
@@ -699,7 +726,7 @@ class MessengeItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
     private void setMessageCount(ArrayList<UserBotMsg> userBotMsg, TextView messageCount, String userName) {
 
         String activityName = getCurrentlyRunningActivity(context);
-        if (Fragment_Messenger.currentActiveUser.equals(userName) && activityName.equals("com.bhola.livevideochat.ChatScreen_User")) {
+        if (Fragment_Messenger.currentActiveUser.equals(userName) && activityName != null && activityName.equals("com.bhola.livevideochat.ChatScreen_User")) {
             messageCount.setVisibility(View.GONE);
             return; //this is because when we are in the chat screem and pressed back the message count is shwoing which should not show
         }
@@ -723,7 +750,7 @@ class MessengeItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
     private void setMessageCountQuestion(UserQuestionWithAns userQuestionWithAns, TextView messageCount, String userName) {
 
         String activityName = getCurrentlyRunningActivity(context);
-        if (Fragment_Messenger.currentActiveUser.equals(userName) && activityName.equals("com.bhola.livevideochat.ChatScreen_User")) {
+        if (Fragment_Messenger.currentActiveUser.equals(userName) && activityName != null && activityName.equals("com.bhola.livevideochat.ChatScreen_User")) {
             messageCount.setVisibility(View.GONE);
             return; //this is because when we are in the chat screem and pressed back the message count is shwoing which should not show
         }

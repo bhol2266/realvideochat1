@@ -42,7 +42,11 @@ import android.Manifest;
 import com.google.android.material.badge.BadgeDrawable;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
+import com.google.common.reflect.TypeToken;
+import com.google.gson.Gson;
 
+import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.Objects;
 
 
@@ -128,11 +132,11 @@ public class MainActivity extends AppCompatActivity {
                                     badge_text.setVisibility(View.VISIBLE);
                                     badge_text.setText("1");
                                     badge_text.setBackgroundResource(R.drawable.badge_background);
-                                    MediaPlayer mediaPlayer = MediaPlayer.create(MainActivity.this, R.raw.message_received);
-                                    mediaPlayer.start();
+//                                    MediaPlayer mediaPlayer = MediaPlayer.create(MainActivity.this, R.raw.message_received);
+//                                    mediaPlayer.start();
 
                                 }
-                            }, 3000);
+                            }, 6000);
 
                         } else {
                             if (unreadMessage_count != 0) {
@@ -202,9 +206,50 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private int getUndreadMessage_Count() {
-        SharedPreferences sharedPreferences = getSharedPreferences("messenger_chats", MainActivity.this.MODE_PRIVATE);
-        int count = sharedPreferences.getInt("unreadMessage_Count", 0);
-        return count;
+
+        ArrayList<ChatItem_ModelClass> userListTemp=new ArrayList<>();
+        SharedPreferences sharedPreferences = MainActivity.this.getSharedPreferences("messenger_chats", Context.MODE_PRIVATE);
+
+// Retrieve the JSON string from SharedPreferences
+        String json="";
+        if (SplashScreen.userLoggedIn && SplashScreen.userLoggedIAs.equals("Google")) {
+            json = sharedPreferences.getString("userListTemp_Google", null);
+        } else {
+            json = sharedPreferences.getString("userListTemp_Guest", null);
+        }
+
+// Convert the JSON string back to ArrayList
+        Gson gson = new Gson();
+        Type type = new TypeToken<ArrayList<ChatItem_ModelClass>>() {
+        }.getType();
+
+
+        if (json == null) {
+            // Handle case when no ArrayList is saved in SharedPreferences
+            return 0;
+        } else {
+            userListTemp = gson.fromJson(json, type);
+
+            int count = 0;
+            for (int i = 0; i < userListTemp.size(); i++) {
+
+                ChatItem_ModelClass modelclass = userListTemp.get(i);
+
+                for (int j = 0; j < modelclass.getUserBotMsg().size(); j++) {
+                    UserBotMsg userBotMsg = modelclass.getUserBotMsg().get(j);
+                    if (userBotMsg.getSent() == 1 && userBotMsg.getRead() == 0) {
+                        count = count + 1;
+                    }
+                }
+                if (modelclass.isContainsQuestion()) {
+                    if (modelclass.getQuestionWithAns().getSent() == 1 && modelclass.getQuestionWithAns().getRead() == 0) {
+                        count = count + 1;
+                    }
+                }
+            }
+            return count;
+        }
+
     }
 
     @Override

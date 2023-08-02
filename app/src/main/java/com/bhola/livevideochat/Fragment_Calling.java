@@ -99,7 +99,10 @@ public class Fragment_Calling extends Fragment {
 
     private void init() {
 
-        startRingTone();
+        try {
+            startRingTone();
+        } catch (Exception e) {
+        }
 
 
         TextView profileName = view.findViewById(R.id.profileName);
@@ -163,6 +166,7 @@ public class Fragment_Calling extends Fragment {
     }
 
     private void startRingTone() {
+
         // Get the default ringtone
         Uri defaultRingtoneUri = RingtoneManager.getActualDefaultRingtoneUri(context, RingtoneManager.TYPE_RINGTONE);
         defaultRingtone = RingtoneManager.getRingtone(context, defaultRingtoneUri);

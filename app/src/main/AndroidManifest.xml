@@ -39,7 +39,7 @@
             android:name=".Video"
             android:exported="false" />
         <activity
-            android:name=".Profile_girl"
+            android:name=".Profile"
             android:exported="false" />
         <activity
             android:name=".admin_panel"

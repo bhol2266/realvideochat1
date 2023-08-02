@@ -11,6 +11,7 @@ import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.InsetDrawable;
 import android.media.AudioAttributes;
 import android.media.MediaPlayer;
+import android.os.Build;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -64,6 +65,7 @@ public class ChatScreen_User extends Activity {
     private Handler handler;
     private Runnable myRunnable;
     private Thread myThread;
+    static ArrayList<ChatItem_ModelClass> userListTemp;
 
     LinearLayout answerslayout, ll2;   //ll2 is message writting box
 
@@ -128,16 +130,47 @@ public class ChatScreen_User extends Activity {
         });
     }
 
+
     private void getModalClass() {
 
-        String userName = getIntent().getStringExtra("userName");
-        for (int i = 0; i < Fragment_Messenger.userListTemp.size(); i++) {
-            if (Fragment_Messenger.userListTemp.get(i).getUserName().equals(userName)) {
-                modelClass = Fragment_Messenger.userListTemp.get(i);
+        retreive_sharedPreferences(ChatScreen_User.this);
+
+        SharedPreferences sharedPreferences = getSharedPreferences("UserInfo", MODE_PRIVATE);
+        String userName = sharedPreferences.getString("userName", "");
+
+        for (int i = 0; i < userListTemp.size(); i++) {
+            if (userListTemp.get(i).getUserName().equals(userName)) {
+                modelClass = userListTemp.get(i);
             }
         }
-
         Fragment_Messenger.currentActiveUser = modelClass.getUserName();
+
+    }
+
+    public static boolean retreive_sharedPreferences(Context context) {
+        userListTemp = new ArrayList<>();
+        SharedPreferences sharedPreferences = context.getSharedPreferences("messenger_chats", Context.MODE_PRIVATE);
+// Retrieve the JSON string from SharedPreferences
+
+        String json = "";
+        if (SplashScreen.userLoggedIn && SplashScreen.userLoggedIAs.equals("Google")) {
+            json = sharedPreferences.getString("userListTemp_Google", null);
+        } else {
+            json = sharedPreferences.getString("userListTemp_Guest", null);
+        }
+
+// Convert the JSON string back to ArrayList
+        Gson gson = new Gson();
+        Type type = new TypeToken<ArrayList<ChatItem_ModelClass>>() {
+        }.getType();
+
+        if (json == null) {
+            // Handle case when no ArrayList is saved in SharedPreferences
+            return false;
+        } else {
+            userListTemp = gson.fromJson(json, type);
+            return true;
+        }
     }
 
 
@@ -150,7 +183,6 @@ public class ChatScreen_User extends Activity {
 
 
             UserQuestionWithAns userQuestionWithAns = modelClass.getQuestionWithAns();
-            Log.d(SplashScreen.TAG, "sendDataRecyclerview: "+userQuestionWithAns.getSent());
             Chats_Modelclass chats_modelclass = new Chats_Modelclass(userQuestionWithAns.getQuestion(), "mimeType/text", "", modelClass.getUserProfile(), userQuestionWithAns.getDateTime(), 2);
             chatsArrayList.add(chats_modelclass);
 
@@ -168,7 +200,7 @@ public class ChatScreen_User extends Activity {
 
                 for (int i = 0; i < modelClass.getQuestionWithAns().getReplyToUser().size(); i++) {
                     UserBotMsg userBotMsg = modelClass.getQuestionWithAns().getReplyToUser().get(i);
-                    if (userBotMsg.getSent() == 1) {
+                    if (userBotMsg.getSent() == 1 ) {
                         Chats_Modelclass chats_modelclass3 = new Chats_Modelclass(userBotMsg.getMsg(), "mimeType/text", "", modelClass.getUserProfile(), userBotMsg.getDateTime(), 2);
                         chatsArrayList.add(chats_modelclass3);
                         update_userListTemp_replyMessage(i);
@@ -185,7 +217,6 @@ public class ChatScreen_User extends Activity {
                     UserBotMsg userBotMsg = modelClass.getUserBotMsg().get(i);
                     Chats_Modelclass chats_modelclass = new Chats_Modelclass(userBotMsg.getMsg(), userBotMsg.getMimeType(), userBotMsg.getExtraMsg(), modelClass.getUserProfile(), userBotMsg.getDateTime(), 2);
                     chatsArrayList.add(chats_modelclass);
-
 
                     if (userBotMsg.getRead() == 0) {
                         userBotMsg.setRead(1);
@@ -305,8 +336,12 @@ public class ChatScreen_User extends Activity {
 
                 for (int j = 0; j < modelClass.getQuestionWithAns().getReplyToUser().size(); j++) {
                     if (j == index) {
+
                         Fragment_Messenger.userListTemp.get(i).getQuestionWithAns().getReplyToUser().get(index).setRead(1);
                         Fragment_Messenger.userListTemp.get(i).getQuestionWithAns().getReplyToUser().get(index).setSent(1);
+                        Log.d(SplashScreen.TAG, "update_userListTemp_replyMessage: "+Fragment_Messenger.userListTemp.get(i).getQuestionWithAns().getReplyToUser().get(index).getRead());
+                        Log.d(SplashScreen.TAG, "update_userListTemp_replyMessage: "+Fragment_Messenger.userListTemp.get(i).getQuestionWithAns().getReplyToUser().get(index).getSent());
+                        Log.d(SplashScreen.TAG, "index: "+j);
                     }
 
                 }
@@ -318,19 +353,24 @@ public class ChatScreen_User extends Activity {
 
 
     private void scrollrecycelrvewToBottom() {
-        NestedScrollView nestedScrollview = findViewById(R.id.nestedScrollview);
-        new Handler().postDelayed(new Runnable() {
+        NestedScrollView nestedScrollView = findViewById(R.id.nestedScrollview);
+      // Replace R.id.recyclerView with the correct ID of your RecyclerView
+        if (recylerview == null || chatsArrayList == null || chatsArrayList.size() == 0) {
+            return;
+        }
+        recylerview.postDelayed(new Runnable() {
             @Override
             public void run() {
-                if (chatsArrayList.size() == 0) {
-                    return;
+                try {
+                    int lastItemPosition = chatsArrayList.size() - 1;
+                    int y = recylerview.getChildAt(lastItemPosition).getTop();
+                    nestedScrollView.smoothScrollTo(0, y);
+                } catch (Exception e) {
+                    // Handle any exception that might occur while scrolling
+                    e.printStackTrace();
                 }
-                final float y = recylerview.getChildAt(chatsArrayList.size() - 1).getY();
-                nestedScrollview.smoothScrollTo(0, (int) y);
-
             }
         }, 500);
-
     }
 
     private void load_UnsentMessage() {
@@ -349,7 +389,7 @@ public class ChatScreen_User extends Activity {
             @Override
             public void run() {
                 // Start the task on the new thread
-                handler.postDelayed(myRunnable, 500);
+                handler.postDelayed(myRunnable, 1000);
             }
         });
 
@@ -362,20 +402,16 @@ public class ChatScreen_User extends Activity {
             if (Fragment_Messenger.userListTemp.get(i).getUserName().equals(modelClass.getUserName())) {
 
 
-
                 if (modelClass.isContainsQuestion()) {
                     for (int j = 0; j < Fragment_Messenger.userListTemp.get(i).getQuestionWithAns().getReplyToUser().size(); j++) {
                         UserBotMsg userBotMsg = Fragment_Messenger.userListTemp.get(i).getQuestionWithAns().getReplyToUser().get(j);
 
                         if (userBotMsg.getSent() == 1) {
-                            if (modelClass.getQuestionWithAns().getReplyToUser().get(j).getRead() == 0) {
-
+                            if (userBotMsg.getRead() == 0) {
                                 Chats_Modelclass chats_modelclass = new Chats_Modelclass(userBotMsg.getMsg(), userBotMsg.getMimeType(), userBotMsg.getExtraMsg(), modelClass.getUserProfile(), userBotMsg.getDateTime(), 2);
                                 chatsArrayList.add(chats_modelclass);
 
-                                modelClass.getQuestionWithAns().getReplyToUser().get(j).setSent(1);
                                 modelClass.getQuestionWithAns().getReplyToUser().get(j).setRead(1);
-
                                 update_userListTemp_replyMessage(j);
                                 chatAdapter.notifyItemInserted(chatsArrayList.size() - 1);
                                 scrollrecycelrvewToBottom();
@@ -383,7 +419,6 @@ public class ChatScreen_User extends Activity {
                         }
                     }
                 } else {
-
 
 
                     for (int j = 0; j < Fragment_Messenger.userListTemp.get(i).getUserBotMsg().size(); j++) {
@@ -396,7 +431,6 @@ public class ChatScreen_User extends Activity {
 
                                 Chats_Modelclass chats_modelclass = new Chats_Modelclass(userBotMsg.getMsg(), userBotMsg.getMimeType(), userBotMsg.getExtraMsg(), modelClass.getUserProfile(), userBotMsg.getDateTime(), 2);
                                 chatsArrayList.add(chats_modelclass);
-
                                 modelClass.getUserBotMsg().get(j).setSent(1);
                                 modelClass.getUserBotMsg().get(j).setRead(1);
                                 update_userListTemp(j);
@@ -421,7 +455,6 @@ public class ChatScreen_User extends Activity {
         TextView viewProfile = findViewById(R.id.viewProfile);
 
 
-
         profileName.setText(modelClass.getUserName());
 
         ImageView profileImage = findViewById(R.id.profileImage);
@@ -429,7 +462,8 @@ public class ChatScreen_User extends Activity {
         viewProfile.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(ChatScreen_User.this, Profile_girl.class);
+
+                Intent intent = new Intent(ChatScreen_User.this, Profile.class);
                 intent.putExtra("userName", modelClass.getUserName());
                 startActivity(intent);
             }
@@ -437,7 +471,8 @@ public class ChatScreen_User extends Activity {
         profileImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(ChatScreen_User.this, Profile_girl.class);
+
+                Intent intent = new Intent(ChatScreen_User.this, Profile.class);
                 intent.putExtra("userName", modelClass.getUserName());
                 startActivity(intent);
             }
@@ -594,8 +629,15 @@ public class ChatScreen_User extends Activity {
     protected void onDestroy() {
         super.onDestroy();
         // Stop the task and terminate the new thread
-        handler.removeCallbacks(myRunnable);
-        myThread.interrupt();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            if (handler != null && handler.hasCallbacks(myRunnable)) {
+                handler.removeCallbacks(myRunnable);
+            }
+        }
+
+        if (myThread != null && myThread.isAlive()) {
+            myThread.interrupt();
+        }
     }
 }
 

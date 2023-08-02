@@ -3,28 +3,21 @@ package com.bhola.livevideochat;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
-import androidx.core.view.WindowCompat;
-import androidx.core.view.WindowInsetsCompat;
-import androidx.core.view.WindowInsetsControllerCompat;
 
-import android.app.Dialog;
+import android.content.Context;
 import android.content.Intent;
-import android.graphics.Bitmap;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.InsetDrawable;
-import android.os.Build;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
 import android.widget.GridLayout;
 import android.widget.ImageView;
 import android.widget.RatingBar;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -33,17 +26,18 @@ import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.squareup.picasso.Picasso;
 
+import org.checkerframework.checker.units.qual.A;
+
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 
-public class Profile_girl extends AppCompatActivity {
+public class Profile extends AppCompatActivity {
 
     ChatItem_ModelClass modelClass;
     AlertDialog block_user_dialog = null;
     AlertDialog report_user_dialog = null;
     AlertDialog report_userSucessfully_dialog = null;
     GridLayout gridLayout;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -91,7 +85,7 @@ public class Profile_girl extends AppCompatActivity {
         voiceCall.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                startActivity(new Intent(Profile_girl.this, VipMembership.class));
+                startActivity(new Intent(Profile.this, VipMembership.class));
             }
         });
 
@@ -99,7 +93,7 @@ public class Profile_girl extends AppCompatActivity {
         videoCall.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                startActivity(new Intent(Profile_girl.this, VipMembership.class));
+                startActivity(new Intent(Profile.this, VipMembership.class));
 
             }
         });
@@ -108,7 +102,7 @@ public class Profile_girl extends AppCompatActivity {
         chat.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                startActivity(new Intent(Profile_girl.this, VipMembership.class));
+                startActivity(new Intent(Profile.this, VipMembership.class));
             }
         });
 
@@ -146,7 +140,7 @@ public class Profile_girl extends AppCompatActivity {
 
     private void blockUserDialog() {
 
-        final androidx.appcompat.app.AlertDialog.Builder builder = new androidx.appcompat.app.AlertDialog.Builder(Profile_girl.this);
+        final androidx.appcompat.app.AlertDialog.Builder builder = new androidx.appcompat.app.AlertDialog.Builder(Profile.this);
         LayoutInflater inflater = LayoutInflater.from(getApplicationContext());
         View promptView = inflater.inflate(R.layout.dialog_block_user, null);
         builder.setView(promptView);
@@ -163,7 +157,7 @@ public class Profile_girl extends AppCompatActivity {
         confirm.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Toast.makeText(Profile_girl.this, "User blocked succesfully", Toast.LENGTH_SHORT).show();
+                Toast.makeText(Profile.this, "User blocked succesfully", Toast.LENGTH_SHORT).show();
                 block_user_dialog.dismiss();
             }
         });
@@ -183,7 +177,7 @@ public class Profile_girl extends AppCompatActivity {
 
     private void reportUserDialog() {
 
-        final androidx.appcompat.app.AlertDialog.Builder builder = new androidx.appcompat.app.AlertDialog.Builder(Profile_girl.this);
+        final androidx.appcompat.app.AlertDialog.Builder builder = new androidx.appcompat.app.AlertDialog.Builder(Profile.this);
         LayoutInflater inflater = LayoutInflater.from(getApplicationContext());
         View promptView = inflater.inflate(R.layout.dialog_report_user, null);
         builder.setView(promptView);
@@ -221,7 +215,7 @@ public class Profile_girl extends AppCompatActivity {
 
     private void reportUserSucessfullDialog() {
 
-        final androidx.appcompat.app.AlertDialog.Builder builder = new androidx.appcompat.app.AlertDialog.Builder(Profile_girl.this);
+        final androidx.appcompat.app.AlertDialog.Builder builder = new androidx.appcompat.app.AlertDialog.Builder(Profile.this);
         LayoutInflater inflater = LayoutInflater.from(getApplicationContext());
         View promptView = inflater.inflate(R.layout.dialog_report_user_sucessfull, null);
         builder.setView(promptView);
@@ -237,7 +231,7 @@ public class Profile_girl extends AppCompatActivity {
         confirm.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Toast.makeText(Profile_girl.this, "User Reported", Toast.LENGTH_SHORT).show();
+                Toast.makeText(Profile.this, "User Reported", Toast.LENGTH_SHORT).show();
                 report_userSucessfully_dialog.dismiss();
             }
         });
@@ -249,7 +243,6 @@ public class Profile_girl extends AppCompatActivity {
 
     }
 
-
     private void getModalClass() {
 
         String userName = getIntent().getStringExtra("userName");
@@ -260,6 +253,9 @@ public class Profile_girl extends AppCompatActivity {
         }
 
     }
+
+
+
 
     private void setRatingBar() {
 
@@ -279,6 +275,7 @@ public class Profile_girl extends AppCompatActivity {
         gridLayout = findViewById(R.id.gridLayout);
         ArrayList<String> imageList = new ArrayList<>();
         imageList.add(modelClass.getUserProfile());
+
         for (int i = 0; i < modelClass.getUserBotMsg().size(); i++) {
             String extraMsg = "";
             extraMsg = modelClass.getUserBotMsg().get(i).getExtraMsg();
@@ -321,7 +318,7 @@ public class Profile_girl extends AppCompatActivity {
 
 //                    Dialog dialog=new Dialog(this,andr)
 
-                    ImageViewerDialog dialog = new ImageViewerDialog(Profile_girl.this, imageList, finalI);
+                    ImageViewerDialog dialog = new ImageViewerDialog(Profile.this, imageList, finalI);
                     dialog.show();
                 }
             });

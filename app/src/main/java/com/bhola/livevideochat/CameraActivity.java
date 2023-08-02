@@ -66,6 +66,11 @@ import androidx.fragment.app.FragmentTransaction;
 
 import com.airbnb.lottie.LottieAnimationView;
 import com.google.common.reflect.TypeToken;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.google.gson.Gson;
 
 import org.json.JSONArray;
@@ -231,7 +236,6 @@ public class CameraActivity extends AppCompatActivity {
         toast.show();
 
         girlsList.get(currentVideoIndex).setLiked(true);
-        save_SharedPrefrence();
     }
 
     private void getCall() {
@@ -261,7 +265,7 @@ public class CameraActivity extends AppCompatActivity {
 
     private void playRinging() {
 
-        playVideoinTheBackground();
+        loadDataArraylist();
 
         handler2 = new Handler();
         runnable2 = new Runnable() {
@@ -320,15 +324,30 @@ public class CameraActivity extends AppCompatActivity {
     }
 
 
-    private void playVideoinTheBackground() {
+    private void loadDataArraylist() {
 
 
-        readGirlsVideo();
+        girlsList = new ArrayList<>();
         if (SplashScreen.App_updating.equals("active")) {
-            for (int j = girlsList.size() - 1; j > 0; j--) {
-                girlsList.remove(j);
-            }
+            Girl girl = new Girl();
+            girl.setName("Amrita Desai");
+            girl.setAge(25);
+            girl.setVideoUrl("https://bucket2266.blr1.cdn.digitaloceanspaces.com/Amrita%20Desai.mp4");
+            girl.setCensored(true);
+            girl.setSeen(false);
+            girl.setLiked(false);
+            girlsList.add(girl);
+            currentVideoIndex = 0;
+            playVideoinBackground();
+
+        } else {
+            readGirlsVideo();  // json file
         }
+
+    }
+
+    private void playVideoinBackground() {
+
 
         videoView = findViewById(R.id.videoView);
         controlsLayout.setVisibility(View.GONE);
@@ -348,17 +367,12 @@ public class CameraActivity extends AppCompatActivity {
 
             }
         });
-        String baseUrl = "https://bucket2266.blr1.cdn.digitaloceanspaces.com/";
 
+        String baseUrl = "https://bucket2266.blr1.cdn.digitaloceanspaces.com/";
         String videoPath = baseUrl + girlsList.get(currentVideoIndex).getName() + ".mp4";
 
-        if (SplashScreen.App_updating.equals("active")) {
-            videoPath = baseUrl + girlsList.get(0).getName() + ".mp4";
-            currentVideoIndex = 0;
 
-        }
-
-        Log.d(SplashScreen.TAG, "playVideoinTheBackground: " + girlsList.get(0).getName());
+        Log.d(SplashScreen.TAG, "loadDataArraylist: " + girlsList.get(0).getName());
         Log.d(SplashScreen.TAG, "currentVideoIndex: " + currentVideoIndex);
         Log.d(SplashScreen.TAG, "videoPath: " + videoPath);
 
@@ -411,7 +425,6 @@ public class CameraActivity extends AppCompatActivity {
                         profilename.setText(girlsList.get(currentVideoIndex).getName());
                         controlsLayout.setVisibility(View.VISIBLE);
                         tapToReplyView.setVisibility(View.GONE);
-                        save_SharedPrefrence();
                         resetButtons();
 
 
@@ -422,6 +435,7 @@ public class CameraActivity extends AppCompatActivity {
             }
         });
     }
+
 
     private void setTimer() {
         TextView counterText = findViewById(R.id.counterText);
@@ -462,13 +476,10 @@ public class CameraActivity extends AppCompatActivity {
                     countDownTimer.cancel();
                 }
                 if (currentVideoIndex == girlsList.size() - 1) {
-
                     for (Girl girll : girlsList) {
                         girll.setLiked(false);
                     }
-                    save_SharedPrefrence();
                     currentVideoIndex = 0;
-
                 }
             }
 
@@ -482,52 +493,10 @@ public class CameraActivity extends AppCompatActivity {
         countDownTimer.start();
     }
 
-    private void save_SharedPrefrence() {
-
-        SharedPreferences preferences = CameraActivity.this.getSharedPreferences("UserInfo", Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = preferences.edit();
-
-        Gson gson = new Gson();
-        // Save the ArrayList of JSON strings to SharedPreferences
-        editor.putString("girlsList", gson.toJson(girlsList));
-        editor.apply();
-
-    }
-
-    private void get_SharedPrefrence() {
-
-
-        SharedPreferences preferences = CameraActivity.this.getSharedPreferences("UserInfo", Context.MODE_PRIVATE);
-        String json = preferences.getString("girlsList", null);
-
-
-        // Convert the JSON string back to ArrayList
-        Gson gson = new Gson();
-        Type type = new TypeToken<ArrayList<Girl>>() {
-        }.getType();
-
-
-        if (json != null) {
-            // Handle case when no ArrayList is saved in SharedPreferences
-
-            girlsList = gson.fromJson(json, type);
-        }
-
-    }
-
 
     private void readGirlsVideo() {
-        girlsList = new ArrayList<>();
 
-        get_SharedPrefrence();
-        if (girlsList.size() != 0) {
-            if (girlsList.size() == 1 && SplashScreen.App_updating.equals("inactive")) {
-                girlsList.clear();
-            } else {
-                return;
-            }
-        }
-        // Read and parse the JSON file
+//         Read and parse the JSON file
         try {
             JSONObject jsonObject = new JSONObject(loadJSONFromAsset());
             JSONArray girlsArray = jsonObject.getJSONArray("girls");
@@ -553,6 +522,59 @@ public class CameraActivity extends AppCompatActivity {
         } catch (JSONException e) {
             e.printStackTrace();
         }
+
+        if (SplashScreen.userLoggedIn && SplashScreen.userLoggedIAs.equals("Google") && SplashScreen.App_updating.equals("inactive")) {
+            DatabaseReference usersRef = FirebaseDatabase.getInstance().getReference("Girls_Video/girls");
+            usersRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+
+
+                    for (DataSnapshot userSnapshot : dataSnapshot.getChildren()) {
+
+                        String name = (String) userSnapshot.child("name").getValue();
+
+                        Long longValue = (Long) userSnapshot.child("age").getValue();
+                        int age = longValue.intValue();
+
+                        String videoUrl = (String) userSnapshot.child("videoUrl").getValue();
+
+                        Boolean booleanValue_censored = userSnapshot.child("censored").getValue(Boolean.class);
+                        boolean censored = booleanValue_censored.booleanValue();
+
+                        Boolean booleanValue_seen = userSnapshot.child("seen").getValue(Boolean.class);
+                        boolean seen = booleanValue_seen.booleanValue();
+
+                        Boolean booleanValue_liked = userSnapshot.child("liked").getValue(Boolean.class);
+                        boolean liked = booleanValue_liked.booleanValue();
+
+                        Girl girl = new Girl();
+                        girl.setName(name);
+                        girl.setAge(age);
+                        girl.setVideoUrl(videoUrl);
+                        girl.setCensored(censored);
+                        girl.setSeen(seen);
+                        girl.setLiked(liked);
+
+                        // Add the Girl object to the ArrayList
+                        girlsList.add(0, girl);
+
+                    }
+                    playVideoinBackground();
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+                    Log.d(SplashScreen.TAG, " userList.size(): " + databaseError.getMessage());
+                    playVideoinBackground();
+
+                }
+            });
+        } else {
+            playVideoinBackground();
+
+        }
+
 
     }
 
