@@ -214,6 +214,7 @@ public class CameraActivity extends AppCompatActivity {
                     }
                 }, 1600);
 
+
                 getCall();
                 showCustomToast();
 
@@ -248,15 +249,22 @@ public class CameraActivity extends AppCompatActivity {
             @Override
             public void run() {
                 FragmentManager fragmentManager = getSupportFragmentManager();
-                FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-                Fragment_Calling fragment = new Fragment_Calling();
 
-                Bundle args = new Bundle();
-                args.putString("name", girlsList.get(index).getName()); // Replace "key" with an appropriate key and "Your Data" with the data you want to pass
+                if (!fragmentManager.isDestroyed()) {
+                    try {
+                        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+                        Fragment_Calling fragment = new Fragment_Calling();
 
-                fragment.setArguments(args);
-                fragmentTransaction.replace(R.id.player, fragment);
-                fragmentTransaction.commit();
+                        Bundle args = new Bundle();
+                        args.putString("name", girlsList.get(index).getName()); // Replace "key" with an appropriate key and "Your Data" with the data you want to pass
+
+                        fragment.setArguments(args);
+                        fragmentTransaction.replace(R.id.player, fragment);
+                        fragmentTransaction.commit();
+                    } catch (Exception e) {
+
+                    }
+                }
             }
         };
         callhandler.postDelayed(callRunnable, 10000);
@@ -693,19 +701,20 @@ public class CameraActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
 
+                try {
+                    final Bitmap currentImage = ((BitmapDrawable) speaker.getDrawable()).getBitmap();
+                    Drawable myDrawable = getResources().getDrawable(R.drawable.speaker);
+                    final Bitmap speaker_on = ((BitmapDrawable) myDrawable).getBitmap();
 
-                final Bitmap currentImage = ((BitmapDrawable) speaker.getDrawable()).getBitmap();
-                Drawable myDrawable = getResources().getDrawable(R.drawable.speaker);
-                final Bitmap speaker_on = ((BitmapDrawable) myDrawable).getBitmap();
+                    if (currentImage.sameAs(speaker_on)) {
+                        mediaPlayer.setVolume(0f, 0f);
+                        speaker.setImageResource(R.drawable.speaker_off);
+                    } else {
+                        mediaPlayer.setVolume(1f, 1f);
+                        speaker.setImageResource(R.drawable.speaker);
 
-                if (currentImage.sameAs(speaker_on)) {
-                    mediaPlayer.setVolume(0f, 0f);
-                    speaker.setImageResource(R.drawable.speaker_off);
-                } else {
-
-
-                    mediaPlayer.setVolume(1f, 1f);
-                    speaker.setImageResource(R.drawable.speaker);
+                    }
+                } catch (Exception e) {
 
                 }
 

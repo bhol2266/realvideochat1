@@ -22,7 +22,6 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -35,6 +34,7 @@ import com.google.firebase.database.ValueEventListener;
 import com.google.gson.Gson;
 import com.squareup.picasso.Picasso;
 
+import org.checkerframework.checker.units.qual.A;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -142,6 +142,13 @@ public class Fragment_Messenger extends Fragment {
                         String gender = (String) userSnapshot.child("gender").getValue();
                         String age = (String) userSnapshot.child("age").getValue();
                         String country = (String) userSnapshot.child("country").getValue();
+
+                        ArrayList<String> contentImages = new ArrayList<>();
+                        for (DataSnapshot document : userSnapshot.child("content").getChildren()) {
+                            contentImages.add(document.getValue(String.class));
+                        }
+
+
                         String users = (String) userSnapshot.child("users").getValue();
                         String answerRate = (String) userSnapshot.child("answerRate").getValue();
                         String userProfile = (String) userSnapshot.child("userProfile").getValue();
@@ -195,7 +202,7 @@ public class Fragment_Messenger extends Fragment {
                         }
 
 
-                        ChatItem_ModelClass user = new ChatItem_ModelClass(id, userName, gender, age, country, users, answerRate, userProfile, containsQuestion, recommendationType, userBotMsgList, questionWithAns);
+                        ChatItem_ModelClass user = new ChatItem_ModelClass(id, userName, gender, age, country, contentImages, users, answerRate, userProfile, containsQuestion, recommendationType, userBotMsgList, questionWithAns);
 
                         userList.add(user);
 
@@ -313,8 +320,8 @@ public class Fragment_Messenger extends Fragment {
                         questionWithAns = new UserQuestionWithAns(question, answersList, dateTime, action, read, sent, reply, replyToUserList);
                     }
 
-
-                    ChatItem_ModelClass user = new ChatItem_ModelClass(id, userName, gender, age, country, users, answerRate, userProfile, containsQuestion, recommendationType, userBotMsgList, questionWithAns);
+                    ArrayList<String> contentImages = new ArrayList<>();
+                    ChatItem_ModelClass user = new ChatItem_ModelClass(id, userName, gender, age, country, contentImages, users, answerRate, userProfile, containsQuestion, recommendationType, userBotMsgList, questionWithAns);
                     userList.add(user);
 
                 }
@@ -593,7 +600,7 @@ class MessengeItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
                         @Override
                         public void run() {
 
-                            
+
                             int time = 0;
                             if (holder.getAbsoluteAdapterPosition() == -1) {
                                 time = 100000;
@@ -676,7 +683,6 @@ class MessengeItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
                                     userBotMsg.setSent(1);
                                     userBotMsg.setDateTime(String.valueOf(currentTime.getTime()));
 
-                                    
 
                                     int currentPostion = -1;
                                     for (int j = 0; j < userList.size(); j++) {

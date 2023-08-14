@@ -3,6 +3,11 @@
     <string name="app_ID">ca-app-pub-8226562131234590~2838964179</string>
 
 
+    <string name="notification_channel_id">my_notification_channel</string>
+    <string name="notification_channel_name">My Notification Channel</string>
+    <string name="notification_channel_description">Channel for showing delayed notifications</string>
+
+
     ADMOB Real Ads ID :
     <string name="BannerAd">ca-app-pub-8226562131234590/1920634170</string>
     <string name="RewardedInterstitial">ca-app-pub-8226562131234590/6116497115</string>

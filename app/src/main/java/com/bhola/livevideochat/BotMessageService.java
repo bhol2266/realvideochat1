@@ -61,9 +61,7 @@ public class BotMessageService extends Service {
 
         // Create a notification channel (required for Android 8.0 and above)
 
-        String title = "My Notification";
-        String message = "This is my notification message.";
-        NotificationUtils.showNotification(this, title, message);
+
     }
 
     @Override

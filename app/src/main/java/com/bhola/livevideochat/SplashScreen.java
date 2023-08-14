@@ -140,6 +140,7 @@ public class SplashScreen extends AppCompatActivity {
                 animationCompleted = true;
 
                 if (!activityChanged) {
+                    activityChanged=true;
                     handler_forIntent();
                 }
 

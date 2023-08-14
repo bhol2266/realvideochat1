@@ -46,13 +46,15 @@ import java.lang.reflect.Type;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
 public class ChatScreen_User extends Activity {
 
 
-    ChatItem_ModelClass modelClass;
+    ChatItem_ModelClass modelClass = null;
     AlertDialog block_user_dialog = null;
     AlertDialog report_user_dialog = null;
     AlertDialog report_userSucessfully_dialog = null;
@@ -143,7 +145,11 @@ public class ChatScreen_User extends Activity {
                 modelClass = userListTemp.get(i);
             }
         }
-        Fragment_Messenger.currentActiveUser = modelClass.getUserName();
+        if (modelClass != null) {
+            Fragment_Messenger.currentActiveUser = modelClass.getUserName();
+        } else {
+            startActivity(new Intent(ChatScreen_User.this, MainActivity.class));
+        }
 
     }
 
@@ -200,7 +206,7 @@ public class ChatScreen_User extends Activity {
 
                 for (int i = 0; i < modelClass.getQuestionWithAns().getReplyToUser().size(); i++) {
                     UserBotMsg userBotMsg = modelClass.getQuestionWithAns().getReplyToUser().get(i);
-                    if (userBotMsg.getSent() == 1 ) {
+                    if (userBotMsg.getSent() == 1) {
                         Chats_Modelclass chats_modelclass3 = new Chats_Modelclass(userBotMsg.getMsg(), "mimeType/text", "", modelClass.getUserProfile(), userBotMsg.getDateTime(), 2);
                         chatsArrayList.add(chats_modelclass3);
                         update_userListTemp_replyMessage(i);
@@ -339,9 +345,9 @@ public class ChatScreen_User extends Activity {
 
                         Fragment_Messenger.userListTemp.get(i).getQuestionWithAns().getReplyToUser().get(index).setRead(1);
                         Fragment_Messenger.userListTemp.get(i).getQuestionWithAns().getReplyToUser().get(index).setSent(1);
-                        Log.d(SplashScreen.TAG, "update_userListTemp_replyMessage: "+Fragment_Messenger.userListTemp.get(i).getQuestionWithAns().getReplyToUser().get(index).getRead());
-                        Log.d(SplashScreen.TAG, "update_userListTemp_replyMessage: "+Fragment_Messenger.userListTemp.get(i).getQuestionWithAns().getReplyToUser().get(index).getSent());
-                        Log.d(SplashScreen.TAG, "index: "+j);
+                        Log.d(SplashScreen.TAG, "update_userListTemp_replyMessage: " + Fragment_Messenger.userListTemp.get(i).getQuestionWithAns().getReplyToUser().get(index).getRead());
+                        Log.d(SplashScreen.TAG, "update_userListTemp_replyMessage: " + Fragment_Messenger.userListTemp.get(i).getQuestionWithAns().getReplyToUser().get(index).getSent());
+                        Log.d(SplashScreen.TAG, "index: " + j);
                     }
 
                 }
@@ -354,7 +360,7 @@ public class ChatScreen_User extends Activity {
 
     private void scrollrecycelrvewToBottom() {
         NestedScrollView nestedScrollView = findViewById(R.id.nestedScrollview);
-      // Replace R.id.recyclerView with the correct ID of your RecyclerView
+        // Replace R.id.recyclerView with the correct ID of your RecyclerView
         if (recylerview == null || chatsArrayList == null || chatsArrayList.size() == 0) {
             return;
         }
@@ -751,13 +757,22 @@ class ChatsAdapter extends RecyclerView.Adapter {
                 reciverViewHolder.picMsgLayout.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        ArrayList<String> imageList = new ArrayList<>();
-                        imageList.add(modelClass.getUserProfile());
+                        ArrayList<Map<String,String>> imageList = new ArrayList<>();
+
+                        Map<String, String> stringMap = new HashMap<>();
+                        stringMap.put("url", modelClass.getUserProfile());
+                        stringMap.put("type", "free");
+                        imageList.add(stringMap);
+
+
                         for (int i = 0; i < modelClass.getUserBotMsg().size(); i++) {
                             String extraMsg = "";
                             extraMsg = modelClass.getUserBotMsg().get(i).getExtraMsg();
                             if (extraMsg.length() > 5 && extraMsg.contains(".jpg") || extraMsg.contains(".png")) {
-                                imageList.add(extraMsg);
+                                Map<String, String> stringMap2 = new HashMap<>();
+                                stringMap2.put("url",extraMsg);
+                                stringMap2.put("type", "free");
+                                imageList.add(stringMap2);
                             }
                         }
 
