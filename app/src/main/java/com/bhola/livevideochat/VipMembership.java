@@ -4,21 +4,16 @@ import android.animation.Animator;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.AlarmManager;
-import android.app.Notification;
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.InsetDrawable;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -37,9 +32,6 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatTextView;
 import androidx.cardview.widget.CardView;
-import androidx.core.app.ActivityCompat;
-import androidx.core.app.NotificationCompat;
-import androidx.core.app.NotificationManagerCompat;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -84,7 +76,7 @@ public class VipMembership extends AppCompatActivity {
     AlertDialog dialog;
     private BillingClient billingClient;
     LinearLayout progressBar;
-    TextView buyNowTimer, offerTimer, offerTextview;
+    TextView buyNowTimer, offerTimer,offerTextview;
 
     private BroadcastReceiver timerUpdateReceiver, timerUpdateReceiverCheck;
     private boolean isTimerRunning = false;
@@ -92,6 +84,7 @@ public class VipMembership extends AppCompatActivity {
     ArrayList<ProductDetails> productlist_offer;
     public static int[] selectedCard = {-1};
     Button btnContinue;
+    private static final String CHANNEL_ID = "notification_channel_id";
     private static final int REQUEST_CODE = 123;
     public static GridAdapter adapter;
 
@@ -768,10 +761,10 @@ public class VipMembership extends AppCompatActivity {
             exit_dialog();
             backpressCount++;
         } else {
-
             showNotification();
             super.onBackPressed();
         }
+
     }
 
 

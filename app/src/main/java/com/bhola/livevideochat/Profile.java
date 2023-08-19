@@ -12,12 +12,10 @@ import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.InsetDrawable;
 import android.os.Build;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
-import android.widget.FrameLayout;
 import android.widget.GridLayout;
 import android.widget.ImageView;
 import android.widget.RatingBar;
@@ -282,7 +280,7 @@ public class Profile extends AppCompatActivity {
         for (int i = 0; i < modelClass.getUserBotMsg().size(); i++) {
             String extraMsg = "";
             extraMsg = modelClass.getUserBotMsg().get(i).getExtraMsg();
-            if (extraMsg.length() > 5 && extraMsg.contains(".jpg") || extraMsg.contains(".png")) {
+            if (extraMsg.length() > 5 && extraMsg.contains(".jpg") || extraMsg.contains(".png") || extraMsg.contains(".jpeg")) {
 
                 Map<String, String> stringMap1 = new HashMap<>();
                 stringMap1.put("url", extraMsg);
