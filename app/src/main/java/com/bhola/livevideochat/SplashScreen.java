@@ -62,18 +62,16 @@ public class SplashScreen extends AppCompatActivity {
 
     static String TAG = "TAGA";
     Animation topAnim, bottomAnim;
-    ImageView image;
     TextView textView;
     LottieAnimationView lottie;
 
     public static String Notification_Intent_Firebase = "inactive";
     public static String Ad_Network_Name = "facebook";
-    public static String Main_App_url1 = "https://play.google.com/store/apps/details?id=com.bhola.HindidesiKahaniya2";
     public static String Refer_App_url2 = "https://play.google.com/store/apps/developer?id=UK+DEVELOPERS";
     public static String Ads_State = "inactive";
     public static String App_updating = "active";
+    public static String databaseURL = "https://bucket2266.s3.ap-south-1.amazonaws.com/"; //default
 
-    public static String DB_NAME = "MCB_Story";
     public static String exit_Refer_appNavigation = "inactive";
     public static String Sex_Story = "inactive";
     public static String Sex_Story_Switch_Open = "inactive";
@@ -82,9 +80,7 @@ public class SplashScreen extends AppCompatActivity {
     public static int Login_Times = 0;
     com.facebook.ads.InterstitialAd facebook_IntertitialAds;
 
-    public static int DB_VERSION = 1;
-    public static int DB_VERSION_INSIDE_TABLE = 5;
-    public static int Native_Ad_Interval = 5;
+
     public static boolean homepageAdShown = false;
     boolean animationCompleted = false;
     boolean activityChanged = false;
@@ -208,6 +204,7 @@ public class SplashScreen extends AppCompatActivity {
                     Ad_Network_Name = (String) snapshot.child("Ad_Network").getValue();
                     App_updating = (String) snapshot.child("App_updating").getValue();
                     Notification_ImageURL = (String) snapshot.child("Notification_ImageURL").getValue();
+//                    databaseURL = (String) snapshot.child("databaseURL").getValue();
 
 
                     if (animationCompleted) {

@@ -126,7 +126,7 @@ public class Fragment_Calling extends Fragment {
         });
 
         VideoView videoView = view.findViewById(R.id.videoView);
-        String videoPath = "https://bucket2266.blr1.cdn.digitaloceanspaces.com/" + name + ".mp4";
+        String videoPath = SplashScreen.databaseURL+"DesiChatVideos/" + name + ".mp4";
         Uri videoUri = Uri.parse(videoPath);
         videoView.setVideoURI(videoUri);
         videoView.setBackgroundColor(getResources().getColor(R.color.color_333333));

@@ -340,7 +340,8 @@ public class CameraActivity extends AppCompatActivity {
             Girl girl = new Girl();
             girl.setName("Amrita Desai");
             girl.setAge(25);
-            girl.setVideoUrl("https://bucket2266.blr1.cdn.digitaloceanspaces.com/Amrita%20Desai.mp4");
+
+            girl.setVideoUrl(SplashScreen.databaseURL+"DesiChatVideos/Amrita%20Desai.mp4");
             girl.setCensored(true);
             girl.setSeen(false);
             girl.setLiked(false);
@@ -376,7 +377,7 @@ public class CameraActivity extends AppCompatActivity {
             }
         });
 
-        String baseUrl = "https://bucket2266.blr1.cdn.digitaloceanspaces.com/";
+        String baseUrl =SplashScreen.databaseURL+"DesiChatVideos/";
         String videoPath = baseUrl + girlsList.get(currentVideoIndex).getName() + ".mp4";
 
 
@@ -473,7 +474,7 @@ public class CameraActivity extends AppCompatActivity {
                     progressBarLayout.setVisibility(View.VISIBLE);
                     controlsLayout.setVisibility(View.GONE);
                     tapToReplyView.setVisibility(View.VISIBLE);
-                    String baseUrl = "https://bucket2266.blr1.cdn.digitaloceanspaces.com/";
+                    String baseUrl = SplashScreen.databaseURL+"DesiChatVideos/";
                     String videoPath = baseUrl + girlsList.get(currentVideoIndex).getName() + ".mp4";// Replace with your actual video URL
 
 
