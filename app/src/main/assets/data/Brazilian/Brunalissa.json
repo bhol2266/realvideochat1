@@ -1,0 +1,43 @@
+{
+  "Name": "Brunalissa",
+  "From": "Brazil",
+  "Languages": "",
+  "Age": "",
+  "InterestedIn": "",
+  "BodyType": "",
+  "Specifics": "",
+  "Ethnicity": "",
+  "Hair": "",
+  "EyeColor": "",
+  "Subculture": "",
+  "Interests": [],
+  "profilePhoto": "https://static-cdn.strpst.com/avatars/c/1/d/c1dcaad1cebe528cc15ed83995e7e5af-full",
+  "coverPhoto": "https://static-cdn.strpst.com/avatars/c/1/d/c1dcaad1cebe528cc15ed83995e7e5af-full",
+  "images": [
+    "https://static-cdn.strpst.com/photos/3/a/6/3a6a76ba236aa48a86c1f2cc24fb647c-thumb",
+    "https://static-cdn.strpst.com/photos/8/9/9/89911bdc92cd507536a6c3398411beb3-thumb",
+    "https://static-cdn.strpst.com/photos/6/4/7/6479927f738c303a1f05620ca6ff1e5c-thumb"
+  ],
+  "videos": [
+    {
+      "imageUrl": "https://hls.strpst.com/records/34437295/2023/7/27//a862b0035f55165a0cf08d91a2d054bbc6abd888.jpg",
+      "videoUrl": "/trailer.mp4"
+    },
+    {
+      "imageUrl": "https://video-thumbs.strpst.com/public/34437295/24f2fa86e5da7d883f5c03eb2a5ddf1f/720p/thumb-0055.jpg",
+      "videoUrl": "https://video-trailers.strpst.com/public/34437295/24f2fa86e5da7d883f5c03eb2a5ddf1f/720p/trailer.mp4"
+    },
+    {
+      "imageUrl": "https://video-thumbs.strpst.com/public/34437295/5cc6ad8fdf3023dca20e742767a91b2c/240p/thumb-0034.jpg",
+      "videoUrl": "https://video-trailers.strpst.com/public/34437295/5cc6ad8fdf3023dca20e742767a91b2c/240p/trailer.mp4"
+    },
+    {
+      "imageUrl": "https://video-thumbs.strpst.com/public/34437295/b9259f46c8a1bca6265a7db2b2759bb6/240p/thumb-0060.jpg",
+      "videoUrl": "https://video-trailers.strpst.com/public/34437295/b9259f46c8a1bca6265a7db2b2759bb6/240p/trailer.mp4"
+    },
+    {
+      "imageUrl": "https://video-thumbs.strpst.com/public/34437295/11b1e5805d54dbdabafadf6867d40f58/240p/thumb-0013.jpg",
+      "videoUrl": "https://video-trailers.strpst.com/public/34437295/11b1e5805d54dbdabafadf6867d40f58/240p/trailer.mp4"
+    }
+  ]
+}

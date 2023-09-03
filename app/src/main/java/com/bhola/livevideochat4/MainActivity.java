@@ -1,4 +1,4 @@
-package com.bhola.livevideochat;
+package com.bhola.livevideochat4;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -18,6 +18,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.ColorDrawable;
@@ -47,6 +48,8 @@ import com.google.gson.Gson;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 
@@ -85,8 +88,70 @@ public class MainActivity extends AppCompatActivity {
         initializeBottonFragments();
         askForNotificationPermission(); //Android 13 and higher
 
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                loadData_DB();
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        // Update UI components
+                    }
+                });
+            }
+        }).start();
+
+    }
+
+    private void loadData_DB() {
+        ArrayList<Model_Profile> girlsList = new ArrayList<>();
+
+        Cursor cursor = new DatabaseHelper(MainActivity.this, SplashScreen.DB_NAME, SplashScreen.DB_VERSION, "GirlsProfile").readRandomGirls();
+
+        if (cursor.moveToFirst()) {
+            do {
+                // Extract data from the cursor and populate the Model_Profile object
+                String Username = SplashScreen.decryption(cursor.getString(0));
+                String Name = SplashScreen.decryption(cursor.getString(1));
+                String Country = cursor.getString(2);
+                String Languages = cursor.getString(3);
+                String Age = cursor.getString(4);
+                String InterestedIn = cursor.getString(5);
+                String BodyType = cursor.getString(6);
+                String Specifics = SplashScreen.decryption(cursor.getString(7));
+                String Ethnicity = cursor.getString(8);
+                String Hair = cursor.getString(9);
+                String EyeColor = cursor.getString(10);
+                String Subculture = cursor.getString(11);
+                String profilePhoto = SplashScreen.decryption(cursor.getString(13));
+                String coverPhoto = SplashScreen.decryption(cursor.getString(14));
 
 
+                // Convert JSON strings back to arrays/lists using Gson
+                Gson gson = new Gson();
+
+
+                String interestsJson = SplashScreen.decryption(cursor.getString(12));
+                List<Map<String, String>> Interests = gson.fromJson(interestsJson, new TypeToken<List<Map<String, String>>>() {
+                }.getType());
+
+                String imagesJson = SplashScreen.decryption(cursor.getString(15));
+                List<String> images = gson.fromJson(imagesJson, new TypeToken<List<String>>() {
+                }.getType());
+
+                String videosJson = SplashScreen.decryption(cursor.getString(16));
+                List<Map<String, String>> videos = gson.fromJson(videosJson, new TypeToken<List<Map<String, String>>>() {
+                }.getType());
+
+                // Create a new Model_Profile object and populate it
+                Model_Profile model_profile = new Model_Profile(Username, Name, Country, Languages, Age, InterestedIn, BodyType, Specifics, Ethnicity, Hair, EyeColor, Subculture, profilePhoto, coverPhoto, Interests, images, videos);
+                girlsList.add(model_profile);
+            } while (cursor.moveToNext());
+
+        }
+        Log.d(SplashScreen.TAG, "loadData_DB: " + girlsList.size());
+
+        cursor.close();
     }
 
     private void initializeBottonFragments() {
@@ -99,7 +164,14 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onConfigureTab(@NonNull TabLayout.Tab tab, int position) {
                 switch (position) {
+
                     case 0:
+                        tab.setIcon(R.drawable.trending);
+                        View view5 = getLayoutInflater().inflate(R.layout.customtab, null);
+                        view5.findViewById(R.id.icon).setBackgroundResource(R.drawable.trending);
+                        tab.setCustomView(view5);
+                        break;
+                    case 1:
                         tab.setIcon(R.drawable.videocall);
 
                         View view1 = getLayoutInflater().inflate(R.layout.customtab, null);
@@ -111,7 +183,7 @@ public class MainActivity extends AppCompatActivity {
                         ImageView tabIcon = tabView.findViewById(R.id.icon);
                         tabIcon.setBackgroundTintList(ContextCompat.getColorStateList(MainActivity.this, R.color.themeColor));
                         break;
-                    case 1:
+                    case 2:
                         tab.setIcon(R.drawable.chat);
 
 
@@ -152,7 +224,7 @@ public class MainActivity extends AppCompatActivity {
                         break;
 
 
-                    case 2:
+                    case 3:
                         tab.setIcon(R.drawable.info_2);
 
 
@@ -160,6 +232,8 @@ public class MainActivity extends AppCompatActivity {
                         view3.findViewById(R.id.icon).setBackgroundResource(R.drawable.info_2);
                         tab.setCustomView(view3);
                         break;
+
+
                     default:
                         tab.setIcon(R.drawable.user2);
                         View view4 = getLayoutInflater().inflate(R.layout.customtab, null);
@@ -207,11 +281,11 @@ public class MainActivity extends AppCompatActivity {
 
     private int getUndreadMessage_Count() {
 
-        ArrayList<ChatItem_ModelClass> userListTemp=new ArrayList<>();
+        ArrayList<ChatItem_ModelClass> userListTemp = new ArrayList<>();
         SharedPreferences sharedPreferences = MainActivity.this.getSharedPreferences("messenger_chats", Context.MODE_PRIVATE);
 
 // Retrieve the JSON string from SharedPreferences
-        String json="";
+        String json = "";
         if (SplashScreen.userLoggedIn && SplashScreen.userLoggedIAs.equals("Google")) {
             json = sharedPreferences.getString("userListTemp_Google", null);
         } else {
