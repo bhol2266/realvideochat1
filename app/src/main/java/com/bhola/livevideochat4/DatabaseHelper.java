@@ -149,7 +149,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public Cursor readRandomGirls() {
 
         SQLiteDatabase db = this.getWritableDatabase();
-        String query = "SELECT * FROM " + Database_tableNo + " WHERE LENGTH(images) > 50 LIMIT 20";
+        String query = "SELECT * FROM " + Database_tableNo + " WHERE LENGTH(images) > 50 LIMIT 100";
         Cursor cursor = db.rawQuery(query, null);
         return cursor;
 

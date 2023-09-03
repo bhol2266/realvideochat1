@@ -88,71 +88,10 @@ public class MainActivity extends AppCompatActivity {
         initializeBottonFragments();
         askForNotificationPermission(); //Android 13 and higher
 
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                loadData_DB();
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        // Update UI components
-                    }
-                });
-            }
-        }).start();
+
 
     }
 
-    private void loadData_DB() {
-        ArrayList<Model_Profile> girlsList = new ArrayList<>();
-
-        Cursor cursor = new DatabaseHelper(MainActivity.this, SplashScreen.DB_NAME, SplashScreen.DB_VERSION, "GirlsProfile").readRandomGirls();
-
-        if (cursor.moveToFirst()) {
-            do {
-                // Extract data from the cursor and populate the Model_Profile object
-                String Username = SplashScreen.decryption(cursor.getString(0));
-                String Name = SplashScreen.decryption(cursor.getString(1));
-                String Country = cursor.getString(2);
-                String Languages = cursor.getString(3);
-                String Age = cursor.getString(4);
-                String InterestedIn = cursor.getString(5);
-                String BodyType = cursor.getString(6);
-                String Specifics = SplashScreen.decryption(cursor.getString(7));
-                String Ethnicity = cursor.getString(8);
-                String Hair = cursor.getString(9);
-                String EyeColor = cursor.getString(10);
-                String Subculture = cursor.getString(11);
-                String profilePhoto = SplashScreen.decryption(cursor.getString(13));
-                String coverPhoto = SplashScreen.decryption(cursor.getString(14));
-
-
-                // Convert JSON strings back to arrays/lists using Gson
-                Gson gson = new Gson();
-
-
-                String interestsJson = SplashScreen.decryption(cursor.getString(12));
-                List<Map<String, String>> Interests = gson.fromJson(interestsJson, new TypeToken<List<Map<String, String>>>() {
-                }.getType());
-
-                String imagesJson = SplashScreen.decryption(cursor.getString(15));
-                List<String> images = gson.fromJson(imagesJson, new TypeToken<List<String>>() {
-                }.getType());
-
-                String videosJson = SplashScreen.decryption(cursor.getString(16));
-                List<Map<String, String>> videos = gson.fromJson(videosJson, new TypeToken<List<Map<String, String>>>() {
-                }.getType());
-
-                // Create a new Model_Profile object and populate it
-                Model_Profile model_profile = new Model_Profile(Username, Name, Country, Languages, Age, InterestedIn, BodyType, Specifics, Ethnicity, Hair, EyeColor, Subculture, profilePhoto, coverPhoto, Interests, images, videos);
-                girlsList.add(model_profile);
-            } while (cursor.moveToNext());
-
-        }
-        Log.d(SplashScreen.TAG, "loadData_DB: " + girlsList.size());
-
-        cursor.close();
-    }
 
     private void initializeBottonFragments() {
         viewPager2 = findViewById(R.id.viewpager);
