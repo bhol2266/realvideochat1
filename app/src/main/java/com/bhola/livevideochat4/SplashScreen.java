@@ -64,6 +64,7 @@ public class SplashScreen extends AppCompatActivity {
     public static String Ads_State = "inactive";
     public static String App_updating = "active";
     public static String databaseURL = "https://bucket2266.s3.ap-south-1.amazonaws.com/"; //default
+    public static ArrayList<Map<String, String>> countryList;
 
     public static String exit_Refer_appNavigation = "inactive";
     public static String Sex_Story = "inactive";
@@ -113,11 +114,16 @@ public class SplashScreen extends AppCompatActivity {
         }
         sharedPrefrences();
 
+        countryList=  loadCountryListFromAsset(this, "countrylist.json");
+        Log.d(TAG, "countryList: "+countryList.size());
+
 
         topAnim = AnimationUtils.loadAnimation(this, R.anim.top_animation);
         bottomAnim = AnimationUtils.loadAnimation(this, R.anim.bottom_animation);
         textView = findViewById(R.id.textView_splashscreen);
         lottie = findViewById(R.id.lottie);
+
+
 
 
 //        textView.setAnimation(topAnim);
@@ -549,5 +555,36 @@ public class SplashScreen extends AppCompatActivity {
 
     }
 
+
+    private ArrayList<Map<String, String>> loadCountryListFromAsset(Context context, String fileName) {
+        ArrayList<Map<String, String>> countryList = new ArrayList<>();
+
+        try {
+            AssetManager assetManager = context.getAssets();
+            InputStream inputStream = assetManager.open(fileName);
+
+            int size = inputStream.available();
+            byte[] buffer = new byte[size];
+            inputStream.read(buffer);
+            inputStream.close();
+
+            String json = new String(buffer, "UTF-8");
+
+            JSONArray jsonArray = new JSONArray(json);
+
+            for (int i = 0; i < jsonArray.length(); i++) {
+                JSONObject jsonObject = jsonArray.getJSONObject(i);
+                Map<String, String> countryMap = new HashMap<>();
+                countryMap.put("nationality", jsonObject.getString("nationality"));
+                countryMap.put("flagUrl", jsonObject.getString("flagUrl"));
+                countryMap.put("country", jsonObject.getString("country"));
+                countryList.add(countryMap);
+            }
+        } catch (IOException | JSONException e) {
+            e.printStackTrace();
+        }
+
+        return countryList;
+    }
 
 }

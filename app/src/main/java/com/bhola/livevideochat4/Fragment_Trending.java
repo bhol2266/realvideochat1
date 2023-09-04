@@ -5,9 +5,11 @@ import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -63,19 +65,64 @@ public class Fragment_Trending extends Fragment {
         getChildFragmentManager().beginTransaction().replace(R.id.fragment_container, fragmentA1, "HOT").addToBackStack(null).commit();
 
         TextView HotTextview = view.findViewById(R.id.HotTextview);
+        ImageView HotTextview_line = view.findViewById(R.id.HotTextview_line);
+
+        TextView NearbyTextview = view.findViewById(R.id.NearbyTextview);
+        ImageView NearbyTextview_line = view.findViewById(R.id.NearbyTextview_line);
+
+
         HotTextview.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Fragment_Hot fragment = new Fragment_Hot();
                 getChildFragmentManager().beginTransaction().replace(R.id.fragment_container, fragment, "HOT").addToBackStack(null).commit();
+
+
+                float textSizeInDp = 23; // Replace with your desired text size in dp
+                float scale = getResources().getDisplayMetrics().density;
+                int textSizeInPixels = (int) (textSizeInDp * scale + 0.5f);
+                int textSizeInPixels2 = (int) (16 * scale + 0.5f);
+
+// Set the text size in pixels
+                NearbyTextview.setTextSize(TypedValue.COMPLEX_UNIT_PX, textSizeInPixels2);
+                NearbyTextview_line.setVisibility(View.INVISIBLE);
+
+                HotTextview.setTextSize(TypedValue.COMPLEX_UNIT_PX, textSizeInPixels);
+                HotTextview_line.setVisibility(View.VISIBLE);
+
+                int lightgray = getResources().getColor(com.google.android.ads.mediationtestsuite.R.color.gmts_light_gray); // Replace with your color resource or a specific color value
+                int semiblack = getResources().getColor(R.color.semiblack); // Replace with your color resource or a specific color value
+
+                NearbyTextview.setTextColor(lightgray);
+                HotTextview.setTextColor(semiblack);
+
             }
         });
-        TextView NearbyTextview = view.findViewById(R.id.NearbyTextview);
+
         NearbyTextview.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Fragment_Nearby fragment = new Fragment_Nearby();
                 getChildFragmentManager().beginTransaction().replace(R.id.fragment_container, fragment, "NEARBY").addToBackStack(null).commit();
+
+
+                float textSizeInDp = 23; // Replace with your desired text size in dp
+                float scale = getResources().getDisplayMetrics().density;
+                int textSizeInPixels = (int) (textSizeInDp * scale + 0.5f);
+                int textSizeInPixels2 = (int) (16 * scale + 0.5f);
+
+// Set the text size in pixels
+                NearbyTextview.setTextSize(TypedValue.COMPLEX_UNIT_PX, textSizeInPixels);
+                NearbyTextview_line.setVisibility(View.VISIBLE);
+
+                HotTextview.setTextSize(TypedValue.COMPLEX_UNIT_PX, textSizeInPixels2);
+                HotTextview_line.setVisibility(View.INVISIBLE);
+
+                int lightgray = getResources().getColor(com.google.android.ads.mediationtestsuite.R.color.gmts_light_gray); // Replace with your color resource or a specific color value
+                int semiblack = getResources().getColor(R.color.semiblack); // Replace with your color resource or a specific color value
+
+                NearbyTextview.setTextColor(semiblack);
+                HotTextview.setTextColor(lightgray);
             }
         });
 

@@ -16,7 +16,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.HashMap;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String TAG = "TAGA";
@@ -149,7 +148,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public Cursor readRandomGirls() {
 
         SQLiteDatabase db = this.getWritableDatabase();
-        String query = "SELECT * FROM " + Database_tableNo + " WHERE LENGTH(images) > 50 LIMIT 100";
+        String query = "SELECT * FROM " + Database_tableNo + " WHERE LENGTH(images) > 50 ORDER BY RANDOM() LIMIT 30";
         Cursor cursor = db.rawQuery(query, null);
         return cursor;
 
