@@ -1,7 +1,16 @@
 package com.bhola.livevideochat4;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Picture;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.PictureDrawable;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
@@ -10,54 +19,48 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.RelativeLayout;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.appcompat.app.AlertDialog;
+import androidx.cardview.widget.CardView;
 import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
-import androidx.recyclerview.widget.LinearSmoothScroller;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.caverock.androidsvg.SVG;
+import com.caverock.androidsvg.SVGParseException;
+import com.google.common.reflect.TypeToken;
+import com.google.gson.Gson;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+
+import de.hdodenhof.circleimageview.CircleImageView;
 
 
 public class Fragment_Trending extends Fragment {
 
-    private RecyclerView recyclerView1, recyclerView2, recyclerView3;
-    private ImageAdapter imageAdapter, imageAdapter2, imageAdapter3;
-    LinearSmoothScroller smoothScroller1, smoothScroller2, smoothScroller3;
-    List<Integer> imageList2;
-    private Handler handlerAnimation, blinkhandler, countHandler;
-    RelativeLayout btnRelativelayout;
-    int randomNumber, current_value;
-    TextView onlineCountTextview;
     Context context;
-    AlertDialog permissionDialog;
-
-
-    ActivityResultLauncher<String[]> mPermissionResultLauncher;
-    private boolean isCameraPermissionGranted;
-    private boolean isMicrophonePermissionGranted;
-    private String[] PERMISSIONS;
-
-
-    private static final int CAMERA_PERMISSION_REQUEST_CODE = 100;
-    private static final int MICROPHONE_PERMISSION_REQUEST_CODE = 101;
-
-
-    public Fragment_Trending() {
-        // Required empty public constructor
-    }
+    View view;
+    public static DrawerLayout drawerLayout;
+    public static String selectedCountry = "All";
 
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
-        View view = inflater.inflate(R.layout.fragment_trending, container, false);
+        view = inflater.inflate(R.layout.fragment_trending, container, false);
 
         context = getContext();
         // Inflate the layout for context fragment
@@ -127,50 +130,247 @@ public class Fragment_Trending extends Fragment {
         });
 
 
+        sideLayout_Countries();
         return view;
     }
 
+    private void sideLayout_Countries() {
 
-    private boolean hasPermissions(Context context, String... PERMISSIONS) {
+        LinearLayout openDrawer = view.findViewById(R.id.openDrawer);
+        drawerLayout = view.findViewById(R.id.drawerLayout);
 
-        if (context != null && PERMISSIONS != null) {
+        openDrawer.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
 
-            for (String permission : PERMISSIONS) {
-
-                if (ActivityCompat.checkSelfPermission(context, permission) != PackageManager.PERMISSION_GRANTED) {
-                    return false;
+                if (drawerLayout.isDrawerOpen(GravityCompat.END)) {
+                    drawerLayout.closeDrawer(GravityCompat.END);
+                } else {
+                    drawerLayout.openDrawer(GravityCompat.END);
                 }
             }
+        });
+
+
+        ArrayList<CountryInfo_Model> newList = new ArrayList<>(SplashScreen.countryList);
+
+
+        CountryInfo_Model countryInfoModel = new CountryInfo_Model();
+        countryInfoModel.setNationality("All");
+        countryInfoModel.setFlagUrl("All");
+        countryInfoModel.setCountry("All");
+        countryInfoModel.setSelected(true);
+
+        newList.add(0, countryInfoModel);
+
+        CountryRecyclerViewAdapter adapter = new CountryRecyclerViewAdapter(requireContext(), newList);
+        RecyclerView recyclerView = view.findViewById(R.id.recycler_view);
+        recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
+        recyclerView.setAdapter(adapter);
+
+
+    }
+
+
+
+}
+
+class CountryRecyclerViewAdapter extends RecyclerView.Adapter<CountryRecyclerViewAdapter.ViewHolder> {
+
+    private Context context;
+    private ArrayList<CountryInfo_Model> itemList;
+
+    public CountryRecyclerViewAdapter(Context context, ArrayList<CountryInfo_Model> countryList) {
+        this.context = context;
+        this.itemList = countryList;
+    }
+
+    @NonNull
+    @Override
+    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.country_list_item, parent, false);
+        return new ViewHolder(view);
+    }
+
+    @Override
+    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
+        CountryInfo_Model countryInfoModel = itemList.get(position);
+        holder.countryName.setText(countryInfoModel.getCountry());
+
+        if (countryInfoModel.getCountry().equals("All")) {
+            Drawable drawable = context.getResources().getDrawable(R.drawable.earth);
+            holder.flagurl.setImageDrawable(drawable);
+        } else {
+            new DownloadAndDisplaySvgTask(holder.flagurl).execute(countryInfoModel.getFlagUrl());
+        }
+        if (countryInfoModel.isSelected()) {
+            holder.counrtyCard.setCardBackgroundColor(ContextCompat.getColor(context, R.color.themeColorExtralight));
+            holder.countryName.setTextColor(Color.WHITE);
+        } else {
+            holder.counrtyCard.setCardBackgroundColor(Color.parseColor("#F1FBFF"));
+            int colorResource = R.color.semiblack; // Replace with your color resource
+            int textColor = ContextCompat.getColor(context, colorResource);
+            holder.countryName.setTextColor(textColor);
+
+
         }
 
-        return true;
+        holder.counrtyCard.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                for (CountryInfo_Model otherItem : itemList) {
+                    otherItem.setSelected(false);
+                }
+
+                // Select the clicked item
+                countryInfoModel.setSelected(true);
+                Fragment_Trending.selectedCountry = countryInfoModel.getCountry();
+                notifyDataSetChanged(); // Notify adapter to refresh the UI
+                loadDatabase_Country(countryInfoModel.getCountry(),holder.counrtyCard);
+            }
+        });
+
+    }
+
+    private void loadDatabase_Country(String selectedCountry, CardView counrtyCard) {
+
+        Fragment_Hot.girlsList.clear();
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                Cursor cursor = new DatabaseHelper(context, SplashScreen.DB_NAME, SplashScreen.DB_VERSION, "GirlsProfile").readGirls_Country(selectedCountry);
+                if (cursor.moveToFirst()) {
+                    do {
+                        // Extract data from the cursor and populate the Model_Profile object
+                        String Username = SplashScreen.decryption(cursor.getString(0));
+                        String Name = SplashScreen.decryption(cursor.getString(1));
+                        String Country = cursor.getString(2);
+                        String Languages = cursor.getString(3);
+                        String Age = cursor.getString(4);
+                        String InterestedIn = cursor.getString(5);
+                        String BodyType = cursor.getString(6);
+                        String Specifics = SplashScreen.decryption(cursor.getString(7));
+                        String Ethnicity = cursor.getString(8);
+                        String Hair = cursor.getString(9);
+                        String EyeColor = cursor.getString(10);
+                        String Subculture = cursor.getString(11);
+                        String profilePhoto = SplashScreen.decryption(cursor.getString(13));
+                        String coverPhoto = SplashScreen.decryption(cursor.getString(14));
+
+
+                        // Convert JSON strings back to arrays/lists using Gson
+                        Gson gson = new Gson();
+
+
+                        String interestsJson = SplashScreen.decryption(cursor.getString(12));
+                        List<Map<String, String>> Interests = gson.fromJson(interestsJson, new TypeToken<List<Map<String, String>>>() {
+                        }.getType());
+
+                        String imagesJson = SplashScreen.decryption(cursor.getString(15));
+                        List<String> images = gson.fromJson(imagesJson, new TypeToken<List<String>>() {
+                        }.getType());
+
+                        String videosJson = SplashScreen.decryption(cursor.getString(16));
+                        List<Map<String, String>> videos = gson.fromJson(videosJson, new TypeToken<List<Map<String, String>>>() {
+                        }.getType());
+
+                        // Create a new Model_Profile object and populate it
+                        Model_Profile model_profile = new Model_Profile(Username, Name, Country, Languages, Age, InterestedIn, BodyType, Specifics, Ethnicity, Hair, EyeColor, Subculture, profilePhoto, coverPhoto, Interests, images, videos);
+                        Fragment_Hot.girlsList.add(model_profile);
+                    } while (cursor.moveToNext());
+
+                }
+                cursor.close();
+                ((Activity) context).runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Fragment_Hot.swipeRefreshLayout.setRefreshing(false);
+                        new Handler().postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                Fragment_Hot.adapter.notifyDataSetChanged();
+                                Fragment_Trending.drawerLayout.closeDrawer(GravityCompat.END);
+
+                            }
+                        }, 200);
+
+                    }
+                });
+            }
+        }).start();
+
+
+
     }
 
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+    public int getItemCount() {
+        return itemList.size();
+    }
 
-        if (requestCode == 1) {
-            boolean permissionGranted = true;
-            if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                Toast.makeText(context, "Camera Permission is granted", Toast.LENGTH_SHORT).show();
-            } else {
-                permissionGranted = false;
-                Toast.makeText(context, "Camera Permission is denied", Toast.LENGTH_SHORT).show();
-            }
+    public class ViewHolder extends RecyclerView.ViewHolder {
+        TextView countryName;
+        CircleImageView flagurl;
+        CardView counrtyCard;
 
-            if (grantResults[1] == PackageManager.PERMISSION_GRANTED) {
-                Toast.makeText(context, "Record Audio is granted", Toast.LENGTH_SHORT).show();
-            } else {
-                permissionGranted = false;
-                Toast.makeText(context, "Record Audio is denied", Toast.LENGTH_SHORT).show();
-            }
+        public ViewHolder(View itemView) {
+            super(itemView);
+            countryName = itemView.findViewById(R.id.countryName);
+            flagurl = itemView.findViewById(R.id.flagurl);
+            counrtyCard = itemView.findViewById(R.id.counrtyCard);
+        }
+    }
+}
 
+class DownloadAndDisplaySvgTask extends AsyncTask<String, Void, Bitmap> {
+    private final ImageView imageView;
 
+    DownloadAndDisplaySvgTask(ImageView imageView) {
+        this.imageView = imageView;
+    }
+
+    @Override
+    protected Bitmap doInBackground(String... params) {
+        String imageUrl = params[0];
+
+        try {
+            // Download the SVG image from the URL
+            HttpURLConnection connection = (HttpURLConnection) new URL(imageUrl).openConnection();
+            connection.connect();
+            InputStream inputStream = connection.getInputStream();
+
+            // Load SVG image using AndroidSVG
+            SVG svg = SVG.getFromInputStream(inputStream);
+
+            // Render SVG to a Bitmap
+            Picture picture = svg.renderToPicture();
+            PictureDrawable pictureDrawable = new PictureDrawable(picture);
+            Bitmap bitmap = Bitmap.createBitmap(
+                    pictureDrawable.getIntrinsicWidth(),
+                    pictureDrawable.getIntrinsicHeight(),
+                    Bitmap.Config.ARGB_8888
+            );
+            Canvas canvas = new Canvas(bitmap);
+            canvas.drawPicture(picture);
+
+            return bitmap;
+        } catch (IOException | SVGParseException e) {
+            e.printStackTrace();
+            return null;
         }
     }
 
+    @Override
+    protected void onPostExecute(Bitmap result) {
+        if (result != null && imageView != null) {
+            // Display the Bitmap in the ImageView
+            imageView.setImageBitmap(result);
+        }
+    }
 }
+
+
 
 

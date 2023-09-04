@@ -3,7 +3,6 @@ package com.bhola.livevideochat4;
 import android.animation.ObjectAnimator;
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -12,21 +11,15 @@ import android.graphics.drawable.PictureDrawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
-import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
-import android.widget.AbsListView;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.core.view.ViewCompat;
 import androidx.core.widget.NestedScrollView;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
@@ -45,7 +38,6 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -54,14 +46,14 @@ public class Fragment_Hot extends Fragment {
 
     View view;
     Context context;
-    GirlsCardAdapter adapter;
+    public static GirlsCardAdapter adapter;
     SliderAdapter sliderAdapter;
-    ArrayList<Model_Profile> girlsList;
+    public static ArrayList<Model_Profile> girlsList;
     ArrayList<Model_Profile> girlsList_slider;
     int currentItems, totalItems, scrollOutItems;
     Boolean isScrolling = false;
     GridLayoutManager layoutManager;
-    SwipeRefreshLayout swipeRefreshLayout;
+    public static SwipeRefreshLayout swipeRefreshLayout;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -182,14 +174,14 @@ public class Fragment_Hot extends Fragment {
                 if (scrollY == (v.getChildAt(0).getMeasuredHeight() - v.getMeasuredHeight())) {
                     // Scrolled to the end of the NestedScrollView
                     // You can load more data here
-                    swipeRefreshLayout.setRefreshing(true);
-
-                    loadDatabase();
+                    if (Fragment_Trending.selectedCountry.equals("All")) {
+                        swipeRefreshLayout.setRefreshing(true);
+                        loadDatabase();
+                    }
 
                 }
             }
         });
-
 
 
     }
@@ -252,7 +244,7 @@ public class Fragment_Hot extends Fragment {
                             public void run() {
                                 adapter.notifyDataSetChanged();
                             }
-                        },200);
+                        }, 200);
 
                     }
                 });
@@ -261,6 +253,8 @@ public class Fragment_Hot extends Fragment {
 
 
     }
+
+
 }
 
 
@@ -291,9 +285,9 @@ class GirlsCardAdapter extends RecyclerView.Adapter<GirlsCardAdapter.GridViewHol
         holder.name.setText(item.getName());
         Picasso.get().load(item.getProfilePhoto()).into(holder.profile);
 
-        for (Map<String, String> countryMap : SplashScreen.countryList) {
-            if (item.getFrom().equals(countryMap.get("country"))) {
-                new DownloadAndDisplaySvgTask(holder.flag).execute(countryMap.get("flagUrl"));
+        for (CountryInfo_Model countryMap : SplashScreen.countryList) {
+            if (item.getFrom().equals(countryMap.getCountry())) {
+                new DownloadAndDisplaySvgTask(holder.flag).execute(countryMap.getFlagUrl());
             }
         }
         new Handler().postDelayed(new Runnable() {

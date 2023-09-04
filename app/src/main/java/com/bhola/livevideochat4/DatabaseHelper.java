@@ -154,6 +154,21 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     }
 
+    public Cursor readGirls_Country(String country) {
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        if (country.equals("All")) {
+            String query = "SELECT * FROM " + Database_tableNo + " WHERE LENGTH(images) > 50 ORDER BY RANDOM() LIMIT 50";
+            Cursor cursor = db.rawQuery(query, null);
+            return cursor;
+        } else {
+
+            Cursor cursor = db.query(Database_tableNo, null, "country=?", new String[]{country}, null, null, null, null);
+            return cursor;
+        }
+
+    }
+
     public Cursor readAudioStories(String category) {
         SQLiteDatabase db = this.getWritableDatabase();
         Cursor cursor;
