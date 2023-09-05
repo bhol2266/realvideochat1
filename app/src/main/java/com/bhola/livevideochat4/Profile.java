@@ -6,8 +6,12 @@ import androidx.cardview.widget.CardView;
 import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.core.view.WindowInsetsControllerCompat;
+import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Color;
@@ -18,10 +22,13 @@ import android.graphics.drawable.InsetDrawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.annotation.NonNull;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.OrientationEventListener;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.GridLayout;
@@ -48,6 +55,8 @@ public class Profile extends AppCompatActivity {
     AlertDialog report_userSucessfully_dialog = null;
     GridLayout gridLayout;
     Model_Profile model_profile;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -57,12 +66,15 @@ public class Profile extends AppCompatActivity {
         }
         setContentView(R.layout.activity_profile_girl);
 
-        fullscreenMode();
+//        fullscreenMode();
 
         getGirlProfile_DB();
-     
+
         actionbar();
+        
     }
+
+
 
 
     private void bindDetails() {
@@ -105,25 +117,25 @@ public class Profile extends AppCompatActivity {
             }
         });
 
-        TextView Languages=findViewById(R.id.Languages);
+        TextView Languages = findViewById(R.id.Languages);
         Languages.setText(model_profile.getLanguages());
 
-        TextView InterestedIn=findViewById(R.id.InterestedIn);
+        TextView InterestedIn = findViewById(R.id.InterestedIn);
         InterestedIn.setText(model_profile.getInterestedIn());
 
-        TextView BodyType=findViewById(R.id.BodyType);
+        TextView BodyType = findViewById(R.id.BodyType);
         BodyType.setText(model_profile.getBodyType());
 
-        TextView Ethnicity=findViewById(R.id.Ethnicity);
+        TextView Ethnicity = findViewById(R.id.Ethnicity);
         Ethnicity.setText(model_profile.getEthnicity());
 
-        TextView Hair=findViewById(R.id.Hair);
+        TextView Hair = findViewById(R.id.Hair);
         Hair.setText(model_profile.getHair());
 
-        TextView EyeColor=findViewById(R.id.EyeColor);
+        TextView EyeColor = findViewById(R.id.EyeColor);
         EyeColor.setText(model_profile.getEyeColor());
 
-        TextView Subculture=findViewById(R.id.Subculture);
+        TextView Subculture = findViewById(R.id.Subculture);
         Subculture.setText(model_profile.getSubculture());
 
 
@@ -304,8 +316,9 @@ public class Profile extends AppCompatActivity {
                     }.getType());
 
                     // Create a new Model_Profile object and populate it
-                     model_profile = new Model_Profile(Username, Name, Country, Languages, Age, InterestedIn, BodyType, Specifics, Ethnicity, Hair, EyeColor, Subculture, profilePhoto, coverPhoto, Interests, images, videos);
-                }                cursor.close();
+                    model_profile = new Model_Profile(Username, Name, Country, Languages, Age, InterestedIn, BodyType, Specifics, Ethnicity, Hair, EyeColor, Subculture, profilePhoto, coverPhoto, Interests, images, videos);
+                }
+                cursor.close();
                 ((Activity) Profile.this).runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -326,15 +339,13 @@ public class Profile extends AppCompatActivity {
     }
 
 
-
     private void setImageinGridLayout() {
 
-        gridLayout = findViewById(R.id.gridLayout);
         ArrayList<Map<String, String>> imageList = new ArrayList<>();
 
         for (int i = 0; i < model_profile.getImages().size(); i++) {
             Map<String, String> stringMap1 = new HashMap<>();
-            stringMap1.put("url", model_profile.getImages().get(i).replace("thumb","full"));
+            stringMap1.put("url", model_profile.getImages().get(i).replace("thumb", "full"));
             stringMap1.put("type", "free");  //premium
             imageList.add(stringMap1);
         }
@@ -345,72 +356,47 @@ public class Profile extends AppCompatActivity {
             stringMap1.put("type", "free");  //premium
             imageList.add(stringMap1);
         }
-        Log.d(SplashScreen.TAG, "setImageinGridLayout: "+imageList);
+
+
+        RecyclerView recyclerView = findViewById(R.id.recyclerView); // Replace with your RecyclerView's ID
+        recyclerView.setLayoutManager(new GridLayoutManager(this, 4));
+
+        // Populate imageList with your image data
+
+        ProfileGirlImageAdapter imageAdapter = new ProfileGirlImageAdapter(this, imageList);
+        recyclerView.setAdapter(imageAdapter);
+
+        int originalScreenWidth = getResources().getDisplayMetrics().widthPixels;
+
+        // Decrease the screen width by 15%
+        int screenWidth = (int) (originalScreenWidth * 0.85);
+        Log.d(SplashScreen.TAG, "screenWidth: " + screenWidth);
+//        int cardViewWidth = screenWidth / numColumns;
+
 
 
 
         for (int i = 0; i < imageList.size(); i++) {
 
 
-            // Create a new CardView
-            CardView cardView = new CardView(this);
+//// Set corner radius and elevation for the CardView
+//            int cornerRadius = (int) (20 * getResources().getDisplayMetrics().density); // Set the desired corner radius in dp
+//            float elevation = 0 * getResources().getDisplayMetrics().density; // Set the desired elevation in dp
+//            cardView.setRadius(cornerRadius);
+//            cardView.setElevation(elevation);
+//
+//
+//            ImageView imageView = new ImageView(this);
+//            imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
+//
 
-// Set corner radius and elevation for the CardView
-            int cornerRadius = (int) (20 * getResources().getDisplayMetrics().density); // Set the desired corner radius in dp
-            float elevation = 0 * getResources().getDisplayMetrics().density; // Set the desired elevation in dp
-            cardView.setRadius(cornerRadius);
-            cardView.setElevation(elevation);
-
-
-            ImageView imageView = new ImageView(this);
-            imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
-
-            int dpValue = 100;
-            float density = getResources().getDisplayMetrics().density;
-            int pixelWidth = (int) (dpValue * density);
 
 // Load the image with Picasso
-            Picasso.get()
-                    .load(imageList.get(i).get("url"))
-                    .resize(pixelWidth, 0) // Set the width in pixels and let Picasso calculate the height
-                    .into(imageView);
-
-            if (SplashScreen.coins == 0) {
-
-                if (imageList.get(i).get("type").equals("premium")) {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                        imageView.setRenderEffect(RenderEffect.createBlurEffect(40, 40, Shader.TileMode.MIRROR));
-                    }
-                }
-            }
-
-// Set layout parameters for width and height
-            int widthInPixels = (int) (80 * getResources().getDisplayMetrics().density); // Desired width in dp
-            int heightInPixels = (int) ((widthInPixels * 4) / 3.5); // Calculated height to maintain 4:3 ratio
-
-            CardView.LayoutParams layoutParams = new CardView.LayoutParams(widthInPixels, heightInPixels);
-            layoutParams.setMargins(10, 10, 10, 10);
-
-// Add the ImageView to the CardView
-            cardView.addView(imageView, layoutParams);
-            int finalI = i;
-            cardView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-
-                    DisplayMetrics displayMetrics = new DisplayMetrics();
-                    getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
-                    int screenWidth = displayMetrics.widthPixels;
-                    int screenHeight = displayMetrics.heightPixels;
-
-                    ImageViewerDialog dialog = new ImageViewerDialog(Profile.this, imageList, finalI,screenWidth,screenHeight);
-                    dialog.show();
-                }
-            });
 
 
-// Add the CardView to the GridLayout
-            gridLayout.addView(cardView);
+
+
+
         }
 
 
@@ -428,6 +414,7 @@ public class Profile extends AppCompatActivity {
             getWindow().getAttributes().layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
         }
     }
+
     private void showAds() {
         if (SplashScreen.Ad_Network_Name.equals("admob")) {
             ADS_ADMOB.Interstitial_Ad(this);
@@ -438,3 +425,88 @@ public class Profile extends AppCompatActivity {
     }
 
 }
+
+
+class ProfileGirlImageAdapter extends RecyclerView.Adapter<ProfileGirlImageAdapter.ImageViewHolder> {
+    private final Context context;
+    private final List<Map<String, String>> imageList;
+
+    public ProfileGirlImageAdapter(Context context, List<Map<String, String>> imageList) {
+        this.context = context;
+        this.imageList = imageList;
+    }
+
+    @NonNull
+    @Override
+    public ImageViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        View view = LayoutInflater.from(parent.getContext())
+                .inflate(R.layout.profile_image_item, parent, false);
+        return new ImageViewHolder(view);
+    }
+
+    @Override
+    public void onBindViewHolder(@NonNull ImageViewHolder holder, int position) {
+        Map<String, String> imageItem = imageList.get(position);
+//        holder.bind(imageItem);
+
+        Picasso.get()
+                .load(imageItem.get("url"))
+                .resize(150, 0) // Set the width in pixels and let Picasso calculate the height
+                .into(holder.imageView);
+
+        int widthInPixels = holder.imageView.getWidth(); // Get the current width
+        int heightInPixels = (int) (widthInPixels * 3.5 / 4); // Calculate the height
+
+//        ViewGroup.LayoutParams layoutParams = holder.imageView.getLayoutParams();
+//        layoutParams.height = heightInPixels;
+//        holder.imageView.setLayoutParams(layoutParams);
+
+
+        if (SplashScreen.coins == 0) {
+
+            if (imageItem.get("type").equals("premium")) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                    holder.imageView.setRenderEffect(RenderEffect.createBlurEffect(40, 40, Shader.TileMode.MIRROR));
+                }
+            }
+        }
+
+        holder.cardView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                DisplayMetrics displayMetrics = new DisplayMetrics();
+                ((Activity) context).getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+                int originalScreenWidth = displayMetrics.widthPixels;
+                int screenHeight = displayMetrics.heightPixels;
+
+
+                // Decrease the screen width by 15%
+                int screenWidth = (int) (originalScreenWidth * 0.85);
+
+                ImageViewerDialog dialog = new ImageViewerDialog(context, (ArrayList<Map<String, String>>) imageList, holder.getAbsoluteAdapterPosition(), screenWidth, screenHeight);
+                dialog.show();
+            }
+        });
+    }
+
+
+
+    @Override
+    public int getItemCount() {
+        return imageList.size();
+    }
+
+    public class ImageViewHolder extends RecyclerView.ViewHolder {
+        private final CardView cardView;
+        private final ImageView imageView;
+
+        public ImageViewHolder(@NonNull View itemView) {
+            super(itemView);
+            cardView = itemView.findViewById(R.id.cardView);
+            imageView = itemView.findViewById(R.id.imageView);
+        }
+
+    }
+}
+

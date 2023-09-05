@@ -1,8 +1,10 @@
 package com.bhola.livevideochat4;
 
+
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.graphics.Color;
 import android.graphics.RenderEffect;
 import android.graphics.Shader;
@@ -14,17 +16,19 @@ import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.core.view.WindowInsetsControllerCompat;
 import androidx.recyclerview.widget.RecyclerView;
-import androidx.viewpager.widget.ViewPager;
 
 import android.support.annotation.NonNull;
+import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.OrientationEventListener;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.Toast;
 
-import androidx.viewpager.widget.PagerAdapter;
 import androidx.viewpager2.widget.ViewPager2;
 
 import com.github.chrisbanes.photoview.PhotoView;
@@ -67,12 +71,13 @@ public class ImageViewerDialog extends Dialog {
                 dismiss(); // Close the dialog
             }
         });
-        ImagePagerAdapter pagerAdapter = new ImagePagerAdapter(context, imageUrls,screenWidth,screenHeight);
+        ImagePagerAdapter pagerAdapter = new ImagePagerAdapter(context, imageUrls, screenWidth, screenHeight);
         viewPager.setAdapter(pagerAdapter);
         viewPager.setCurrentItem(selectedIndex);
 
         // Add any other logic or UI customization as needed
     }
+
     private void fullscreenMode() {
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
@@ -86,12 +91,14 @@ public class ImageViewerDialog extends Dialog {
     }
 
 }
+
 class ImagePagerAdapter extends RecyclerView.Adapter<ImagePagerAdapter.ImageViewHolder> {
 
     private Context context;
     private ArrayList<Map<String, String>> imageUrls;
     private int screenWidth;
     private int screenHeight;
+
 
     public ImagePagerAdapter(Context context, ArrayList<Map<String, String>> imageUrls, int screenWidth, int screenHeight) {
         this.context = context;
@@ -119,8 +126,8 @@ class ImagePagerAdapter extends RecyclerView.Adapter<ImagePagerAdapter.ImageView
 
     public class ImageViewHolder extends RecyclerView.ViewHolder {
 
-        private ImageView imageView;
-        private ImageView lock;
+        private PhotoView imageView;
+        private LinearLayout lock;
 
         public ImageViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -129,8 +136,7 @@ class ImagePagerAdapter extends RecyclerView.Adapter<ImagePagerAdapter.ImageView
         }
 
         public void bind(int position) {
-            int desiredWidth = screenWidth / 2; // You can adjust this as needed
-            int desiredHeight = screenHeight / 2; // You can adjust this as needed
+
 
             Picasso.get()
                     .load(imageUrls.get(position).get("url"))
@@ -157,4 +163,5 @@ class ImagePagerAdapter extends RecyclerView.Adapter<ImagePagerAdapter.ImageView
             }
         }
     }
+
 }
