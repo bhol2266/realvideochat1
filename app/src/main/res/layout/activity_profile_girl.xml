@@ -96,178 +96,463 @@
 
         </RelativeLayout>
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:visibility="gone">
-
-
-            <ListView
-                android:id="@+id/listview"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
-
-        </LinearLayout>
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="450dp"
+            android:layout_height="550dp"
             android:layout_gravity="bottom"
             android:background="@drawable/profile_girl_bg"
+            android:orientation="vertical">
 
-            android:orientation="vertical"
-            android:padding="20dp">
-
-            <TextView
-                android:id="@+id/profileName"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="2dp"
-                android:fontFamily="@font/inter"
-                android:text="Sunanda Delhi :)"
-                android:textColor="@color/semiblack"
-                android:textSize="18dp"
-                android:textStyle="bold" />
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="5dp"
-                android:orientation="horizontal">
-
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginRight="15dp"
-                    android:orientation="horizontal">
-
-                    <ImageView
-                        android:layout_width="15dp"
-                        android:layout_height="15dp"
-                        android:layout_gravity="center"
-                        android:layout_marginTop="2dp"
-                        android:layout_marginRight="5dp"
-                        android:src="@drawable/female_icon" />
-
-                    <TextView
-                        android:id="@+id/age"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:fontFamily="@font/inter"
-                        android:text="19"
-                        android:textColor="@color/semiblack"
-                        android:textSize="15dp" />
-
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginRight="15dp"
-                    android:orientation="horizontal">
-
-                    <ImageView
-                        android:layout_width="15dp"
-                        android:layout_height="15dp"
-                        android:layout_gravity="center"
-                        android:layout_marginTop="2dp"
-                        android:layout_marginRight="5dp"
-                        android:src="@drawable/location_icon"
-                        app:tint="@color/gmts_light_gray" />
-
-                    <TextView
-                        android:id="@+id/country"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:fontFamily="@font/inter"
-                        android:text="India"
-                        android:textColor="@color/semiblack"
-                        android:textSize="15dp" />
-
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginRight="15dp"
-                    android:orientation="horizontal">
-
-                    <ImageView
-                        android:layout_width="15dp"
-                        android:layout_height="15dp"
-                        android:layout_gravity="center"
-                        android:layout_marginTop="1dp"
-                        android:layout_marginRight="5dp"
-                        android:src="@drawable/group"
-                        app:tint="@color/gmts_light_gray" />
-
-                    <TextView
-                        android:id="@+id/users"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:fontFamily="@font/inter"
-                        android:text="6010"
-                        android:textColor="@color/semiblack"
-                        android:textSize="14dp" />
-
-                </LinearLayout>
-
-
-            </LinearLayout>
-
-
-            <FrameLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
-
-                <RatingBar
-                    android:id="@+id/ratingBar"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="start"
-                    android:isIndicator="true"
-                    android:numStars="5"
-                    android:progressTint="#E3AA00"
-                    android:rating="3.5"
-                    android:scaleX=".8"
-                    android:scaleY=".8"
-                    android:secondaryProgressTint="#00B88A01"
-                    android:transformPivotX="0dp"
-                    android:transformPivotY="50dp" />
-
-
-                <TextView
-                    android:id="@+id/answerRatingTextview"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:layout_marginLeft="80dp"
-                    android:text="AnswerRate: 75%"
-                    android:textColor="@color/semiblack"
-                    android:textSize="15dp" />
-
-
-            </FrameLayout>
 
             <ScrollView
                 android:layout_width="match_parent"
+                android:layout_marginTop="30dp"
+
                 android:layout_height="match_parent">
 
-                <GridLayout
-                    android:id="@+id/gridLayout"
+
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:paddingBottom="30dp"
-                    android:layout_marginTop="5dp"
-                    android:columnCount="4"
-                    android:rowCount="2">
+                    android:orientation="vertical">
 
-                </GridLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="bottom"
+                        android:orientation="vertical">
+
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"
+                            android:paddingLeft="20dp"
+                            android:paddingRight="20dp"
+                      >
+
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:gravity="center_vertical"
+                                android:orientation="horizontal">
+
+                                <TextView
+                                    android:id="@+id/profileName"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:fontFamily="@font/inter"
+                                    android:text="Sunanda Delhi :)"
+                                    android:textColor="@color/semiblack"
+                                    android:textSize="18dp"
+                                    android:textStyle="bold" />
+
+                                <LinearLayout
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:gravity="center_vertical"
+                                    android:paddingLeft="15dp"
+                                    android:orientation="horizontal">
+
+                                    <ImageView
+                                        android:layout_width="15dp"
+                                        android:layout_height="15dp"
+                                        android:alpha="0.7"
+                                        android:src="@drawable/clock"
+                                        android:text="Languages :"
+                                        app:tint="@color/themeColor" />
+
+
+                                    <TextView
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:fontFamily="@font/inter"
+                                        android:paddingLeft="5dp"
+                                        android:text="Last online time"
+                                        android:textColor="@color/semiblack"
+                                        android:textSize="14dp" />
+                                </LinearLayout>
+
+
+                            </LinearLayout>
+
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="5dp"
+                                android:orientation="horizontal">
+
+                                <LinearLayout
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginRight="15dp"
+                                    android:orientation="horizontal">
+
+                                    <ImageView
+                                        android:layout_width="15dp"
+                                        android:layout_height="15dp"
+                                        android:layout_gravity="center"
+                                        android:layout_marginTop="2dp"
+                                        android:layout_marginRight="5dp"
+                                        android:src="@drawable/female_icon" />
+
+                                    <TextView
+                                        android:id="@+id/age"
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:layout_gravity="center"
+                                        android:fontFamily="@font/inter"
+                                        android:text="19"
+                                        android:textColor="@color/semiblack"
+                                        android:textSize="15dp" />
+
+                                </LinearLayout>
+
+                                <LinearLayout
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginRight="15dp"
+                                    android:orientation="horizontal">
+
+                                    <ImageView
+                                        android:layout_width="15dp"
+                                        android:layout_height="15dp"
+                                        android:layout_gravity="center"
+                                        android:layout_marginTop="2dp"
+                                        android:layout_marginRight="5dp"
+                                        android:src="@drawable/location_icon"
+                                        app:tint="@color/gmts_light_gray" />
+
+                                    <TextView
+                                        android:id="@+id/country"
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:layout_gravity="center"
+                                        android:fontFamily="@font/inter"
+                                        android:text="India"
+                                        android:textColor="@color/semiblack"
+                                        android:textSize="15dp" />
+
+                                </LinearLayout>
+
+                                <LinearLayout
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginRight="15dp"
+                                    android:orientation="horizontal"
+                                    android:visibility="gone">
+
+                                    <ImageView
+                                        android:layout_width="15dp"
+                                        android:layout_height="15dp"
+                                        android:layout_gravity="center"
+                                        android:layout_marginTop="1dp"
+                                        android:layout_marginRight="5dp"
+                                        android:src="@drawable/group"
+                                        app:tint="@color/gmts_light_gray" />
+
+                                    <TextView
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:layout_gravity="center"
+                                        android:fontFamily="@font/inter"
+                                        android:text="6010"
+                                        android:textColor="@color/semiblack"
+                                        android:textSize="14dp" />
+
+                                </LinearLayout>
+
+
+                            </LinearLayout>
+
+
+
+                        </LinearLayout>
+
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"
+                            android:paddingTop="15dp"
+                            android:paddingLeft="20dp"
+                            android:paddingRight="20dp"
+                    >
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginBottom="5dp"
+                                android:fontFamily="@font/rubrik_bold"
+                                android:text=""
+                                android:textColor="@color/gmts_light_gray"
+                                android:textSize="18dp" />
+
+                            <LinearLayout
+                                android:id="@+id/Languageslayout"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginBottom="5dp"
+                                android:gravity="center_vertical"
+                                android:orientation="horizontal">
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:fontFamily="@font/inter"
+                                    android:text="Languages    :"
+                                    android:textColor="@color/semiblack"
+                                    android:textSize="14dp" />
+
+
+                                <TextView
+                                    android:id="@+id/Languages"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:fontFamily="@font/inter"
+                                    android:paddingLeft="20dp"
+                                    android:text=""
+                                    android:textColor="@color/gmts_light_gray"
+                                    android:textSize="14dp" />
+                            </LinearLayout>
+
+                            <LinearLayout
+                                android:id="@+id/InterestedInlayout"
+
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginBottom="5dp"
+                                android:gravity="center_vertical"
+                                android:orientation="horizontal">
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:fontFamily="@font/inter"
+                                    android:text="InterestedIn  :"
+                                    android:textColor="@color/semiblack"
+                                    android:textSize="14dp" />
+
+
+                                <TextView
+                                    android:id="@+id/InterestedIn"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:fontFamily="@font/inter"
+                                    android:paddingLeft="20dp"
+                                    android:text=""
+                                    android:textColor="@color/gmts_light_gray"
+                                    android:textSize="14dp" />
+                            </LinearLayout>
+
+                            <LinearLayout
+                                android:id="@+id/BodyTypelayout"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginBottom="5dp"
+                                android:gravity="center_vertical"
+                                android:orientation="horizontal">
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:fontFamily="@font/inter"
+                                    android:text="BodyType      :"
+                                    android:textColor="@color/semiblack"
+                                    android:textSize="14dp" />
+
+
+                                <TextView
+                                    android:id="@+id/BodyType"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:fontFamily="@font/inter"
+                                    android:paddingLeft="20dp"
+                                    android:text=""
+                                    android:textColor="@color/gmts_light_gray"
+                                    android:textSize="14dp" />
+                            </LinearLayout>
+
+                            <LinearLayout
+                                android:id="@+id/Specificslayout"
+
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginBottom="5dp"
+                                android:gravity="center_vertical"
+                                android:orientation="horizontal">
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:fontFamily="@font/inter"
+                                    android:text="Specifics       :"
+                                    android:textColor="@color/semiblack"
+                                    android:textSize="14dp" />
+
+
+                                <TextView
+                                    android:id="@+id/Specifics"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:fontFamily="@font/inter"
+                                    android:paddingLeft="20dp"
+                                    android:text=""
+                                    android:textColor="@color/gmts_light_gray"
+                                    android:textSize="14dp" />
+                            </LinearLayout>
+
+                            <LinearLayout
+                                android:id="@+id/Ethnicitylayout"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginBottom="5dp"
+                                android:gravity="center_vertical"
+                                android:orientation="horizontal">
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:fontFamily="@font/inter"
+                                    android:text="Ethnicity        :"
+                                    android:textColor="@color/semiblack"
+                                    android:textSize="14dp" />
+
+
+                                <TextView
+                                    android:id="@+id/Ethnicity"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:fontFamily="@font/inter"
+                                    android:paddingLeft="20dp"
+                                    android:text=""
+                                    android:textColor="@color/gmts_light_gray"
+                                    android:textSize="14dp" />
+
+
+                            </LinearLayout>
+
+                            <LinearLayout
+                                android:id="@+id/Hairlayout"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginBottom="5dp"
+                                android:gravity="center_vertical"
+                                android:orientation="horizontal">
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:fontFamily="@font/inter"
+                                    android:text="Hair                :"
+                                    android:textColor="@color/semiblack"
+                                    android:textSize="14dp" />
+
+
+                                <TextView
+                                    android:id="@+id/Hair"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:fontFamily="@font/inter"
+                                    android:paddingLeft="20dp"
+                                    android:text=""
+                                    android:textColor="@color/gmts_light_gray"
+                                    android:textSize="14dp" />
+
+
+                            </LinearLayout>
+
+                            <LinearLayout
+                                android:id="@+id/EyeColorlayout"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginBottom="5dp"
+                                android:gravity="center_vertical"
+                                android:orientation="horizontal">
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:fontFamily="@font/inter"
+                                    android:text="EyeColor       :"
+                                    android:textColor="@color/semiblack"
+                                    android:textSize="14dp" />
+
+
+                                <TextView
+                                    android:id="@+id/EyeColor"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:fontFamily="@font/inter"
+                                    android:paddingLeft="20dp"
+                                    android:text=""
+                                    android:textColor="@color/gmts_light_gray"
+                                    android:textSize="14dp" />
+
+
+                            </LinearLayout>
+
+                            <LinearLayout
+                                android:id="@+id/Subculturelayout"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginBottom="5dp"
+                                android:gravity="center_vertical"
+                                android:orientation="horizontal">
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:fontFamily="@font/inter"
+                                    android:text="Subculture    :"
+                                    android:textColor="@color/semiblack"
+                                    android:textSize="14dp" />
+
+
+                                <TextView
+                                    android:id="@+id/Subculture"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:fontFamily="@font/inter"
+                                    android:paddingLeft="20dp"
+                                    android:text=""
+                                    android:textColor="@color/gmts_light_gray"
+                                    android:textSize="14dp" />
+
+
+                            </LinearLayout>
+
+                        </LinearLayout>
+                    </LinearLayout>
+
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="5dp"
+                        android:fontFamily="@font/rubrik_bold"
+                        android:text="Content"
+                        android:paddingLeft="20dp"
+                        android:layout_marginTop="10dp"
+                        android:textColor="@color/gmts_light_gray"
+                        android:textSize="18dp" />
+
+                    <GridLayout
+                        android:id="@+id/gridLayout"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:columnCount="4"
+                        android:paddingLeft="15dp"
+                        android:paddingRight="15dp"
+                        android:paddingBottom="30dp"
+                        android:rowCount="2">
+
+                    </GridLayout>
+
+                </LinearLayout>
+
             </ScrollView>
 
         </LinearLayout>

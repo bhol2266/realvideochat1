@@ -1,14 +1,19 @@
 package com.bhola.livevideochat4;
 
+import android.Manifest;
 import android.animation.ObjectAnimator;
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.graphics.Picture;
-import android.graphics.drawable.PictureDrawable;
-import android.os.AsyncTask;
+import android.graphics.BitmapFactory;
+
+import android.graphics.drawable.Drawable;
+import android.location.Address;
+import android.location.Geocoder;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.LayoutInflater;
@@ -20,6 +25,9 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.cardview.widget.CardView;
+import androidx.core.app.ActivityCompat;
+import androidx.core.view.GravityCompat;
 import androidx.core.widget.NestedScrollView;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
@@ -27,20 +35,22 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
-import com.caverock.androidsvg.SVG;
-import com.caverock.androidsvg.SVGParseException;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.squareup.picasso.Picasso;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Random;
+
+import de.hdodenhof.circleimageview.CircleImageView;
+
 
 public class Fragment_Hot extends Fragment {
 
@@ -69,16 +79,47 @@ public class Fragment_Hot extends Fragment {
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
+                Fragment_Trending.selectedCountry = "All";
                 girlsList.clear();
-                girlsList_slider.clear();
                 loadDatabase();
-                loadDatabase_slider();
+                updateFlagButton();
             }
         });
         setUpSlider();
         setupRecycerView();
         return view;
     }
+
+    private void updateFlagButton() {
+        if (Fragment_Trending.selectedCountry.equals("All")) {
+            Drawable drawable = context.getResources().getDrawable(R.drawable.earth);
+            Fragment_Trending.flagIcon.setImageDrawable(drawable);
+            Fragment_Trending.countryName.setText("Region");
+        } else {
+            loadImageview(Fragment_Trending.flagIcon, Fragment_Trending.selectedCountry, context);
+            Fragment_Trending.countryName.setText(Fragment_Trending.selectedCountry);
+
+        }
+    }
+
+    private void loadImageview(CircleImageView flagurl, String country, Context context) {
+        try {
+            // Replace "image.jpg" with the actual filename and path within the assets folder
+            InputStream inputStream = context.getAssets().open("countryFlag/" + country.replaceAll(" ", "-") + ".png");
+
+            // Decode the input stream into a Bitmap
+            Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
+
+            // Set the Bitmap to the ImageView
+            flagurl.setImageBitmap(bitmap);
+
+            // Close the input stream when done
+            inputStream.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
 
     @SuppressLint("ClickableViewAccessibility")
     private void setUpSlider() {
@@ -162,6 +203,9 @@ public class Fragment_Hot extends Fragment {
 
 
         adapter = new GirlsCardAdapter(context, girlsList);
+        getLocation(girlsList, adapter); // this is to get current current country location and move that country to top of the list in slider layout
+
+
         layoutManager = new GridLayoutManager(context, 2);
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setAdapter(adapter);
@@ -255,6 +299,121 @@ public class Fragment_Hot extends Fragment {
     }
 
 
+    private void getLocation(ArrayList<Model_Profile> newList, GirlsCardAdapter adapter) {
+        FusedLocationProviderClient fusedLocationClient = LocationServices.getFusedLocationProviderClient(context);
+
+        if (ActivityCompat.checkSelfPermission(context, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            return;
+        }
+        fusedLocationClient.getLastLocation()
+                .addOnSuccessListener((Activity) context, location -> {
+                    if (location != null) {
+                        // Use the location data
+                        double latitude = location.getLatitude();
+                        double longitude = location.getLongitude();
+
+                        // Call reverse geocoding to get the city and country
+                        getAddressFromLocation(latitude, longitude, newList, adapter);
+                    }
+                });
+
+
+    }
+
+    private void getAddressFromLocation(double latitude, double longitude, ArrayList<Model_Profile> newList, GirlsCardAdapter adapter) {
+        Geocoder geocoder = new Geocoder(context, Locale.getDefault());
+        try {
+            List<Address> addresses = geocoder.getFromLocation(latitude, longitude, 1);
+            if (addresses.size() > 0) {
+                SplashScreen.currentCity = addresses.get(0).getLocality();
+                SplashScreen.currentCountry = addresses.get(0).getCountryName();
+                // Now you have the city and country information
+
+                for (int i = 0; i < newList.size(); i++) {
+                    Model_Profile modelProfile = newList.get(i);
+                    if (SplashScreen.currentCountry.equals(modelProfile.getFrom())) {
+
+                        loadDatabase_Country(modelProfile.getFrom());
+                    }
+                }
+
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    private void loadDatabase_Country(String selectedCountry) {
+
+        Fragment_Hot.girlsList.clear();
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                Cursor cursor = new DatabaseHelper(context, SplashScreen.DB_NAME, SplashScreen.DB_VERSION, "GirlsProfile").readGirls_Country(selectedCountry);
+                if (cursor.moveToFirst()) {
+                    do {
+                        // Extract data from the cursor and populate the Model_Profile object
+                        String Username = SplashScreen.decryption(cursor.getString(0));
+                        String Name = SplashScreen.decryption(cursor.getString(1));
+                        String Country = cursor.getString(2);
+                        String Languages = cursor.getString(3);
+                        String Age = cursor.getString(4);
+                        String InterestedIn = cursor.getString(5);
+                        String BodyType = cursor.getString(6);
+                        String Specifics = SplashScreen.decryption(cursor.getString(7));
+                        String Ethnicity = cursor.getString(8);
+                        String Hair = cursor.getString(9);
+                        String EyeColor = cursor.getString(10);
+                        String Subculture = cursor.getString(11);
+                        String profilePhoto = SplashScreen.decryption(cursor.getString(13));
+                        String coverPhoto = SplashScreen.decryption(cursor.getString(14));
+
+
+                        // Convert JSON strings back to arrays/lists using Gson
+                        Gson gson = new Gson();
+
+
+                        String interestsJson = SplashScreen.decryption(cursor.getString(12));
+                        List<Map<String, String>> Interests = gson.fromJson(interestsJson, new TypeToken<List<Map<String, String>>>() {
+                        }.getType());
+
+                        String imagesJson = SplashScreen.decryption(cursor.getString(15));
+                        List<String> images = gson.fromJson(imagesJson, new TypeToken<List<String>>() {
+                        }.getType());
+
+                        String videosJson = SplashScreen.decryption(cursor.getString(16));
+                        List<Map<String, String>> videos = gson.fromJson(videosJson, new TypeToken<List<Map<String, String>>>() {
+                        }.getType());
+
+                        // Create a new Model_Profile object and populate it
+                        Model_Profile model_profile = new Model_Profile(Username, Name, Country, Languages, Age, InterestedIn, BodyType, Specifics, Ethnicity, Hair, EyeColor, Subculture, profilePhoto, coverPhoto, Interests, images, videos);
+                        Fragment_Hot.girlsList.add(model_profile);
+                    } while (cursor.moveToNext());
+
+                }
+                cursor.close();
+                ((Activity) context).runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Fragment_Hot.swipeRefreshLayout.setRefreshing(false);
+                        new Handler().postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                Fragment_Hot.adapter.notifyDataSetChanged();
+
+                            }
+                        }, 200);
+
+                    }
+                });
+            }
+        }).start();
+
+
+    }
+
 }
 
 
@@ -287,7 +446,7 @@ class GirlsCardAdapter extends RecyclerView.Adapter<GirlsCardAdapter.GridViewHol
 
         for (CountryInfo_Model countryMap : SplashScreen.countryList) {
             if (item.getFrom().equals(countryMap.getCountry())) {
-                new DownloadAndDisplaySvgTask(holder.flag).execute(countryMap.getFlagUrl());
+                loadImageview(holder.flag, countryMap.getCountry());
             }
         }
         new Handler().postDelayed(new Runnable() {
@@ -298,8 +457,37 @@ class GirlsCardAdapter extends RecyclerView.Adapter<GirlsCardAdapter.GridViewHol
             }
         }, getRandomNumber());
 
+        holder.cardView1.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                Intent intent = new Intent(context, Profile.class);
+                intent.putExtra("userName", item.getUsername());
+                context.startActivity(intent);
+            }
+        });
+
 
     }
+
+    private void loadImageview(ImageView imageView, String country) {
+        try {
+            // Replace "image.jpg" with the actual filename and path within the assets folder
+            InputStream inputStream = context.getAssets().open("countryFlag/" + country.replaceAll(" ", "-") + ".png");
+
+            // Decode the input stream into a Bitmap
+            Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
+
+            // Set the Bitmap to the ImageView
+            imageView.setImageBitmap(bitmap);
+
+            // Close the input stream when done
+            inputStream.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
 
     private long getRandomNumber() {
 
@@ -328,6 +516,7 @@ class GirlsCardAdapter extends RecyclerView.Adapter<GirlsCardAdapter.GridViewHol
     public static class GridViewHolder extends RecyclerView.ViewHolder {
         TextView name;
         ImageView profile, hello, flag;
+        CardView cardView1;
 
         public GridViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -335,57 +524,12 @@ class GirlsCardAdapter extends RecyclerView.Adapter<GirlsCardAdapter.GridViewHol
             name = itemView.findViewById(R.id.name);
             hello = itemView.findViewById(R.id.hello);
             flag = itemView.findViewById(R.id.flag);
+            cardView1 = itemView.findViewById(R.id.cardView1);
 
 
         }
     }
 
-    private static class DownloadAndDisplaySvgTask extends AsyncTask<String, Void, Bitmap> {
-        private final ImageView imageView;
-
-        DownloadAndDisplaySvgTask(ImageView imageView) {
-            this.imageView = imageView;
-        }
-
-        @Override
-        protected Bitmap doInBackground(String... params) {
-            String imageUrl = params[0];
-
-            try {
-                // Download the SVG image from the URL
-                HttpURLConnection connection = (HttpURLConnection) new URL(imageUrl).openConnection();
-                connection.connect();
-                InputStream inputStream = connection.getInputStream();
-
-                // Load SVG image using AndroidSVG
-                SVG svg = SVG.getFromInputStream(inputStream);
-
-                // Render SVG to a Bitmap
-                Picture picture = svg.renderToPicture();
-                PictureDrawable pictureDrawable = new PictureDrawable(picture);
-                Bitmap bitmap = Bitmap.createBitmap(
-                        pictureDrawable.getIntrinsicWidth(),
-                        pictureDrawable.getIntrinsicHeight(),
-                        Bitmap.Config.ARGB_8888
-                );
-                Canvas canvas = new Canvas(bitmap);
-                canvas.drawPicture(picture);
-
-                return bitmap;
-            } catch (IOException | SVGParseException e) {
-                e.printStackTrace();
-                return null;
-            }
-        }
-
-        @Override
-        protected void onPostExecute(Bitmap result) {
-            if (result != null && imageView != null) {
-                // Display the Bitmap in the ImageView
-                imageView.setImageBitmap(result);
-            }
-        }
-    }
 }
 
 

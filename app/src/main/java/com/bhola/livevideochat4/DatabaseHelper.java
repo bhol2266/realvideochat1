@@ -152,6 +152,13 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         Cursor cursor = db.rawQuery(query, null);
         return cursor;
 
+    }  public Cursor readSingleGirl(String username) {
+
+        SQLiteDatabase db = this.getWritableDatabase();
+        Cursor cursor = db.query(Database_tableNo, null, "Username=?", new String[]{SplashScreen.encryption(username)}, null, null, null, null);
+
+        return cursor;
+
     }
 
     public Cursor readGirls_Country(String country) {

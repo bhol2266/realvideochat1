@@ -3,20 +3,22 @@ public class CountryInfo_Model {
     private String nationality;
     private String flagUrl;
     private String country;
+    private String countryCode;
     private boolean isSelected;
 
     // Constructors
     public CountryInfo_Model() {
     }
 
-    public CountryInfo_Model(String nationality, String flagUrl, String country, boolean isSelected) {
+
+    public CountryInfo_Model(String nationality, String flagUrl, String country, String countryCode, boolean isSelected) {
         this.nationality = nationality;
         this.flagUrl = flagUrl;
         this.country = country;
+        this.countryCode = countryCode;
         this.isSelected = isSelected;
     }
 
-    // Getters and setters
     public String getNationality() {
         return nationality;
     }
@@ -41,6 +43,14 @@ public class CountryInfo_Model {
         this.country = country;
     }
 
+    public String getCountryCode() {
+        return countryCode;
+    }
+
+    public void setCountryCode(String countryCode) {
+        this.countryCode = countryCode;
+    }
+
     public boolean isSelected() {
         return isSelected;
     }
@@ -48,6 +58,4 @@ public class CountryInfo_Model {
     public void setSelected(boolean selected) {
         isSelected = selected;
     }
-
-
 }

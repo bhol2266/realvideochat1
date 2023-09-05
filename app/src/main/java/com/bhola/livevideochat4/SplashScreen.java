@@ -97,6 +97,11 @@ public class SplashScreen extends AppCompatActivity {
 
     private FirebaseAnalytics mFirebaseAnalytics;
 
+    //location
+    public static String currentCity  = "";
+    public static String currentCountry  = "";
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -115,7 +120,6 @@ public class SplashScreen extends AppCompatActivity {
         sharedPrefrences();
 
         countryList = loadCountryListFromAsset(this, "countrylist.json");
-        Log.d(TAG, "countryList: " + countryList.size());
 
 
         topAnim = AnimationUtils.loadAnimation(this, R.anim.top_animation);
@@ -576,6 +580,8 @@ public class SplashScreen extends AppCompatActivity {
                 countryInfoModel.setNationality(jsonObject.getString("nationality"));
                 countryInfoModel.setFlagUrl(jsonObject.getString("flagUrl"));
                 countryInfoModel.setCountry(jsonObject.getString("country"));
+                countryInfoModel.setCountryCode(jsonObject.getString("countryCode"));
+
                 countryInfoModel.setSelected(false);
 
                 countryList.add(countryInfoModel);

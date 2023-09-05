@@ -1,16 +1,16 @@
 package com.bhola.livevideochat4;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
-import android.graphics.Canvas;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
-import android.graphics.Picture;
 import android.graphics.drawable.Drawable;
-import android.graphics.drawable.PictureDrawable;
-import android.os.AsyncTask;
+import android.location.Address;
+import android.location.Geocoder;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
@@ -21,7 +21,6 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.cardview.widget.CardView;
 import androidx.core.app.ActivityCompat;
@@ -32,18 +31,17 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.caverock.androidsvg.SVG;
-import com.caverock.androidsvg.SVGParseException;
+
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import de.hdodenhof.circleimageview.CircleImageView;
@@ -55,7 +53,8 @@ public class Fragment_Trending extends Fragment {
     View view;
     public static DrawerLayout drawerLayout;
     public static String selectedCountry = "All";
-
+    public static CircleImageView flagIcon;
+    public static TextView countryName;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -129,9 +128,16 @@ public class Fragment_Trending extends Fragment {
             }
         });
 
+        updateFlagIconButton();
 
         sideLayout_Countries();
         return view;
+    }
+
+    private void updateFlagIconButton() {
+        flagIcon = view.findViewById(R.id.flagIcon);
+        countryName = view.findViewById(R.id.countryName);
+
     }
 
     private void sideLayout_Countries() {
@@ -163,7 +169,10 @@ public class Fragment_Trending extends Fragment {
 
         newList.add(0, countryInfoModel);
 
+
         CountryRecyclerViewAdapter adapter = new CountryRecyclerViewAdapter(requireContext(), newList);
+        getLocation(newList, adapter); // this is to get current current country location and move that country to top of the list in slider layout
+
         RecyclerView recyclerView = view.findViewById(R.id.recycler_view);
         recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
         recyclerView.setAdapter(adapter);
@@ -172,8 +181,57 @@ public class Fragment_Trending extends Fragment {
     }
 
 
+    private void getLocation(ArrayList<CountryInfo_Model> newList, CountryRecyclerViewAdapter adapter) {
+        FusedLocationProviderClient fusedLocationClient = LocationServices.getFusedLocationProviderClient(context);
+
+        if (ActivityCompat.checkSelfPermission(context, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            return;
+        }
+        fusedLocationClient.getLastLocation()
+                .addOnSuccessListener((Activity) context, location -> {
+                    if (location != null) {
+                        // Use the location data
+                        double latitude = location.getLatitude();
+                        double longitude = location.getLongitude();
+
+                        // Call reverse geocoding to get the city and country
+                        getAddressFromLocation(latitude, longitude, newList,  adapter);
+                    }
+                });
+
+
+    }
+
+    private void getAddressFromLocation(double latitude, double longitude, ArrayList<CountryInfo_Model> newList, CountryRecyclerViewAdapter adapter) {
+        Geocoder geocoder = new Geocoder(context, Locale.getDefault());
+        try {
+            List<Address> addresses = geocoder.getFromLocation(latitude, longitude, 1);
+            if (addresses.size() > 0) {
+                SplashScreen.currentCity = addresses.get(0).getLocality();
+                SplashScreen.currentCountry = addresses.get(0).getCountryName();
+                // Now you have the city and country information
+
+                int fromIndex = -1;
+                for (int i = 0; i < newList.size(); i++) {
+                    CountryInfo_Model countryInfoModel1 = newList.get(i);
+                    if (SplashScreen.currentCountry.equals(countryInfoModel1.getCountry())) {
+                        fromIndex = i; // Index of the item to move
+                    }
+                }
+                if (fromIndex != -1) {
+                    CountryInfo_Model countryInfoModel2 = newList.remove(fromIndex);
+                    newList.add(1, countryInfoModel2);
+                    adapter.notifyDataSetChanged();
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
 
 }
+
 
 class CountryRecyclerViewAdapter extends RecyclerView.Adapter<CountryRecyclerViewAdapter.ViewHolder> {
 
@@ -201,8 +259,11 @@ class CountryRecyclerViewAdapter extends RecyclerView.Adapter<CountryRecyclerVie
             Drawable drawable = context.getResources().getDrawable(R.drawable.earth);
             holder.flagurl.setImageDrawable(drawable);
         } else {
-            new DownloadAndDisplaySvgTask(holder.flagurl).execute(countryInfoModel.getFlagUrl());
+
+            loadImageview(holder.flagurl, countryInfoModel.getCountry(), context);
+
         }
+
         if (countryInfoModel.isSelected()) {
             holder.counrtyCard.setCardBackgroundColor(ContextCompat.getColor(context, R.color.themeColorExtralight));
             holder.countryName.setTextColor(Color.WHITE);
@@ -226,11 +287,41 @@ class CountryRecyclerViewAdapter extends RecyclerView.Adapter<CountryRecyclerVie
                 countryInfoModel.setSelected(true);
                 Fragment_Trending.selectedCountry = countryInfoModel.getCountry();
                 notifyDataSetChanged(); // Notify adapter to refresh the UI
-                loadDatabase_Country(countryInfoModel.getCountry(),holder.counrtyCard);
+                loadDatabase_Country(countryInfoModel.getCountry(), holder.counrtyCard);
+
+
+                if (Fragment_Trending.selectedCountry.equals("All")) {
+                    Drawable drawable = context.getResources().getDrawable(R.drawable.earth);
+                    Fragment_Trending.flagIcon.setImageDrawable(drawable);
+                    Fragment_Trending.countryName.setText("Region");
+                } else {
+                    loadImageview(Fragment_Trending.flagIcon, Fragment_Trending.selectedCountry, context);
+                    Fragment_Trending.countryName.setText(countryInfoModel.getCountry());
+
+                }
             }
         });
 
     }
+
+    private void loadImageview(CircleImageView flagurl, String country, Context context) {
+        try {
+            // Replace "image.jpg" with the actual filename and path within the assets folder
+            InputStream inputStream = context.getAssets().open("countryFlag/" + country.replaceAll(" ", "-") + ".png");
+
+            // Decode the input stream into a Bitmap
+            Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
+
+            // Set the Bitmap to the ImageView
+            flagurl.setImageBitmap(bitmap);
+
+            // Close the input stream when done
+            inputStream.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
 
     private void loadDatabase_Country(String selectedCountry, CardView counrtyCard) {
 
@@ -301,7 +392,6 @@ class CountryRecyclerViewAdapter extends RecyclerView.Adapter<CountryRecyclerVie
         }).start();
 
 
-
     }
 
 
@@ -324,52 +414,6 @@ class CountryRecyclerViewAdapter extends RecyclerView.Adapter<CountryRecyclerVie
     }
 }
 
-class DownloadAndDisplaySvgTask extends AsyncTask<String, Void, Bitmap> {
-    private final ImageView imageView;
-
-    DownloadAndDisplaySvgTask(ImageView imageView) {
-        this.imageView = imageView;
-    }
-
-    @Override
-    protected Bitmap doInBackground(String... params) {
-        String imageUrl = params[0];
-
-        try {
-            // Download the SVG image from the URL
-            HttpURLConnection connection = (HttpURLConnection) new URL(imageUrl).openConnection();
-            connection.connect();
-            InputStream inputStream = connection.getInputStream();
-
-            // Load SVG image using AndroidSVG
-            SVG svg = SVG.getFromInputStream(inputStream);
-
-            // Render SVG to a Bitmap
-            Picture picture = svg.renderToPicture();
-            PictureDrawable pictureDrawable = new PictureDrawable(picture);
-            Bitmap bitmap = Bitmap.createBitmap(
-                    pictureDrawable.getIntrinsicWidth(),
-                    pictureDrawable.getIntrinsicHeight(),
-                    Bitmap.Config.ARGB_8888
-            );
-            Canvas canvas = new Canvas(bitmap);
-            canvas.drawPicture(picture);
-
-            return bitmap;
-        } catch (IOException | SVGParseException e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
-
-    @Override
-    protected void onPostExecute(Bitmap result) {
-        if (result != null && imageView != null) {
-            // Display the Bitmap in the ImageView
-            imageView.setImageBitmap(result);
-        }
-    }
-}
 
 
 

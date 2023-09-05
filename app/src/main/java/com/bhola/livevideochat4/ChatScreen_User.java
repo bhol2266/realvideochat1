@@ -783,8 +783,9 @@ class ChatsAdapter extends RecyclerView.Adapter {
                             }
                         }
 
-                        ImageViewerDialog dialog = new ImageViewerDialog(context, imageList, index);
-                        dialog.show();
+
+//                        ImageViewerDialog dialog = new ImageViewerDialog(context, imageList, index, screenWidth, screenHeight);
+//                        dialog.show();
 
                     }
                 });

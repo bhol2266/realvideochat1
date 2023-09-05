@@ -5,25 +5,22 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.core.view.WindowInsetsControllerCompat;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentTransaction;
 import androidx.viewpager2.widget.ViewPager2;
 
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.database.Cursor;
 import android.graphics.Color;
-import android.graphics.PorterDuff;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.InsetDrawable;
-import android.media.MediaPlayer;
+import android.location.Address;
+import android.location.Geocoder;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -35,22 +32,22 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.Manifest;
 
-import com.google.android.material.badge.BadgeDrawable;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 
+import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.Locale;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -61,19 +58,19 @@ public class MainActivity extends AppCompatActivity {
     public static int unreadMessage_count;
     public static ViewPager2 viewPager2;
     com.facebook.ads.InterstitialAd facebook_IntertitialAds;
-
+    private static final int LOCATION_PERMISSION_REQUEST_CODE = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 //        fullscreenMode();
+        getUserLocation();
 
 
         if (SplashScreen.Ads_State.equals("active")) {
             showAds();
         }
-
 
         Button startVideoBtn = findViewById(R.id.startVideoBtn);
         startVideoBtn.setOnClickListener(new View.OnClickListener() {
@@ -91,8 +88,17 @@ public class MainActivity extends AppCompatActivity {
         askForNotificationPermission(); //Android 13 and higher
 
 
-
     }
+
+    private void getUserLocation() {
+
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+        } else {
+            // Permission not granted, request it
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION_PERMISSION_REQUEST_CODE);
+        }
+    }
+
 
 
     private void initializeBottonFragments() {
@@ -293,6 +299,14 @@ public class MainActivity extends AppCompatActivity {
                 // their decision.
             }
         }
+        if (requestCode == LOCATION_PERMISSION_REQUEST_CODE) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // Permission granted, proceed with location-related tasks
+                // e.g., retrieve location, get country, and city information
+            } else {
+                // Permission denied, handle accordingly (e.g., show a message to the user)
+            }
+        }
     }
 
     private void askForNotificationPermission() {
@@ -394,10 +408,6 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-    }
 
     private void showAds() {
         if (SplashScreen.Ad_Network_Name.equals("admob")) {
