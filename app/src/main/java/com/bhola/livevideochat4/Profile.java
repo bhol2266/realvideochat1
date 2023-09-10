@@ -1,15 +1,5 @@
 package com.bhola.livevideochat4;
 
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.cardview.widget.CardView;
-import androidx.core.view.WindowCompat;
-import androidx.core.view.WindowInsetsCompat;
-import androidx.core.view.WindowInsetsControllerCompat;
-import androidx.recyclerview.widget.GridLayoutManager;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -26,16 +16,22 @@ import android.support.annotation.NonNull;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.OrientationEventListener;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.Window;
 import android.view.WindowManager;
 import android.widget.GridLayout;
 import android.widget.ImageView;
-import android.widget.RatingBar;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.cardview.widget.CardView;
+import androidx.core.view.WindowCompat;
+import androidx.core.view.WindowInsetsCompat;
+import androidx.core.view.WindowInsetsControllerCompat;
+import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.airbnb.lottie.LottieAnimationView;
 import com.google.common.reflect.TypeToken;
@@ -64,6 +60,7 @@ public class Profile extends AppCompatActivity {
         if (SplashScreen.Ads_State.equals("active")) {
 //            showAds();
         }
+
         setContentView(R.layout.activity_profile_girl);
 
 //        fullscreenMode();
@@ -71,17 +68,16 @@ public class Profile extends AppCompatActivity {
         getGirlProfile_DB();
 
         actionbar();
-        
+
     }
-
-
 
 
     private void bindDetails() {
         ImageView profileImage = findViewById(R.id.profileImage);
         Picasso.get().load(model_profile.getProfilePhoto()).into(profileImage);
 
-
+        TextView id = findViewById(R.id.id);
+        id.setText(convertUsernameto_number(model_profile.getUsername()));
         TextView profileName = findViewById(R.id.profileName);
         profileName.setText(model_profile.getName());
 
@@ -140,6 +136,39 @@ public class Profile extends AppCompatActivity {
 
 
     }
+
+    private String convertUsernameto_number(String username) {
+
+        long numericValue = 0;
+
+        // Convert letters to their numeric values based on position in the alphabet
+        for (char c : username.toCharArray()) {
+            if (Character.isLetter(c)) {
+                char lowercaseChar = Character.toLowerCase(c);
+                int position = lowercaseChar - 'a' + 1;
+                numericValue = numericValue * 26 + position;
+            }
+        }
+
+        // Extract numeric digits and append them to the numeric value
+        for (char c : username.toCharArray()) {
+            if (Character.isDigit(c)) {
+                int digitValue = Character.getNumericValue(c);
+                numericValue = numericValue * 10 + digitValue;
+            }
+        }
+
+
+        String stringValue = Long.toString(numericValue);
+        // Check if the string has more than 6 digits
+        if (stringValue.length() > 6) {
+            // Truncate the string to 6 digits
+            stringValue = stringValue.substring(0, 6);
+        }
+        return stringValue.replace("-","");
+    }
+
+
 
     private void actionbar() {
         ImageView backArrow = findViewById(R.id.backArrow);
@@ -374,8 +403,6 @@ public class Profile extends AppCompatActivity {
 //        int cardViewWidth = screenWidth / numColumns;
 
 
-
-
         for (int i = 0; i < imageList.size(); i++) {
 
 
@@ -392,9 +419,6 @@ public class Profile extends AppCompatActivity {
 
 
 // Load the image with Picasso
-
-
-
 
 
         }
@@ -439,8 +463,7 @@ class ProfileGirlImageAdapter extends RecyclerView.Adapter<ProfileGirlImageAdapt
     @NonNull
     @Override
     public ImageViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.profile_image_item, parent, false);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.profile_image_item, parent, false);
         return new ImageViewHolder(view);
     }
 
@@ -449,9 +472,7 @@ class ProfileGirlImageAdapter extends RecyclerView.Adapter<ProfileGirlImageAdapt
         Map<String, String> imageItem = imageList.get(position);
 //        holder.bind(imageItem);
 
-        Picasso.get()
-                .load(imageItem.get("url"))
-                .resize(150, 0) // Set the width in pixels and let Picasso calculate the height
+        Picasso.get().load(imageItem.get("url")).resize(150, 0) // Set the width in pixels and let Picasso calculate the height
                 .into(holder.imageView);
 
         int widthInPixels = holder.imageView.getWidth(); // Get the current width
@@ -484,12 +505,14 @@ class ProfileGirlImageAdapter extends RecyclerView.Adapter<ProfileGirlImageAdapt
                 // Decrease the screen width by 15%
                 int screenWidth = (int) (originalScreenWidth * 0.85);
 
-                ImageViewerDialog dialog = new ImageViewerDialog(context, (ArrayList<Map<String, String>>) imageList, holder.getAbsoluteAdapterPosition(), screenWidth, screenHeight);
-                dialog.show();
+                AppCompatActivity activity = (AppCompatActivity) v.getContext();
+                Fragment_LargePhotoViewer fragment = Fragment_LargePhotoViewer.newInstance(context, (ArrayList<Map<String, String>>) imageList, holder.getAbsoluteAdapterPosition(), screenWidth, screenHeight);
+                activity.getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, fragment) // Replace with your container ID
+                        .addToBackStack(null) // Optional, for back navigation
+                        .commit();
             }
         });
     }
-
 
 
     @Override

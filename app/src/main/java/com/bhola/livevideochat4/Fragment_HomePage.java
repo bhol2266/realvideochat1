@@ -62,15 +62,7 @@ public class Fragment_HomePage extends Fragment {
     Context context;
     AlertDialog permissionDialog;
 
-
-    ActivityResultLauncher<String[]> mPermissionResultLauncher;
-    private boolean isCameraPermissionGranted;
-    private boolean isMicrophonePermissionGranted;
     private String[] PERMISSIONS;
-
-
-    private static final int CAMERA_PERMISSION_REQUEST_CODE = 100;
-    private static final int MICROPHONE_PERMISSION_REQUEST_CODE = 101;
 
 
     public Fragment_HomePage() {

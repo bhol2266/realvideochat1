@@ -80,7 +80,7 @@ public class Fragment_Trending extends Fragment {
                 getChildFragmentManager().beginTransaction().replace(R.id.fragment_container, fragment, "HOT").addToBackStack(null).commit();
 
 
-                float textSizeInDp = 23; // Replace with your desired text size in dp
+                float textSizeInDp = 25; // Replace with your desired text size in dp
                 float scale = getResources().getDisplayMetrics().density;
                 int textSizeInPixels = (int) (textSizeInDp * scale + 0.5f);
                 int textSizeInPixels2 = (int) (16 * scale + 0.5f);
@@ -108,7 +108,7 @@ public class Fragment_Trending extends Fragment {
                 getChildFragmentManager().beginTransaction().replace(R.id.fragment_container, fragment, "NEARBY").addToBackStack(null).commit();
 
 
-                float textSizeInDp = 23; // Replace with your desired text size in dp
+                float textSizeInDp = 25; // Replace with your desired text size in dp
                 float scale = getResources().getDisplayMetrics().density;
                 int textSizeInPixels = (int) (textSizeInDp * scale + 0.5f);
                 int textSizeInPixels2 = (int) (16 * scale + 0.5f);

@@ -10,12 +10,13 @@ import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-
 import android.graphics.drawable.Drawable;
 import android.location.Address;
 import android.location.Geocoder;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,11 +24,15 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
 import androidx.core.app.ActivityCompat;
-import androidx.core.view.GravityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.core.widget.NestedScrollView;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
@@ -60,7 +65,8 @@ public class Fragment_Hot extends Fragment {
     SliderAdapter sliderAdapter;
     public static ArrayList<Model_Profile> girlsList;
     ArrayList<Model_Profile> girlsList_slider;
-    int currentItems, totalItems, scrollOutItems;
+    private static final int LOCATION_PERMISSION_REQUEST_CODE = 1;
+    final int NOTIFICATION_REQUEST_CODE = 112;
     Boolean isScrolling = false;
     GridLayoutManager layoutManager;
     public static SwipeRefreshLayout swipeRefreshLayout;
@@ -69,6 +75,7 @@ public class Fragment_Hot extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
+        getUserLocation();
 
         view = inflater.inflate(R.layout.fragment__hot_page, container, false);
         context = getActivity();
@@ -203,7 +210,7 @@ public class Fragment_Hot extends Fragment {
 
 
         adapter = new GirlsCardAdapter(context, girlsList);
-        getLocation(girlsList, adapter); // this is to get current current country location and move that country to top of the list in slider layout
+        getLocation(); // this is to get current current country location and move that country to top of the list in slider layout
 
 
         layoutManager = new GridLayoutManager(context, 2);
@@ -299,7 +306,7 @@ public class Fragment_Hot extends Fragment {
     }
 
 
-    private void getLocation(ArrayList<Model_Profile> newList, GirlsCardAdapter adapter) {
+    private void getLocation() {
         FusedLocationProviderClient fusedLocationClient = LocationServices.getFusedLocationProviderClient(context);
 
         if (ActivityCompat.checkSelfPermission(context, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -313,14 +320,14 @@ public class Fragment_Hot extends Fragment {
                         double longitude = location.getLongitude();
 
                         // Call reverse geocoding to get the city and country
-                        getAddressFromLocation(latitude, longitude, newList, adapter);
+                        getAddressFromLocation(latitude, longitude);
                     }
                 });
 
 
     }
 
-    private void getAddressFromLocation(double latitude, double longitude, ArrayList<Model_Profile> newList, GirlsCardAdapter adapter) {
+    private void getAddressFromLocation(double latitude, double longitude) {
         Geocoder geocoder = new Geocoder(context, Locale.getDefault());
         try {
             List<Address> addresses = geocoder.getFromLocation(latitude, longitude, 1);
@@ -328,12 +335,12 @@ public class Fragment_Hot extends Fragment {
                 SplashScreen.currentCity = addresses.get(0).getLocality();
                 SplashScreen.currentCountry = addresses.get(0).getCountryName();
                 // Now you have the city and country information
+                Log.d(SplashScreen.TAG, "getAddressFromLocation: " + SplashScreen.currentCountry);
 
-                for (int i = 0; i < newList.size(); i++) {
-                    Model_Profile modelProfile = newList.get(i);
-                    if (SplashScreen.currentCountry.equals(modelProfile.getFrom())) {
-
-                        loadDatabase_Country(modelProfile.getFrom());
+                for (int i = 0; i < SplashScreen.countryList.size(); i++) {
+                    CountryInfo_Model countryInfo_model = SplashScreen.countryList.get(i);
+                    if (SplashScreen.currentCountry.equalsIgnoreCase(countryInfo_model.getCountry().trim())) {
+                        loadDatabase_Country(countryInfo_model.getCountry().trim());
                     }
                 }
 
@@ -389,7 +396,12 @@ public class Fragment_Hot extends Fragment {
 
                         // Create a new Model_Profile object and populate it
                         Model_Profile model_profile = new Model_Profile(Username, Name, Country, Languages, Age, InterestedIn, BodyType, Specifics, Ethnicity, Hair, EyeColor, Subculture, profilePhoto, coverPhoto, Interests, images, videos);
-                        Fragment_Hot.girlsList.add(model_profile);
+                        if (model_profile.getImages().size() != 0) {
+                            Fragment_Hot.girlsList.add(0, model_profile);
+
+                        } else {
+                            Fragment_Hot.girlsList.add(model_profile);
+                        }
                     } while (cursor.moveToNext());
 
                 }
@@ -401,8 +413,8 @@ public class Fragment_Hot extends Fragment {
                         new Handler().postDelayed(new Runnable() {
                             @Override
                             public void run() {
-                                Fragment_Hot.adapter.notifyDataSetChanged();
 
+                                Fragment_Hot.adapter.notifyDataSetChanged();
                             }
                         }, 200);
 
@@ -414,13 +426,53 @@ public class Fragment_Hot extends Fragment {
 
     }
 
+    private void askForNotificationPermission() {
+        Toast.makeText(context, "Im here", Toast.LENGTH_SHORT).show();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(requireActivity(), Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions((Activity) requireActivity(), new String[]{Manifest.permission.POST_NOTIFICATIONS}, NOTIFICATION_REQUEST_CODE);
+
+            }
+        }
+    }
+
+    private void getUserLocation() {
+
+        if (ContextCompat.checkSelfPermission(requireActivity(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+        } else {
+            // Permission not granted, request it
+//            ActivityCompat.requestPermissions((Activity) requireActivity(), new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION_PERMISSION_REQUEST_CODE);
+
+            requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION);
+
+        }
+    }
+
+
+    private ActivityResultLauncher<String> requestPermissionLauncher = registerForActivityResult(
+            new ActivityResultContracts.RequestPermission(),
+            new ActivityResultCallback<Boolean>() {
+                @Override
+                public void onActivityResult(Boolean result) {
+                    Log.d(SplashScreen.TAG, "requestCode: " + result);
+                    if (result) {
+                        getLocation();
+                        askForNotificationPermission();
+                    } else {
+                        // PERMISSION NOT GRANTED
+                    }
+                }
+            }
+    );
+
+
 }
 
 
 class GirlsCardAdapter extends RecyclerView.Adapter<GirlsCardAdapter.GridViewHolder> {
 
-    private List<Model_Profile> girlsList;
-    private Context context;
+    private final List<Model_Profile> girlsList;
+    private final Context context;
     private ObjectAnimator breatheAnimator;
 
 

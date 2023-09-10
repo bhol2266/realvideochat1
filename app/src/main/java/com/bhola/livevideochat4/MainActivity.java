@@ -52,58 +52,38 @@ import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity {
 
-    private int CAMERA_PERMISSION_REQUEST_CODE = 123;
-    final int NOTIFICATION_REQUEST_CODE = 112;
     public static TextView badge_text;
     public static int unreadMessage_count;
     public static ViewPager2 viewPager2;
     com.facebook.ads.InterstitialAd facebook_IntertitialAds;
-    private static final int LOCATION_PERMISSION_REQUEST_CODE = 1;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 //        fullscreenMode();
-        getUserLocation();
 
 
         if (SplashScreen.Ads_State.equals("active")) {
             showAds();
         }
 
-        Button startVideoBtn = findViewById(R.id.startVideoBtn);
-        startVideoBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (checkSelfPermission(android.Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
-                    requestPermissions(new String[]{Manifest.permission.CAMERA}, CAMERA_PERMISSION_REQUEST_CODE);
-                } else {
-                    startActivity(new Intent(MainActivity.this, CameraActivity.class));
-                }
-            }
-        });
 
         initializeBottonFragments();
-        askForNotificationPermission(); //Android 13 and higher
 
 
     }
 
-    private void getUserLocation() {
 
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-        } else {
-            // Permission not granted, request it
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION_PERMISSION_REQUEST_CODE);
-        }
-    }
 
 
 
     private void initializeBottonFragments() {
         viewPager2 = findViewById(R.id.viewpager);
         viewPager2.setAdapter(new PagerAdapter(MainActivity.this));
+        viewPager2.setOffscreenPageLimit(5);
+
         TabLayout tabLayout = findViewById(R.id.tabLayout);
 
 
@@ -273,71 +253,8 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == CAMERA_PERMISSION_REQUEST_CODE) {
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                // Camera permission granted, proceed with camera setup
-                startActivity(new Intent(MainActivity.this, CameraActivity.class));
-            } else {
-                // Camera permission denied, handle it gracefully (e.g., display a message or disable camera functionality)
-                Toast.makeText(this, "Camera permission denied", Toast.LENGTH_SHORT).show();
-            }
-        }
-
-        if (requestCode == NOTIFICATION_REQUEST_CODE) {
-            if (grantResults.length > 0 &&
-                    grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                // Permission is granted. Continue the action or workflow
-                // in your app.
-            } else {
-                // Explain to the user that the feature is unavailable because
-                // the feature requires a permission that the user has denied.
-                // At the same time, respect the user's decision. Don't link to
-                // system settings in an effort to convince the user to change
-                // their decision.
-            }
-        }
-        if (requestCode == LOCATION_PERMISSION_REQUEST_CODE) {
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                // Permission granted, proceed with location-related tasks
-                // e.g., retrieve location, get country, and city information
-            } else {
-                // Permission denied, handle accordingly (e.g., show a message to the user)
-            }
-        }
-    }
-
-    private void askForNotificationPermission() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
-                requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS);
-
-                new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        Toast.makeText(MainActivity.this, "Allow Notification for Daily new Stories ", Toast.LENGTH_LONG).show();
-                    }
-                }, 1000);
-            }
-        }
-    }
 
 
-    private final ActivityResultLauncher<String> requestPermissionLauncher =
-            registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
-                if (isGranted) {
-                    // Permission is granted. Continue the action or workflow in your
-                    // app.
-                } else {
-                    // Explain to the user that the feature is unavailable because the
-                    // feature requires a permission that the user has denied. At the
-                    // same time, respect the user's decision. Don't link to system
-                    // settings in an effort to convince the user to change their
-                    // decision.
-                }
-            });
 
 
     @Override
