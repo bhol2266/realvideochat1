@@ -1,6 +1,7 @@
 {
   "project_info": {
     "project_number": "634922729472",
+    "firebase_url": "https://live-video-chat-4-default-rtdb.europe-west1.firebasedatabase.app",
     "project_id": "live-video-chat-4",
     "storage_bucket": "live-video-chat-4.appspot.com"
   },
@@ -14,7 +15,31 @@
       },
       "oauth_client": [
         {
-          "client_id": "634922729472-tcjgdktumpge4h03as6adkcbt4shufc7.apps.googleusercontent.com",
+          "client_id": "634922729472-ahpa6f7gifk44opvtcfh0ti9pmtc6dof.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.bhola.livevideochat4",
+            "certificate_hash": "2178d6d27656547625ead1a13a393c7a0b1a54da"
+          }
+        },
+        {
+          "client_id": "634922729472-etn4j3e22i3cvno5ra14trnrsofk2rfe.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.bhola.livevideochat4",
+            "certificate_hash": "ea9ebb17d0b5b9dbe882c4492b6f40153960aabd"
+          }
+        },
+        {
+          "client_id": "634922729472-t7s7vucihggpug6bsf7178s4d4tq8vgi.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.bhola.livevideochat4",
+            "certificate_hash": "4374a14dca01de7a53411e0f49949025c68f165c"
+          }
+        },
+        {
+          "client_id": "634922729472-92d1gpuc57nqb16aqlvs697d8sv1hjc9.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
@@ -27,7 +52,7 @@
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "634922729472-tcjgdktumpge4h03as6adkcbt4shufc7.apps.googleusercontent.com",
+              "client_id": "634922729472-92d1gpuc57nqb16aqlvs697d8sv1hjc9.apps.googleusercontent.com",
               "client_type": 3
             }
           ]

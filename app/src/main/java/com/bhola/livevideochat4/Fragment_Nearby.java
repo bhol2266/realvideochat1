@@ -2,17 +2,20 @@ package com.bhola.livevideochat4;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
-import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import androidx.cardview.widget.CardView;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -66,7 +69,6 @@ public class Fragment_Nearby extends Fragment {
         recyclerView.setAdapter(adapter);
 
 
-
     }
 
     private void loadDatabase_Country(String selectedCountry) {
@@ -93,7 +95,8 @@ public class Fragment_Nearby extends Fragment {
                         String Subculture = cursor.getString(11);
                         String profilePhoto = SplashScreen.decryption(cursor.getString(13));
                         String coverPhoto = SplashScreen.decryption(cursor.getString(14));
-
+                        int censored = cursor.getInt(17);
+                        int like = cursor.getInt(18);
 
                         // Convert JSON strings back to arrays/lists using Gson
                         Gson gson = new Gson();
@@ -112,7 +115,7 @@ public class Fragment_Nearby extends Fragment {
                         }.getType());
 
                         // Create a new Model_Profile object and populate it
-                        Model_Profile model_profile = new Model_Profile(Username, Name, Country, Languages, Age, InterestedIn, BodyType, Specifics, Ethnicity, Hair, EyeColor, Subculture, profilePhoto, coverPhoto, Interests, images, videos);
+                        Model_Profile model_profile = new Model_Profile(Username, Name, Country, Languages, Age, InterestedIn, BodyType, Specifics, Ethnicity, Hair, EyeColor, Subculture, profilePhoto, coverPhoto, Interests, images, videos,censored,like);
                         girlsList.add(model_profile);
 
                     } while (cursor.moveToNext());
@@ -167,7 +170,8 @@ public class Fragment_Nearby extends Fragment {
                         String Subculture = cursor.getString(11);
                         String profilePhoto = SplashScreen.decryption(cursor.getString(13));
                         String coverPhoto = SplashScreen.decryption(cursor.getString(14));
-
+                        int censored = cursor.getInt(17);
+                        int like = cursor.getInt(18);
 
                         // Convert JSON strings back to arrays/lists using Gson
                         Gson gson = new Gson();
@@ -186,7 +190,7 @@ public class Fragment_Nearby extends Fragment {
                         }.getType());
 
                         // Create a new Model_Profile object and populate it
-                        Model_Profile model_profile = new Model_Profile(Username, Name, Country, Languages, Age, InterestedIn, BodyType, Specifics, Ethnicity, Hair, EyeColor, Subculture, profilePhoto, coverPhoto, Interests, images, videos);
+                        Model_Profile model_profile = new Model_Profile(Username, Name, Country, Languages, Age, InterestedIn, BodyType, Specifics, Ethnicity, Hair, EyeColor, Subculture, profilePhoto, coverPhoto, Interests, images, videos,censored,like);
                         girlsList.add(model_profile);
                     } while (cursor.moveToNext());
 
@@ -244,9 +248,51 @@ class NearByAdapter extends RecyclerView.Adapter<NearByAdapter.ViewHolder> {
         Model_Profile model_profile = girlsList.get(position);
         Picasso.get().load(model_profile.getProfilePhoto()).into(holder.profileImage);
 
-        holder.age.setText(model_profile.getAge().replace("years old","").trim());
+        holder.age.setText(model_profile.getAge().replace("years old", "").trim());
         holder.location.setText(model_profile.getFrom());
         holder.name.setText(model_profile.getName());
+
+        holder.profileImage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(context, Profile.class);
+                intent.putExtra("userName", model_profile.getUsername());
+                intent.putExtra("online", true);
+                context.startActivity(intent);
+            }
+        });
+        holder.message.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                showCustomToast();
+            }
+        });
+
+        holder.videocall.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                context.startActivity(new Intent(context, VipMembership.class));
+            }
+        });
+    }
+
+
+    private void showCustomToast() {
+        LayoutInflater inflater = LayoutInflater.from(context);
+        View layout = inflater.inflate(R.layout.custom_toast_layout, null);
+
+        TextView secondMessage = layout.findViewById(R.id.secondMessage);
+        secondMessage.setVisibility(View.GONE);
+        TextView profileName = layout.findViewById(R.id.profileName);
+        profileName.setText("nice to meet you");
+        // You can customize the text and other properties of the view elements here
+
+        Toast toast = new Toast(context);
+        toast.setGravity(Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL, 0, 130); // Adjust the margin (bottom) here
+        toast.setDuration(Toast.LENGTH_LONG);
+        toast.setView(layout);
+        toast.show();
+
     }
 
     @Override
@@ -257,6 +303,8 @@ class NearByAdapter extends RecyclerView.Adapter<NearByAdapter.ViewHolder> {
     public class ViewHolder extends RecyclerView.ViewHolder {
         ImageView profileImage;
         TextView name, age, location;
+        CardView message;
+        ImageView videocall;
 
         public ViewHolder(View itemView) {
             super(itemView);
@@ -264,6 +312,8 @@ class NearByAdapter extends RecyclerView.Adapter<NearByAdapter.ViewHolder> {
             name = itemView.findViewById(R.id.name);
             age = itemView.findViewById(R.id.age);
             location = itemView.findViewById(R.id.location);
+            message = itemView.findViewById(R.id.message);
+            videocall = itemView.findViewById(R.id.videocall);
         }
     }
 }

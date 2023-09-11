@@ -362,7 +362,7 @@ public class Fragment_Messenger extends Fragment {
                         adapter.notifyItemInserted(0);
 
                         String activityName = MessengeItemsAdapter.getCurrentlyRunningActivity(context);
-                        if (activityName != null && activityName.equals("com.bhola.livevideochat.MainActivity")) {
+                        if (activityName != null && activityName.equals("com.bhola.livevideochat4.MainActivity")) {
                             playSentAudio();
                         }
 
@@ -387,7 +387,7 @@ public class Fragment_Messenger extends Fragment {
                     adapter.notifyItemInserted(0);
 
                     String activityName = MessengeItemsAdapter.getCurrentlyRunningActivity(context);
-                    if (activityName != null && activityName.equals("com.bhola.livevideochat.MainActivity")) {
+                    if (activityName != null && activityName.equals("com.bhola.livevideochat4.MainActivity")) {
                         playSentAudio();
                     }
 
@@ -623,10 +623,10 @@ class MessengeItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
 
 
                                     String activityName = MessengeItemsAdapter.getCurrentlyRunningActivity(context);
-                                    if (activityName != null && activityName.equals("com.bhola.livevideochat.MainActivity")) {
+                                    if (activityName != null && activityName.equals("com.bhola.livevideochat4.MainActivity")) {
                                         Fragment_Messenger.playSentAudio();
                                     }
-                                    if (activityName != null && activityName.equals("com.bhola.livevideochat.ChatScreen_User")) {
+                                    if (activityName != null && activityName.equals("com.bhola.livevideochat4.ChatScreen_User")) {
                                         if (Fragment_Messenger.currentActiveUser.equals(modelClass.getUserName())) {
                                             Fragment_Messenger.playSentAudio();
                                         }
@@ -732,7 +732,7 @@ class MessengeItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
     private void setMessageCount(ArrayList<UserBotMsg> userBotMsg, TextView messageCount, String userName) {
 
         String activityName = getCurrentlyRunningActivity(context);
-        if (Fragment_Messenger.currentActiveUser.equals(userName) && activityName != null && activityName.equals("com.bhola.livevideochat.ChatScreen_User")) {
+        if (Fragment_Messenger.currentActiveUser.equals(userName) && activityName != null && activityName.equals("com.bhola.livevideochat4.ChatScreen_User")) {
             messageCount.setVisibility(View.GONE);
             return; //this is because when we are in the chat screem and pressed back the message count is shwoing which should not show
         }
@@ -756,7 +756,7 @@ class MessengeItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
     private void setMessageCountQuestion(UserQuestionWithAns userQuestionWithAns, TextView messageCount, String userName) {
 
         String activityName = getCurrentlyRunningActivity(context);
-        if (Fragment_Messenger.currentActiveUser.equals(userName) && activityName != null && activityName.equals("com.bhola.livevideochat.ChatScreen_User")) {
+        if (Fragment_Messenger.currentActiveUser.equals(userName) && activityName != null && activityName.equals("com.bhola.livevideochat4.ChatScreen_User")) {
             messageCount.setVisibility(View.GONE);
             return; //this is because when we are in the chat screem and pressed back the message count is shwoing which should not show
         }

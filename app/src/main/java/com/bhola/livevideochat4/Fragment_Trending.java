@@ -31,7 +31,6 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.common.reflect.TypeToken;
@@ -104,6 +103,9 @@ public class Fragment_Trending extends Fragment {
         NearbyTextview.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                if(SplashScreen.App_updating.equals("active")){
+                    return;
+                }
                 Fragment_Nearby fragment = new Fragment_Nearby();
                 getChildFragmentManager().beginTransaction().replace(R.id.fragment_container, fragment, "NEARBY").addToBackStack(null).commit();
 
@@ -148,7 +150,9 @@ public class Fragment_Trending extends Fragment {
         openDrawer.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
+                if (SplashScreen.App_updating.equals("active")) {
+                    return;
+                }
                 if (drawerLayout.isDrawerOpen(GravityCompat.END)) {
                     drawerLayout.closeDrawer(GravityCompat.END);
                 } else {
@@ -195,7 +199,7 @@ public class Fragment_Trending extends Fragment {
                         double longitude = location.getLongitude();
 
                         // Call reverse geocoding to get the city and country
-                        getAddressFromLocation(latitude, longitude, newList,  adapter);
+                        getAddressFromLocation(latitude, longitude, newList, adapter);
                     }
                 });
 
@@ -348,7 +352,8 @@ class CountryRecyclerViewAdapter extends RecyclerView.Adapter<CountryRecyclerVie
                         String Subculture = cursor.getString(11);
                         String profilePhoto = SplashScreen.decryption(cursor.getString(13));
                         String coverPhoto = SplashScreen.decryption(cursor.getString(14));
-
+                        int censored = cursor.getInt(17);
+                        int like = cursor.getInt(18);
 
                         // Convert JSON strings back to arrays/lists using Gson
                         Gson gson = new Gson();
@@ -367,8 +372,12 @@ class CountryRecyclerViewAdapter extends RecyclerView.Adapter<CountryRecyclerVie
                         }.getType());
 
                         // Create a new Model_Profile object and populate it
-                        Model_Profile model_profile = new Model_Profile(Username, Name, Country, Languages, Age, InterestedIn, BodyType, Specifics, Ethnicity, Hair, EyeColor, Subculture, profilePhoto, coverPhoto, Interests, images, videos);
-                        Fragment_Hot.girlsList.add(model_profile);
+                        Model_Profile model_profile = new Model_Profile(Username, Name, Country, Languages, Age, InterestedIn, BodyType, Specifics, Ethnicity, Hair, EyeColor, Subculture, profilePhoto, coverPhoto, Interests, images, videos, censored, like);
+                        if (model_profile.getImages().size() != 0) {
+                            Fragment_Hot.girlsList.add(0, model_profile);
+                        } else {
+                            Fragment_Hot.girlsList.add(model_profile);
+                        }
                     } while (cursor.moveToNext());
 
                 }

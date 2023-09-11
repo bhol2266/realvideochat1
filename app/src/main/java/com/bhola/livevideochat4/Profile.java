@@ -19,6 +19,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.widget.Button;
 import android.widget.GridLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -68,7 +69,37 @@ public class Profile extends AppCompatActivity {
         getGirlProfile_DB();
 
         actionbar();
+    }
 
+    private void censoredBtn() {
+        Button censoredBtn = findViewById(R.id.censoredBtn);
+        if (model_profile.getCensored() == 0) {
+            censoredBtn.setBackgroundColor(getResources().getColor(R.color.themeColor));
+            censoredBtn.setText("Not Censored");
+        } else {
+            censoredBtn.setBackgroundColor(getResources().getColor(R.color.green)); // Assumes you have a green color defined in your resources
+            censoredBtn.setText("Censored");
+
+        }
+
+        censoredBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                if (model_profile.getCensored() == 0) {
+                    String res=new DatabaseHelper(Profile.this,SplashScreen.DB_NAME,SplashScreen.DB_VERSION,"GirlsProfile").updateCensored(model_profile.getUsername(),1);
+
+                    censoredBtn.setBackgroundColor(getResources().getColor(R.color.green));
+                    censoredBtn.setText("Censored");
+                } else {
+                    String res=new DatabaseHelper(Profile.this,SplashScreen.DB_NAME,SplashScreen.DB_VERSION,"GirlsProfile").updateCensored(model_profile.getUsername(),0);
+
+                    censoredBtn.setBackgroundColor(getResources().getColor(R.color.themeColor)); // Assumes you have a green color defined in your resources
+                    censoredBtn.setText("Not Censored");
+
+                }
+            }
+        });
     }
 
 
@@ -165,9 +196,8 @@ public class Profile extends AppCompatActivity {
             // Truncate the string to 6 digits
             stringValue = stringValue.substring(0, 6);
         }
-        return stringValue.replace("-","");
+        return stringValue.replace("-", "");
     }
-
 
 
     private void actionbar() {
@@ -328,9 +358,12 @@ public class Profile extends AppCompatActivity {
                     String Subculture = cursor.getString(11);
                     String profilePhoto = SplashScreen.decryption(cursor.getString(13));
                     String coverPhoto = SplashScreen.decryption(cursor.getString(14));
+                    int censored = cursor.getInt(17);
+                    int like = cursor.getInt(18);
 
                     // Convert JSON strings back to arrays/lists using Gson
                     Gson gson = new Gson();
+
 
                     String interestsJson = SplashScreen.decryption(cursor.getString(12));
                     List<Map<String, String>> Interests = gson.fromJson(interestsJson, new TypeToken<List<Map<String, String>>>() {
@@ -345,7 +378,7 @@ public class Profile extends AppCompatActivity {
                     }.getType());
 
                     // Create a new Model_Profile object and populate it
-                    model_profile = new Model_Profile(Username, Name, Country, Languages, Age, InterestedIn, BodyType, Specifics, Ethnicity, Hair, EyeColor, Subculture, profilePhoto, coverPhoto, Interests, images, videos);
+                    model_profile = new Model_Profile(Username, Name, Country, Languages, Age, InterestedIn, BodyType, Specifics, Ethnicity, Hair, EyeColor, Subculture, profilePhoto, coverPhoto, Interests, images, videos, censored, like);
                 }
                 cursor.close();
                 ((Activity) Profile.this).runOnUiThread(new Runnable() {
@@ -356,6 +389,8 @@ public class Profile extends AppCompatActivity {
                             public void run() {
                                 bindDetails();
                                 setImageinGridLayout();
+                                censoredBtn();
+
                             }
                         }, 200);
 

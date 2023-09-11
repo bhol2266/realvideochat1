@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-
+android:id="@+id/sliderlayout"
     android:layout_margin="5dp"
     android:orientation="vertical">
 
@@ -24,7 +24,7 @@
             android:layout_gravity="center"
             android:layout_height="fill_parent"
             android:scaleType="centerCrop"
-            android:src="@drawable/quality" />
+            android:src="@drawable/woman" />
 
     </androidx.cardview.widget.CardView>
 

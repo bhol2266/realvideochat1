@@ -67,8 +67,6 @@ public class SplashScreen extends AppCompatActivity {
     public static ArrayList<CountryInfo_Model> countryList;
 
     public static String exit_Refer_appNavigation = "inactive";
-    public static String Sex_Story = "inactive";
-    public static String Sex_Story_Switch_Open = "inactive";
     public static String Notification_ImageURL = "https://hotdesipics.co/wp-content/uploads/2022/06/Hot-Bangla-Boudi-Ki-Big-Boobs-Nangi-Selfies-_002.jpg";
     DatabaseReference url_mref;
     public static int Login_Times = 0;
@@ -207,13 +205,11 @@ public class SplashScreen extends AppCompatActivity {
                 public void onDataChange(@NonNull DataSnapshot snapshot) {
                     Refer_App_url2 = (String) snapshot.child("Refer_App_url2").getValue();
                     exit_Refer_appNavigation = (String) snapshot.child("switch_Exit_Nav").getValue();
-                    Sex_Story = (String) snapshot.child("Sex_Story").getValue();
-                    Sex_Story_Switch_Open = (String) snapshot.child("Sex_Story_Switch_Open").getValue();
                     Ads_State = (String) snapshot.child("Ads").getValue();
                     Ad_Network_Name = (String) snapshot.child("Ad_Network").getValue();
                     App_updating = (String) snapshot.child("App_updating").getValue();
                     Notification_ImageURL = (String) snapshot.child("Notification_ImageURL").getValue();
-//                    databaseURL = (String) snapshot.child("databaseURL").getValue();
+                    databaseURL = (String) snapshot.child("databaseURL").getValue();
 
 
                     if (animationCompleted) {
@@ -319,7 +315,7 @@ public class SplashScreen extends AppCompatActivity {
             }
 
             Model_Profile model_profile = new Model_Profile(Username, Name, From, Languages, Age, InterestedIn, BodyType, Specifics,
-                    Ethnicity, Hair, EyeColor, Subculture, profilePhoto, coverPhoto, interestArraylist, imagesArray, videosArraylist);
+                    Ethnicity, Hair, EyeColor, Subculture, profilePhoto, coverPhoto, interestArraylist, imagesArray, videosArraylist,0,0);
 
             String res = new DatabaseHelper(SplashScreen.this, DB_NAME, DB_VERSION, "Profiles").addProfiles(model_profile);
             Log.d(TAG, "onSuccess: " + res);

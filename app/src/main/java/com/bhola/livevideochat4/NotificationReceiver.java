@@ -24,7 +24,6 @@ public class NotificationReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
 
-        Log.d("TAGadsafdsa", "showNotification:"+"Im here");
 
         String userName = intent.getStringExtra("USERNAME");
         this.context = context;

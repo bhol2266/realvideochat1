@@ -22,7 +22,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -74,6 +76,7 @@ public class Fragment_Hot extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        setRetainInstance(true);
 
         getUserLocation();
 
@@ -86,6 +89,9 @@ public class Fragment_Hot extends Fragment {
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
+                if (SplashScreen.App_updating.equals("active")) {
+                    return;
+                }
                 Fragment_Trending.selectedCountry = "All";
                 girlsList.clear();
                 loadDatabase();
@@ -163,7 +169,8 @@ public class Fragment_Hot extends Fragment {
                         String Subculture = cursor.getString(11);
                         String profilePhoto = SplashScreen.decryption(cursor.getString(13));
                         String coverPhoto = SplashScreen.decryption(cursor.getString(14));
-
+                        int censored = cursor.getInt(17);
+                        int like = cursor.getInt(18);
 
                         // Convert JSON strings back to arrays/lists using Gson
                         Gson gson = new Gson();
@@ -182,7 +189,7 @@ public class Fragment_Hot extends Fragment {
                         }.getType());
 
                         // Create a new Model_Profile object and populate it
-                        Model_Profile model_profile = new Model_Profile(Username, Name, Country, Languages, Age, InterestedIn, BodyType, Specifics, Ethnicity, Hair, EyeColor, Subculture, profilePhoto, coverPhoto, Interests, images, videos);
+                        Model_Profile model_profile = new Model_Profile(Username, Name, Country, Languages, Age, InterestedIn, BodyType, Specifics, Ethnicity, Hair, EyeColor, Subculture, profilePhoto, coverPhoto, Interests, images, videos, censored, like);
                         girlsList_slider.add(model_profile);
                     } while (cursor.moveToNext());
 
@@ -191,6 +198,12 @@ public class Fragment_Hot extends Fragment {
                 getActivity().runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
+
+                        if (SplashScreen.App_updating.equals("active")) {
+                            if (girlsList_slider.size() > 4) {
+                                girlsList_slider.subList(4, girlsList_slider.size()).clear();
+                            }
+                        }
                         sliderAdapter.notifyDataSetChanged();
                     }
                 });
@@ -210,8 +223,7 @@ public class Fragment_Hot extends Fragment {
 
 
         adapter = new GirlsCardAdapter(context, girlsList);
-        getLocation(); // this is to get current current country location and move that country to top of the list in slider layout
-
+        getLocation();
 
         layoutManager = new GridLayoutManager(context, 2);
         recyclerView.setLayoutManager(layoutManager);
@@ -260,7 +272,8 @@ public class Fragment_Hot extends Fragment {
                         String Subculture = cursor.getString(11);
                         String profilePhoto = SplashScreen.decryption(cursor.getString(13));
                         String coverPhoto = SplashScreen.decryption(cursor.getString(14));
-
+                        int censored = cursor.getInt(17);
+                        int like = cursor.getInt(18);
 
                         // Convert JSON strings back to arrays/lists using Gson
                         Gson gson = new Gson();
@@ -279,7 +292,7 @@ public class Fragment_Hot extends Fragment {
                         }.getType());
 
                         // Create a new Model_Profile object and populate it
-                        Model_Profile model_profile = new Model_Profile(Username, Name, Country, Languages, Age, InterestedIn, BodyType, Specifics, Ethnicity, Hair, EyeColor, Subculture, profilePhoto, coverPhoto, Interests, images, videos);
+                        Model_Profile model_profile = new Model_Profile(Username, Name, Country, Languages, Age, InterestedIn, BodyType, Specifics, Ethnicity, Hair, EyeColor, Subculture, profilePhoto, coverPhoto, Interests, images, videos, censored, like);
                         girlsList.add(model_profile);
                     } while (cursor.moveToNext());
 
@@ -293,6 +306,11 @@ public class Fragment_Hot extends Fragment {
                         new Handler().postDelayed(new Runnable() {
                             @Override
                             public void run() {
+                                if (SplashScreen.App_updating.equals("active")) {
+                                    if (girlsList.size() > 6) {
+                                        girlsList.subList(6, girlsList.size()).clear();
+                                    }
+                                }
                                 adapter.notifyDataSetChanged();
                             }
                         }, 200);
@@ -307,6 +325,10 @@ public class Fragment_Hot extends Fragment {
 
 
     private void getLocation() {
+
+        if (SplashScreen.App_updating.equals("active")) {
+            return;
+        }
         FusedLocationProviderClient fusedLocationClient = LocationServices.getFusedLocationProviderClient(context);
 
         if (ActivityCompat.checkSelfPermission(context, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -335,7 +357,6 @@ public class Fragment_Hot extends Fragment {
                 SplashScreen.currentCity = addresses.get(0).getLocality();
                 SplashScreen.currentCountry = addresses.get(0).getCountryName();
                 // Now you have the city and country information
-                Log.d(SplashScreen.TAG, "getAddressFromLocation: " + SplashScreen.currentCountry);
 
                 for (int i = 0; i < SplashScreen.countryList.size(); i++) {
                     CountryInfo_Model countryInfo_model = SplashScreen.countryList.get(i);
@@ -376,7 +397,8 @@ public class Fragment_Hot extends Fragment {
                         String Subculture = cursor.getString(11);
                         String profilePhoto = SplashScreen.decryption(cursor.getString(13));
                         String coverPhoto = SplashScreen.decryption(cursor.getString(14));
-
+                        int censored = cursor.getInt(17);
+                        int like = cursor.getInt(18);
 
                         // Convert JSON strings back to arrays/lists using Gson
                         Gson gson = new Gson();
@@ -395,10 +417,9 @@ public class Fragment_Hot extends Fragment {
                         }.getType());
 
                         // Create a new Model_Profile object and populate it
-                        Model_Profile model_profile = new Model_Profile(Username, Name, Country, Languages, Age, InterestedIn, BodyType, Specifics, Ethnicity, Hair, EyeColor, Subculture, profilePhoto, coverPhoto, Interests, images, videos);
+                        Model_Profile model_profile = new Model_Profile(Username, Name, Country, Languages, Age, InterestedIn, BodyType, Specifics, Ethnicity, Hair, EyeColor, Subculture, profilePhoto, coverPhoto, Interests, images, videos, censored, like);
                         if (model_profile.getImages().size() != 0) {
                             Fragment_Hot.girlsList.add(0, model_profile);
-
                         } else {
                             Fragment_Hot.girlsList.add(model_profile);
                         }
@@ -413,7 +434,11 @@ public class Fragment_Hot extends Fragment {
                         new Handler().postDelayed(new Runnable() {
                             @Override
                             public void run() {
-
+                                if (SplashScreen.App_updating.equals("active")) {
+                                    if (girlsList.size() > 6) {
+                                        girlsList.subList(6, girlsList.size()).clear();
+                                    }
+                                }
                                 Fragment_Hot.adapter.notifyDataSetChanged();
                             }
                         }, 200);
@@ -427,7 +452,6 @@ public class Fragment_Hot extends Fragment {
     }
 
     private void askForNotificationPermission() {
-        Toast.makeText(context, "Im here", Toast.LENGTH_SHORT).show();
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (ContextCompat.checkSelfPermission(requireActivity(), Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
                 ActivityCompat.requestPermissions((Activity) requireActivity(), new String[]{Manifest.permission.POST_NOTIFICATIONS}, NOTIFICATION_REQUEST_CODE);
@@ -515,9 +539,12 @@ class GirlsCardAdapter extends RecyclerView.Adapter<GirlsCardAdapter.GridViewHol
 
                 Intent intent = new Intent(context, Profile.class);
                 intent.putExtra("userName", item.getUsername());
+                intent.putExtra("online", false);
                 context.startActivity(intent);
             }
         });
+
+        censoredBtn(item.getCensored(), item.getUsername(), holder.censoredBtn, holder.getAbsoluteAdapterPosition(), item);
 
 
     }
@@ -538,6 +565,57 @@ class GirlsCardAdapter extends RecyclerView.Adapter<GirlsCardAdapter.GridViewHol
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    private void censoredBtn(int censored, String username, Button censoredBtn, int absoluteAdapterPosition, Model_Profile item) {
+        if (censored == 0) {
+            censoredBtn.setBackgroundColor(context.getResources().getColor(R.color.themeColor));
+            censoredBtn.setText("Not Censored");
+        } else {
+            censoredBtn.setBackgroundColor(context.getResources().getColor(R.color.green)); // Assumes you have a green color defined in your resources
+            censoredBtn.setText("Censored");
+
+        }
+
+        censoredBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                if (censored == 0) {
+                    String res = new DatabaseHelper(context, SplashScreen.DB_NAME, SplashScreen.DB_VERSION, "GirlsProfile").updateCensored(username, 1);
+
+                    censoredBtn.setBackgroundColor(context.getResources().getColor(R.color.green));
+                    censoredBtn.setText("Censored");
+                    for (int i = 0; i < Fragment_Hot.girlsList.size(); i++) {
+                        if (Fragment_Hot.girlsList.get(i).getUsername().equals(username)) {
+                            Fragment_Hot.girlsList.get(i).setCensored(1);
+                        }
+                    }
+                } else {
+                    String res = new DatabaseHelper(context, SplashScreen.DB_NAME, SplashScreen.DB_VERSION, "GirlsProfile").updateCensored(username, 0);
+
+                    censoredBtn.setBackgroundColor(context.getResources().getColor(R.color.themeColor)); // Assumes you have a green color defined in your resources
+                    censoredBtn.setText("Not Censored");
+
+                    for (int i = 0; i < Fragment_Hot.girlsList.size(); i++) {
+                        if (Fragment_Hot.girlsList.get(i).getUsername().equals(username)) {
+                            Fragment_Hot.girlsList.get(i).setCensored(0);
+                        }
+                    }
+
+                }
+
+                new Handler().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+
+                        Fragment_Hot.adapter.notifyItemChanged(absoluteAdapterPosition);
+
+                    }
+                }, 500);
+
+            }
+        });
     }
 
 
@@ -569,6 +647,7 @@ class GirlsCardAdapter extends RecyclerView.Adapter<GirlsCardAdapter.GridViewHol
         TextView name;
         ImageView profile, hello, flag;
         CardView cardView1;
+        Button censoredBtn;
 
         public GridViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -577,6 +656,7 @@ class GirlsCardAdapter extends RecyclerView.Adapter<GirlsCardAdapter.GridViewHol
             hello = itemView.findViewById(R.id.hello);
             flag = itemView.findViewById(R.id.flag);
             cardView1 = itemView.findViewById(R.id.cardView1);
+            censoredBtn = itemView.findViewById(R.id.censoredBtn);
 
 
         }
@@ -616,6 +696,16 @@ class SliderAdapter extends RecyclerView.Adapter<SliderAdapter.viewholder> {
         holder.title.setText(item.getName());
         Picasso.get().load(item.getProfilePhoto()).into(holder.thumbnail);
 
+        holder.sliderlayout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(context, Profile.class);
+                intent.putExtra("userName", item.getUsername());
+                intent.putExtra("online", true);
+                context.startActivity(intent);
+            }
+        });
+
     }
 
 
@@ -628,11 +718,13 @@ class SliderAdapter extends RecyclerView.Adapter<SliderAdapter.viewholder> {
     public class viewholder extends RecyclerView.ViewHolder {
         ImageView thumbnail;
         TextView title;
+        LinearLayout sliderlayout;
 
         public viewholder(@NonNull View itemView) {
             super(itemView);
             thumbnail = itemView.findViewById(R.id.imageview);
             title = itemView.findViewById(R.id.categorytextview);
+            sliderlayout = itemView.findViewById(R.id.sliderlayout);
         }
     }
 }

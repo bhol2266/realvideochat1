@@ -9,7 +9,6 @@ import android.util.Log;
 
 import androidx.annotation.Nullable;
 
-
 import com.google.gson.Gson;
 
 import java.io.File;
@@ -146,13 +145,24 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     public Cursor readRandomGirls() {
-
         SQLiteDatabase db = this.getWritableDatabase();
-        String query = "SELECT * FROM " + Database_tableNo + " WHERE LENGTH(images) > 50 ORDER BY RANDOM() LIMIT 30";
-        Cursor cursor = db.rawQuery(query, null);
-        return cursor;
 
-    }  public Cursor readSingleGirl(String username) {
+        if (SplashScreen.App_updating.equals("inactive") && SplashScreen.userLoggedIn && SplashScreen.userLoggedIAs.equals("Google")) {
+//            String query = "SELECT * FROM " + Database_tableNo + " WHERE LENGTH(images) > 50 ORDER BY RANDOM() LIMIT 30";
+//            Cursor cursor = db.rawQuery(query, null);
+//            return cursor;
+
+            String query = "SELECT * FROM " + Database_tableNo + " WHERE LENGTH(images) > 50 AND censored = 1 ORDER BY RANDOM() LIMIT 30";
+            Cursor cursor = db.rawQuery(query, null);
+            return cursor;
+        } else {
+            String query = "SELECT * FROM " + Database_tableNo + " WHERE LENGTH(images) > 50 AND censored = 1 ORDER BY RANDOM() LIMIT 30";
+            Cursor cursor = db.rawQuery(query, null);
+            return cursor;
+        }
+    }
+
+    public Cursor readSingleGirl(String username) {
 
         SQLiteDatabase db = this.getWritableDatabase();
         Cursor cursor = db.query(Database_tableNo, null, "Username=?", new String[]{SplashScreen.encryption(username)}, null, null, null, null);
@@ -161,18 +171,35 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     }
 
-    public Cursor readGirls_Country(String country) {
+    public Cursor readGirls_Country(String countryName) {
         SQLiteDatabase db = this.getWritableDatabase();
+        if (SplashScreen.App_updating.equals("inactive") && SplashScreen.userLoggedIn && SplashScreen.userLoggedIAs.equals("Google")) {
+            if (countryName.equals("All")) {
+                String query = "SELECT * FROM " + Database_tableNo + " WHERE LENGTH(images) > 50 ORDER BY RANDOM() LIMIT 50";
+                Cursor cursor = db.rawQuery(query, null);
+                return cursor;
+            } else {
+                Cursor cursor = db.query(Database_tableNo, null, "country=?", new String[]{countryName}, null, null, null, null);
+                return cursor;
+            }
 
-        if (country.equals("All")) {
-            String query = "SELECT * FROM " + Database_tableNo + " WHERE LENGTH(images) > 50 ORDER BY RANDOM() LIMIT 50";
-            Cursor cursor = db.rawQuery(query, null);
-            return cursor;
         } else {
 
-            Cursor cursor = db.query(Database_tableNo, null, "country=?", new String[]{country}, null, null, null, null);
-            return cursor;
+            if (countryName.equals("All")) {
+                String query = "SELECT * FROM " + Database_tableNo + " WHERE LENGTH(images) > 50 AND censored = 1 ORDER BY RANDOM() LIMIT 30";
+                Cursor cursor = db.rawQuery(query, null);
+                return cursor;
+
+            } else {
+
+                String selection = "country=? AND censored=?"; // Modify the condition as needed
+                String[] selectionArgs = new String[]{countryName, String.valueOf(1)}; // Replace with your arguments
+
+                Cursor cursor = db.query(Database_tableNo, null, selection, selectionArgs, null, null, null, null);
+                return cursor;
+            }
         }
+
 
     }
 
@@ -212,16 +239,16 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
 
-    public String updaterecord(String title, int like_value) {
+    public String updateCensored(String username, int censoredValue) {
         SQLiteDatabase sQLiteDatabase = getWritableDatabase();
         ContentValues contentValues = new ContentValues();
-        contentValues.put("like", like_value);
+        contentValues.put("censored", censoredValue);
 
-        float res = sQLiteDatabase.update(Database_tableNo, contentValues, "Title = ?", new String[]{encryption(title)});
+        float res = sQLiteDatabase.update(Database_tableNo, contentValues, "Username = ?", new String[]{encryption(username)});
         if (res == -1)
             return "Failed";
         else
-            return "Liked";
+            return "Success";
     }
 
     public String updateStoryParagraph(String title, String story) {
