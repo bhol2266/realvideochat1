@@ -69,10 +69,7 @@ public class MainActivity extends AppCompatActivity {
             showAds();
         }
 
-
         initializeBottonFragments();
-
-
     }
 
 

@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
@@ -153,7 +152,6 @@
                 android:paddingBottom="50dp" />
 
 
-
         </LinearLayout>
 
     </androidx.core.widget.NestedScrollView>
@@ -273,16 +271,13 @@
 
     </LinearLayout>
 
-    <RelativeLayout
+    <LinearLayout
         android:id="@+id/bottomNav"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:layout_marginTop="7dp"
-        android:paddingLeft="50dp"
-        android:paddingTop="10dp"
-        android:paddingRight="50dp"
-        android:paddingBottom="10dp">
+        android:orientation="horizontal"
+        android:paddingTop="5dp">
 
         <ImageView
             android:id="@+id/sendImage"
@@ -290,14 +285,33 @@
             android:layout_height="27dp"
             android:layout_alignParentLeft="true"
             android:layout_centerVertical="true"
-            android:alpha="0.7"
+            android:layout_gravity="center"
+            android:layout_weight="1"
             android:src="@drawable/picture" />
+
+        <com.airbnb.lottie.LottieAnimationView
+            android:id="@+id/lottiegift"
+            android:layout_width="30dp"
+            android:layout_height="45dp"
+            android:layout_marginBottom="3dp"
+            android:layout_gravity="center"
+
+            android:layout_weight="1"
+            app:lottie_autoPlay="true"
+
+            app:lottie_rawRes="@raw/lottie_gift"
+            app:lottie_repeatCount="10000"
+            app:lottie_speed="1" />
 
         <ImageView
             android:id="@+id/videoCall"
             android:layout_width="30dp"
             android:layout_height="30dp"
+
             android:layout_centerInParent="true"
+            android:layout_gravity="center"
+            android:layout_weight="1"
+
             android:alpha="0.7"
             android:src="@drawable/videocall" />
 
@@ -307,11 +321,13 @@
             android:layout_height="30dp"
             android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
+            android:layout_gravity="center"
+            android:layout_weight="1"
             android:alpha="0.7"
             android:src="@drawable/telephone" />
 
 
-    </RelativeLayout>
+    </LinearLayout>
 
 
 </RelativeLayout>

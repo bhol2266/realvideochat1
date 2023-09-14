@@ -29,6 +29,7 @@
             android:layout_height="wrap_content"
             android:fontFamily="@font/inter"
             android:maxWidth="180dp"
+            android:maxLines="1"
             android:text="Sunaina Delhi :)"
             android:textColor="@color/gmts_light_gray"
             android:textSize="16dp" />

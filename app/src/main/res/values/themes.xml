@@ -1,4 +1,4 @@
-<resources xmlns:tools="http://schemas.android.com/tools">
+<resources>
     <!-- Base application theme. -->
     <style name="Theme.LiveVideoChat" parent="Theme.MaterialComponents.Light.NoActionBar">
         <!-- Primary brand color. -->
@@ -22,6 +22,20 @@
         <item name="colorPrimary">@color/themeColor</item>
     </style>
 
+
+    <style name="fullscreenalert" parent="Theme.AppCompat.Light.NoActionBar">
+
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">match_parent</item>
+        <item name="android:gravity">center</item>
+        <item name="android:layout_gravity">center</item>
+        <item name="android:windowFullscreen">true</item>
+        <item name="backgroundColor">#ffffff</item>
+        <item name="android:windowBackground">#ffffff</item>
+        <item name="android:windowIsFloating">false</item>
+
+
+    </style>
 
     <!--    bottomsheet dialog rounded corners-->
 

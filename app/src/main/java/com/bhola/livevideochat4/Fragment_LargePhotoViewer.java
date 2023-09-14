@@ -3,12 +3,10 @@ package com.bhola.livevideochat4;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
-import android.content.res.Configuration;
 import android.graphics.RenderEffect;
 import android.graphics.Shader;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -17,9 +15,6 @@ import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 
-import androidx.core.view.WindowCompat;
-import androidx.core.view.WindowInsetsCompat;
-import androidx.core.view.WindowInsetsControllerCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -46,7 +41,7 @@ public class Fragment_LargePhotoViewer extends Fragment {
     }
 
     // Create a new instance of MyFragment and pass data as arguments
-    public static Fragment_LargePhotoViewer newInstance( ArrayList<Map<String, String>> imageList, int adapterPosition, int screenWidth, int screenHeight) {
+    public static Fragment_LargePhotoViewer newInstance(ArrayList<Map<String, String>> imageList, int adapterPosition, int screenWidth, int screenHeight) {
         Fragment_LargePhotoViewer fragment = new Fragment_LargePhotoViewer();
         Bundle args = new Bundle();
         args.putSerializable("imageList", imageList);
@@ -115,7 +110,6 @@ public class Fragment_LargePhotoViewer extends Fragment {
     }
 
 
-
     private void fullscreenMode() {
         // Hide the status bar
         getActivity().getWindow().setFlags(
@@ -179,8 +173,6 @@ class ImagePagerAdapter extends RecyclerView.Adapter<ImagePagerAdapter.ImageView
         public void bind(int position) {
 
 
-
-
             Picasso.get()
                     .load(imageUrls.get(position).get("url"))
                     .resize(screenWidth, 0)
@@ -189,13 +181,17 @@ class ImagePagerAdapter extends RecyclerView.Adapter<ImagePagerAdapter.ImageView
             if (SplashScreen.coins == 0) {
                 if (imageUrls.get(position).get("type").equals("premium")) {
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                        if(SplashScreen.userLoggedIn && SplashScreen.userLoggedIAs.equals("Google")){
                         imageView.setRenderEffect(RenderEffect.createBlurEffect(100, 100, Shader.TileMode.MIRROR));
+                        }else{
+                            imageView.setRenderEffect(RenderEffect.createBlurEffect(200, 200, Shader.TileMode.MIRROR));
+                        }
                     }
                     lock.setVisibility(View.VISIBLE);
                     lock.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View view) {
-                            context.startActivity(new Intent(context, VipMembership.class));
+                            lock.getContext().startActivity(new Intent(lock.getContext(), VipMembership.class));
                         }
                     });
                 } else {

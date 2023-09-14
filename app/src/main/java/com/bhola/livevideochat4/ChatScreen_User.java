@@ -32,10 +32,12 @@ import android.widget.Toast;
 
 import androidx.cardview.widget.CardView;
 import androidx.core.widget.NestedScrollView;
+import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.airbnb.lottie.LottieAnimationView;
+import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.common.reflect.TypeToken;
 import com.google.firebase.database.DatabaseReference;
 import com.google.gson.Gson;
@@ -47,6 +49,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import de.hdodenhof.circleimageview.CircleImageView;
@@ -68,7 +71,7 @@ public class ChatScreen_User extends Activity {
     private Runnable myRunnable;
     private Thread myThread;
     static ArrayList<ChatItem_ModelClass> userListTemp;
-
+public  static  TextView send;
     LinearLayout answerslayout, ll2;   //ll2 is message writting box
 
 
@@ -109,6 +112,14 @@ public class ChatScreen_User extends Activity {
         });
 
         ImageView sendImage = findViewById(R.id.sendImage);
+        ImageView lottiegift = findViewById(R.id.lottiegift);
+
+        lottiegift.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                openBottomSheetDialog();
+            }
+        });
         ImageView videoCall = findViewById(R.id.videoCall);
         ImageView voiceCall = findViewById(R.id.voiceCall);
 
@@ -619,6 +630,58 @@ public class ChatScreen_User extends Activity {
         ColorDrawable back = new ColorDrawable(Color.TRANSPARENT);
         InsetDrawable inset = new InsetDrawable(back, 20);
         report_userSucessfully_dialog.getWindow().setBackgroundDrawable(inset);
+
+    }
+
+
+    private void openBottomSheetDialog() {
+        BottomSheetDialog bottomSheetDialog;
+
+        bottomSheetDialog = new BottomSheetDialog(this);
+        View view = getLayoutInflater().inflate(R.layout.bottomsheetdialog_gifts, null);
+        bottomSheetDialog.setContentView(view);
+        bottomSheetDialog.show();
+
+        send = view.findViewById(R.id.send);
+        send.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startActivity(new Intent(ChatScreen_User.this, VipMembership.class));
+
+            }
+        });
+        TextView coinCount = view.findViewById(R.id.coin);
+        coinCount.setText(String.valueOf(SplashScreen.coins));
+        TextView topup = view.findViewById(R.id.topup);
+        topup.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startActivity(new Intent(ChatScreen_User.this, VipMembership.class));
+            }
+        });
+        TextView problem = findViewById(R.id.problem);
+        RecyclerView recyclerView = view.findViewById(R.id.recyclerView);
+
+        String[] items = {"Rose", "Penghua", "TeddyBear", "Ring", "CrystalShoes", "LaserBall", "Crown", "Ferrari", "Motorcycle", "Yacht", "Bieshu", "Castle"};
+
+        List<GiftItemModel> itemList = new ArrayList<>();
+
+        for (int i = 0; i < items.length; i++) {
+            String item = items[i];
+            int coin = 99 + (i * 100); // Calculate the "coin" value based on the index
+
+            GiftItemModel giftItemModel = new GiftItemModel(item, coin, false);
+            Map<String, Object> itemMap = new HashMap<>();
+            itemMap.put("gift", item);
+            itemMap.put("coin", coin);
+
+            itemList.add(giftItemModel);
+        }
+
+        GiftItemAdapter giftItemAdapter = new GiftItemAdapter(ChatScreen_User.this, itemList);
+        GridLayoutManager layoutManager = new GridLayoutManager(ChatScreen_User.this, 4);
+        recyclerView.setLayoutManager(layoutManager);
+        recyclerView.setAdapter(giftItemAdapter);
 
     }
 

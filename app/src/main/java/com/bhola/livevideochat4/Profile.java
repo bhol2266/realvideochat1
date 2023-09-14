@@ -14,12 +14,10 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
-import android.widget.Button;
 import android.widget.GridLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -35,6 +33,7 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.airbnb.lottie.LottieAnimationView;
+import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.squareup.picasso.Picasso;
@@ -52,8 +51,7 @@ public class Profile extends AppCompatActivity {
     AlertDialog report_userSucessfully_dialog = null;
     GridLayout gridLayout;
     Model_Profile model_profile;
-
-
+    public static TextView send;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -67,41 +65,70 @@ public class Profile extends AppCompatActivity {
 //        fullscreenMode();
 
         getGirlProfile_DB();
-
         actionbar();
+        lottieGift();
     }
 
-    private void censoredBtn() {
-        Button censoredBtn = findViewById(R.id.censoredBtn);
-        if (model_profile.getCensored() == 0) {
-            censoredBtn.setBackgroundColor(getResources().getColor(R.color.themeColor));
-            censoredBtn.setText("Not Censored");
-        } else {
-            censoredBtn.setBackgroundColor(getResources().getColor(R.color.green)); // Assumes you have a green color defined in your resources
-            censoredBtn.setText("Censored");
-
-        }
-
-        censoredBtn.setOnClickListener(new View.OnClickListener() {
+    private void lottieGift() {
+        LottieAnimationView lottiegift = findViewById(R.id.lottiegift);
+        lottiegift.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
-                if (model_profile.getCensored() == 0) {
-                    String res=new DatabaseHelper(Profile.this,SplashScreen.DB_NAME,SplashScreen.DB_VERSION,"GirlsProfile").updateCensored(model_profile.getUsername(),1);
-
-                    censoredBtn.setBackgroundColor(getResources().getColor(R.color.green));
-                    censoredBtn.setText("Censored");
-                } else {
-                    String res=new DatabaseHelper(Profile.this,SplashScreen.DB_NAME,SplashScreen.DB_VERSION,"GirlsProfile").updateCensored(model_profile.getUsername(),0);
-
-                    censoredBtn.setBackgroundColor(getResources().getColor(R.color.themeColor)); // Assumes you have a green color defined in your resources
-                    censoredBtn.setText("Not Censored");
-
-                }
+                openBottomSheetDialog();
             }
         });
     }
 
+    private void openBottomSheetDialog() {
+        BottomSheetDialog bottomSheetDialog;
+
+        bottomSheetDialog = new BottomSheetDialog(this);
+        View view = getLayoutInflater().inflate(R.layout.bottomsheetdialog_gifts, null);
+        bottomSheetDialog.setContentView(view);
+        bottomSheetDialog.show();
+
+         send = view.findViewById(R.id.send);
+        send.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startActivity(new Intent(Profile.this, VipMembership.class));
+
+            }
+        });
+        TextView coinCount = view.findViewById(R.id.coin);
+        coinCount.setText(String.valueOf(SplashScreen.coins));
+        TextView topup = view.findViewById(R.id.topup);
+        topup.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startActivity(new Intent(Profile.this, VipMembership.class));
+            }
+        });
+        TextView problem = findViewById(R.id.problem);
+        RecyclerView recyclerView = view.findViewById(R.id.recyclerView);
+
+        String[] items = {"Rose", "Penghua", "TeddyBear", "Ring", "CrystalShoes", "LaserBall", "Crown", "Ferrari", "Motorcycle", "Yacht", "Bieshu", "Castle"};
+
+        List<GiftItemModel> itemList = new ArrayList<>();
+
+        for (int i = 0; i < items.length; i++) {
+            String item = items[i];
+            int coin = 99 + (i * 100); // Calculate the "coin" value based on the index
+
+            GiftItemModel giftItemModel = new GiftItemModel(item, coin, false);
+            Map<String, Object> itemMap = new HashMap<>();
+            itemMap.put("gift", item);
+            itemMap.put("coin", coin);
+
+            itemList.add(giftItemModel);
+        }
+
+        GiftItemAdapter giftItemAdapter = new GiftItemAdapter(Profile.this, itemList);
+        GridLayoutManager layoutManager = new GridLayoutManager(Profile.this, 4);
+        recyclerView.setLayoutManager(layoutManager);
+        recyclerView.setAdapter(giftItemAdapter);
+
+    }
 
     private void bindDetails() {
         ImageView profileImage = findViewById(R.id.profileImage);
@@ -389,7 +416,6 @@ public class Profile extends AppCompatActivity {
                             public void run() {
                                 bindDetails();
                                 setImageinGridLayout();
-                                censoredBtn();
 
                             }
                         }, 200);
@@ -404,20 +430,22 @@ public class Profile extends AppCompatActivity {
 
 
     private void setImageinGridLayout() {
-
+        if (SplashScreen.App_updating.equals("active")) {
+            return;
+        }
         ArrayList<Map<String, String>> imageList = new ArrayList<>();
 
         for (int i = 0; i < model_profile.getImages().size(); i++) {
             Map<String, String> stringMap1 = new HashMap<>();
             stringMap1.put("url", model_profile.getImages().get(i).replace("thumb", "full"));
-            stringMap1.put("type", "free");  //premium
+            stringMap1.put("type", "premium");  //premium
             imageList.add(stringMap1);
         }
 
         for (int i = 0; i < model_profile.getVideos().size(); i++) {
             Map<String, String> stringMap1 = new HashMap<>();
             stringMap1.put("url", model_profile.getVideos().get(i).get("imageUrl"));
-            stringMap1.put("type", "free");  //premium
+            stringMap1.put("type", "premium");  //premium
             imageList.add(stringMap1);
         }
 
@@ -434,31 +462,12 @@ public class Profile extends AppCompatActivity {
 
         // Decrease the screen width by 15%
         int screenWidth = (int) (originalScreenWidth * 0.85);
-        Log.d(SplashScreen.TAG, "screenWidth: " + screenWidth);
 //        int cardViewWidth = screenWidth / numColumns;
 
 
         for (int i = 0; i < imageList.size(); i++) {
 
-
-//// Set corner radius and elevation for the CardView
-//            int cornerRadius = (int) (20 * getResources().getDisplayMetrics().density); // Set the desired corner radius in dp
-//            float elevation = 0 * getResources().getDisplayMetrics().density; // Set the desired elevation in dp
-//            cardView.setRadius(cornerRadius);
-//            cardView.setElevation(elevation);
-//
-//
-//            ImageView imageView = new ImageView(this);
-//            imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
-//
-
-
-// Load the image with Picasso
-
-
         }
-
-
     }
 
 
@@ -482,6 +491,7 @@ public class Profile extends AppCompatActivity {
             ADS_FACEBOOK.interstitialAd(this, facebook_IntertitialAds, getString(R.string.Facebook_InterstitialAdUnit));
         }
     }
+
 
 }
 
@@ -568,3 +578,41 @@ class ProfileGirlImageAdapter extends RecyclerView.Adapter<ProfileGirlImageAdapt
     }
 }
 
+class GiftItemModel {
+    private String giftName;
+    private int coin;
+    private boolean selected;
+
+    public GiftItemModel() {
+    }
+
+    public GiftItemModel(String giftName, int coin, boolean selected) {
+        this.giftName = giftName;
+        this.coin = coin;
+        this.selected = selected; // Default value is false
+    }
+
+    public String getGiftName() {
+        return giftName;
+    }
+
+    public void setGiftName(String giftName) {
+        this.giftName = giftName;
+    }
+
+    public int getCoin() {
+        return coin;
+    }
+
+    public void setCoin(int coin) {
+        this.coin = coin;
+    }
+
+    public boolean isSelected() {
+        return selected;
+    }
+
+    public void setSelected(boolean selected) {
+        this.selected = selected;
+    }
+}
