@@ -140,8 +140,8 @@
                             <TextView
                                 android:id="@+id/profileName"
                                 android:layout_width="0dp"
-                                android:layout_weight="3"
                                 android:layout_height="wrap_content"
+                                android:layout_weight="3"
                                 android:fontFamily="@font/inter"
                                 android:text="Sunanda Delhi :)"
                                 android:textColor="@color/semiblack"
@@ -149,31 +149,52 @@
                                 android:textStyle="bold" />
 
                             <LinearLayout
+                                android:id="@+id/onlineLayout"
+                                android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:layout_width="0dp"
-                                android:layout_weight="3"
-                                android:visibility="gone"
-                                android:gravity="center_vertical"
-                                android:orientation="horizontal"
-                                android:paddingLeft="15dp">
-
-                                <ImageView
-                                    android:layout_width="15dp"
-                                    android:layout_height="15dp"
-                                    android:alpha="0.7"
-                                    android:src="@drawable/clock"
-                                    android:text="Languages :"
-                                    app:tint="@color/themeColor" />
-
+                                android:gravity="center"
+                                android:orientation="horizontal">
 
                                 <TextView
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
-                                    android:fontFamily="@font/inter"
-                                    android:paddingLeft="5dp"
-                                    android:text="Last online:"
-                                    android:textColor="@color/semiblack"
-                                    android:textSize="14dp" />
+                                    android:text="online"
+                                    android:textColor="@color/green" />
+
+                                <ImageView
+                                    android:layout_width="12dp"
+                                    android:layout_height="12dp"
+                                    android:layout_marginLeft="3dp"
+                                    android:src="@drawable/dot" />
+                            </LinearLayout>
+
+                            <LinearLayout
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:orientation="vertical">
+
+                                <TextView
+                                    android:id="@+id/selectBotBtn"
+                                    android:layout_width="150dp"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginLeft="15dp"
+                                    android:background="@color/themeColor"
+                                    android:padding="10dp"
+                                    android:text="selected bot"
+                                    android:textAlignment="center"
+                                    android:textColor="@color/white" />
+
+                                <TextView
+                                    android:id="@+id/likeBtn"
+                                    android:layout_width="150dp"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginLeft="15dp"
+                                    android:layout_marginTop="15dp"
+                                    android:background="@color/themeColor"
+                                    android:padding="10dp"
+                                    android:text="not like"
+                                    android:textAlignment="center"
+                                    android:textColor="@color/white" />
                             </LinearLayout>
 
 
@@ -210,7 +231,6 @@
                                     android:textSize="15dp" />
 
 
-
                             </LinearLayout>
 
                             <LinearLayout
@@ -244,8 +264,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginRight="15dp"
-                                android:orientation="horizontal"
-                             >
+                                android:orientation="horizontal">
 
                                 <ImageView
                                     android:layout_width="18dp"
@@ -624,10 +643,10 @@
         android:layout_width="90dp"
         android:layout_height="90dp"
         android:layout_gravity="bottom|right"
-        android:layout_marginBottom="80dp"
         android:layout_marginRight="5dp"
+        android:layout_marginBottom="80dp"
         app:lottie_autoPlay="true"
-        app:lottie_repeatCount="10000"
         app:lottie_rawRes="@raw/lottie_gift"
+        app:lottie_repeatCount="10000"
         app:lottie_speed="1" />
 </FrameLayout>

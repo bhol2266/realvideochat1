@@ -1,28 +1,17 @@
 package com.bhola.livevideochat4;
 
-import android.animation.Animator;
+import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.InsetDrawable;
 import android.os.Bundle;
-import android.Manifest;
-
-import androidx.activity.result.ActivityResultCaller;
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.appcompat.app.AlertDialog;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
-import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.LinearSmoothScroller;
-import androidx.recyclerview.widget.RecyclerView;
-
 import android.os.Handler;
-import android.support.annotation.NonNull;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -35,12 +24,23 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.airbnb.lottie.LottieAnimationView;
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.appcompat.app.AlertDialog;
+import androidx.core.content.ContextCompat;
+import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.LinearSmoothScroller;
+import androidx.recyclerview.widget.RecyclerView;
+
+import com.google.common.reflect.TypeToken;
+import com.google.gson.Gson;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -54,16 +54,20 @@ public class Fragment_HomePage extends Fragment {
     private RecyclerView recyclerView1, recyclerView2, recyclerView3;
     private ImageAdapter imageAdapter, imageAdapter2, imageAdapter3;
     LinearSmoothScroller smoothScroller1, smoothScroller2, smoothScroller3;
-    List<Integer> imageList2;
     private Handler handlerAnimation, blinkhandler, countHandler;
     RelativeLayout btnRelativelayout;
     int randomNumber, current_value;
     TextView onlineCountTextview;
-    Context context;
     AlertDialog permissionDialog;
+    ArrayList<Model_Profile> girlList_movingImages;
+    ActivityResultLauncher<String[]> mPermissionResultLauncher;
+    private boolean isCameraPermissionGranted = false;
+    private boolean isRecordAudioPermissionGranted = false;
 
     private String[] PERMISSIONS;
 
+    View view;
+    Context context;
 
     public Fragment_HomePage() {
         // Required empty public constructor
@@ -73,13 +77,32 @@ public class Fragment_HomePage extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
-        View view = inflater.inflate(R.layout.fragment_home_page, container, false);
-
+        view = inflater.inflate(R.layout.fragment_home_page, container, false);
+        context = view.getContext();
+//        Manifest.permission.CAMERA,
+//                Manifest.permission.RECORD_AUDIO,
         context = getContext();
         // Inflate the layout for context fragment
+        mPermissionResultLauncher = registerForActivityResult(new ActivityResultContracts.RequestMultiplePermissions(), new ActivityResultCallback<Map<String, Boolean>>() {
+            @Override
+            public void onActivityResult(Map<String, Boolean> result) {
+                if (result.get(Manifest.permission.CAMERA) != null) {
+                    isCameraPermissionGranted = result.get(Manifest.permission.CAMERA);
+                }
+                if (result.get(Manifest.permission.RECORD_AUDIO) != null) {
+                    isRecordAudioPermissionGranted = result.get(Manifest.permission.RECORD_AUDIO);
+                }
+                if (result.get(Manifest.permission.CAMERA) != null && result.get(Manifest.permission.RECORD_AUDIO) != null && isCameraPermissionGranted && isRecordAudioPermissionGranted) {
+                    Intent intent = new Intent(context, BeforeVideoCall.class);
+                    intent.putExtra("count", onlineCountTextview.getText().toString());
+                    startActivity(intent);
+                }
+            }
+        });
 
-
-        setimagesScrolling(view, context);
+        if (SplashScreen.App_updating.equals("inactive")) {
+            loadDatabase(); //this will load images for moving images and call method    setimagesScrolling()
+        }
         setButtonAnimation(view, context);
         blinkWorldMap(view, context);
         update_onlineCount(view, context);
@@ -91,6 +114,29 @@ public class Fragment_HomePage extends Fragment {
         };
 
         return view;
+    }
+
+
+    private void requestPermission() {
+
+        isCameraPermissionGranted = ContextCompat.checkSelfPermission((Activity) context, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED;
+        isRecordAudioPermissionGranted = ContextCompat.checkSelfPermission((Activity) context, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED;
+
+        List<String> permmisionRequestList = new ArrayList<>();
+        if (!isCameraPermissionGranted) {
+            permmisionRequestList.add(Manifest.permission.CAMERA);
+        }
+        if (!isRecordAudioPermissionGranted) {
+            permmisionRequestList.add(Manifest.permission.RECORD_AUDIO);
+        }
+
+        if (!permmisionRequestList.isEmpty()) {
+            mPermissionResultLauncher.launch(permmisionRequestList.toArray(new String[0]));
+        } else {
+            Intent intent = new Intent(context, BeforeVideoCall.class);
+            intent.putExtra("count", onlineCountTextview.getText().toString());
+            startActivity(intent);
+        }
     }
 
 
@@ -182,18 +228,7 @@ public class Fragment_HomePage extends Fragment {
         btnTextview.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
-
-                if (!hasPermissions(context, PERMISSIONS)) {
-
-                    checkPermissionDialog();
-
-                } else {
-
-                    Intent intent = new Intent(context, BeforeVideoCall.class);
-                    intent.putExtra("count", onlineCountTextview.getText().toString());
-                    startActivity(intent);
-                }
+                requestPermission(); // this method will check permissions and if permission are granted it will take to BeforeCameraActivity
 
             }
         });
@@ -252,7 +287,8 @@ public class Fragment_HomePage extends Fragment {
             @Override
             public void onClick(View view) {
                 permissionDialog.dismiss();
-                ActivityCompat.requestPermissions((Activity) context, PERMISSIONS, 1);
+                requestPermission();
+//                ActivityCompat.requestPermissions((Activity) context, PERMISSIONS, 1);
 
             }
         });
@@ -300,7 +336,7 @@ public class Fragment_HomePage extends Fragment {
 
     }
 
-    private void setimagesScrolling(View view, Context context) {
+    private void setimagesScrolling() {
         recyclerView1 = view.findViewById(R.id.recyclerView1);
         recyclerView2 = view.findViewById(R.id.recyclerView2);
         recyclerView3 = view.findViewById(R.id.recyclerView3);
@@ -332,37 +368,23 @@ public class Fragment_HomePage extends Fragment {
 
 
         // Create a list of image resources from the drawable folder
-        List<Integer> imageList = new ArrayList<>();
-        imageList.add(R.drawable.mgirl1);
-        imageList.add(R.drawable.mgirl2);
-        imageList.add(R.drawable.mgirl3);
-        imageList.add(R.drawable.mgirl4);
-        imageList.add(R.drawable.mgirl5);
-        imageList.add(R.drawable.mgirl6);
-        imageList.add(R.drawable.mgirl8);
-        imageList.add(R.drawable.mgirl9);
+        List<String> imageList = new ArrayList<>();
+        List<String> imageList2 = new ArrayList<>();
+        List<String> imageList3 = new ArrayList<>();
 
-        imageList2 = new ArrayList<>();
-        for (int i = 0; i < 100; i++) {
-            imageList2.add(R.drawable.mgirl10);
-            imageList2.add(R.drawable.mgirl11);
-            imageList2.add(R.drawable.mgirl12);
-            imageList2.add(R.drawable.mgirl13);
-            imageList2.add(R.drawable.mgirl14);
-            imageList2.add(R.drawable.mgirl15);
-            imageList2.add(R.drawable.mgirl16);
-            imageList2.add(R.drawable.mgirl17);
+        int listSize = girlList_movingImages.size();
+        int partSize = listSize / 3;
+        for (int i = 0; i < girlList_movingImages.size(); i++) {
+            Model_Profile model_profile = girlList_movingImages.get(i);
+            String imageUrl = model_profile.getProfilePhoto();
+            if (i < partSize) {
+                imageList.add(imageUrl);
+            } else if (i < partSize * 2) {
+                imageList2.add(imageUrl);
+            } else {
+                imageList3.add(imageUrl);
+            }
         }
-
-
-        List<Integer> imageList3 = new ArrayList<>();
-        imageList3.add(R.drawable.mgirl18);
-        imageList3.add(R.drawable.mgirl19);
-        imageList3.add(R.drawable.mgirl20);
-        imageList3.add(R.drawable.mgirl21);
-        imageList3.add(R.drawable.mgirl22);
-        imageList3.add(R.drawable.mgirl23);
-        imageList3.add(R.drawable.mgirl24);
 
 
         imageAdapter = new ImageAdapter(context, imageList);
@@ -414,6 +436,68 @@ public class Fragment_HomePage extends Fragment {
         recyclerView3.getLayoutManager().startSmoothScroll(smoothScroller3);
     }
 
+    private void loadDatabase() {
+        girlList_movingImages = new ArrayList<>();
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                Cursor cursor = new DatabaseHelper(context, SplashScreen.DB_NAME, SplashScreen.DB_VERSION, "GirlsProfile").readRandomGirlsForMovingImages();
+                if (cursor.moveToFirst()) {
+                    do {
+                        // Extract data from the cursor and populate the Model_Profile object
+                        String Username = SplashScreen.decryption(cursor.getString(0));
+                        String Name = SplashScreen.decryption(cursor.getString(1));
+                        String Country = cursor.getString(2);
+                        String Languages = cursor.getString(3);
+                        String Age = cursor.getString(4);
+                        String InterestedIn = cursor.getString(5);
+                        String BodyType = cursor.getString(6);
+                        String Specifics = SplashScreen.decryption(cursor.getString(7));
+                        String Ethnicity = cursor.getString(8);
+                        String Hair = cursor.getString(9);
+                        String EyeColor = cursor.getString(10);
+                        String Subculture = cursor.getString(11);
+                        String profilePhoto = SplashScreen.decryption(cursor.getString(13));
+                        String coverPhoto = SplashScreen.decryption(cursor.getString(14));
+                        int censored = cursor.getInt(17);
+                        int like = cursor.getInt(18);
+                        int selectedBot = cursor.getInt(19);
+
+                        // Convert JSON strings back to arrays/lists using Gson
+                        Gson gson = new Gson();
+
+
+                        String interestsJson = SplashScreen.decryption(cursor.getString(12));
+                        List<Map<String, String>> Interests = gson.fromJson(interestsJson, new TypeToken<List<Map<String, String>>>() {
+                        }.getType());
+
+                        String imagesJson = SplashScreen.decryption(cursor.getString(15));
+                        List<String> images = gson.fromJson(imagesJson, new TypeToken<List<String>>() {
+                        }.getType());
+
+                        String videosJson = SplashScreen.decryption(cursor.getString(16));
+                        List<Map<String, String>> videos = gson.fromJson(videosJson, new TypeToken<List<Map<String, String>>>() {
+                        }.getType());
+
+                        // Create a new Model_Profile object and populate it
+                        Model_Profile model_profile = new Model_Profile(Username, Name, Country, Languages, Age, InterestedIn, BodyType, Specifics, Ethnicity, Hair, EyeColor, Subculture, profilePhoto, coverPhoto, Interests, images, videos, censored, like, selectedBot);
+                        girlList_movingImages.add(model_profile);
+                    } while (cursor.moveToNext());
+
+                }
+                cursor.close();
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Log.d(SplashScreen.TAG, "run: " + girlList_movingImages.size());
+                        setimagesScrolling();
+
+                    }
+                });
+            }
+        }).start();
+
+    }
 
     @Override
     public void onDestroyView() {
@@ -423,46 +507,6 @@ public class Fragment_HomePage extends Fragment {
 
     }
 
-
-    private boolean hasPermissions(Context context, String... PERMISSIONS) {
-
-        if (context != null && PERMISSIONS != null) {
-
-            for (String permission : PERMISSIONS) {
-
-                if (ActivityCompat.checkSelfPermission(context, permission) != PackageManager.PERMISSION_GRANTED) {
-                    return false;
-                }
-            }
-        }
-
-        return true;
-    }
-
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-
-        if (requestCode == 1) {
-            boolean permissionGranted = true;
-            if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                Toast.makeText(context, "Camera Permission is granted", Toast.LENGTH_SHORT).show();
-            } else {
-                permissionGranted = false;
-                Toast.makeText(context, "Camera Permission is denied", Toast.LENGTH_SHORT).show();
-            }
-
-            if (grantResults[1] == PackageManager.PERMISSION_GRANTED) {
-                Toast.makeText(context, "Record Audio is granted", Toast.LENGTH_SHORT).show();
-            } else {
-                permissionGranted = false;
-                Toast.makeText(context, "Record Audio is denied", Toast.LENGTH_SHORT).show();
-            }
-
-
-        }
-    }
 
 }
 

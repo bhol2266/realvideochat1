@@ -3,354 +3,413 @@
         "nationality": "American",
         "flagUrl": "https://assets.strpst.com/assets/common/components/ui/CountryFlag/images/us.svg",
         "country": "USA",
-        "countryCode": "US"
+        "countryCode": "US",
+        "languageCode": "en"
     },
     {
         "nationality": "Canadian",
         "flagUrl": "https://assets.strpst.com/assets/common/components/ui/CountryFlag/images/ca.svg",
         "country": "Canada",
-        "countryCode": "CA"
+        "countryCode": "CA",
+        "languageCode": "en"
     },
     {
         "nationality": "Mexican",
         "flagUrl": "https://assets.strpst.com/assets/common/components/ui/CountryFlag/images/mx.svg",
         "country": "Mexico",
-        "countryCode": "MX"
+        "countryCode": "MX",
+        "languageCode": "es"
     },
     {
         "nationality": "Argentinian",
         "flagUrl": "https://assets.strpst.com/assets/common/components/ui/CountryFlag/images/ar.svg",
         "country": "Argentina",
-        "countryCode": "AR"
+        "countryCode": "AR",
+        "languageCode": "es"
     },
     {
         "nationality": "Brazilian",
         "flagUrl": "https://assets.strpst.com/assets/common/components/ui/CountryFlag/images/br.svg",
         "country": "Brazil",
-        "countryCode": "BR"
+        "countryCode": "BR",
+        "languageCode": "pt"
     },
     {
         "nationality": "Chilean",
         "flagUrl": "https://assets.strpst.com/assets/common/components/ui/CountryFlag/images/cl.svg",
         "country": "Chile",
-        "countryCode": "CL"
+        "countryCode": "CL",
+        "languageCode": "es"
     },
     {
         "nationality": "Colombian",
         "flagUrl": "https://assets.strpst.com/assets/common/components/ui/CountryFlag/images/co.svg",
         "country": "Colombia",
-        "countryCode": "CO"
+        "countryCode": "CO",
+        "languageCode": "es"
     },
     {
         "nationality": "Ecuadorian",
         "flagUrl": "https://assets.strpst.com/assets/common/components/ui/CountryFlag/images/ec.svg",
         "country": "Ecuador",
-        "countryCode": "EC"
+        "countryCode": "EC",
+        "languageCode": "es"
     },
     {
         "nationality": "Peruvian",
         "flagUrl": "https://assets.strpst.com/assets/common/components/ui/CountryFlag/images/pe.svg",
         "country": "Peru",
-        "countryCode": "PE"
+        "countryCode": "PE",
+        "languageCode": "es"
     },
     {
         "nationality": "Uruguayan",
         "flagUrl": "https://assets.strpst.com/assets/common/components/ui/CountryFlag/images/uy.svg",
         "country": "Uruguay",
-        "countryCode": "UY"
+        "countryCode": "UY",
+        "languageCode": "es"
     },
     {
         "nationality": "Venezuelan",
         "flagUrl": "https://assets.strpst.com/assets/common/components/ui/CountryFlag/images/ve.svg",
         "country": "Venezuela",
-        "countryCode": "VE"
+        "countryCode": "VE",
+        "languageCode": "es"
     },
     {
         "nationality": "Belgian",
         "flagUrl": "https://assets.strpst.com/assets/common/components/ui/CountryFlag/images/be.svg",
         "country": "Belgium",
-        "countryCode": "BE"
+        "countryCode": "BE",
+        "languageCode": "nl"
     },
     {
         "nationality": "Bulgarian",
         "flagUrl": "https://assets.strpst.com/assets/common/components/ui/CountryFlag/images/bg.svg",
         "country": "Bulgaria",
-        "countryCode": "BG"
+        "countryCode": "BG",
+        "languageCode": "bg"
     },
     {
         "nationality": "Croatian",
         "flagUrl": "https://assets.strpst.com/assets/common/components/ui/CountryFlag/images/hr.svg",
         "country": "Croatia",
-        "countryCode": "HR"
+        "countryCode": "HR",
+        "languageCode": "hr"
     },
     {
         "nationality": "Czech",
         "flagUrl": "https://assets.strpst.com/assets/common/components/ui/CountryFlag/images/cz.svg",
         "country": "Czech Republic",
-        "countryCode": "CZ"
+        "countryCode": "CZ",
+        "languageCode": "cs"
     },
     {
         "nationality": "Danish",
         "flagUrl": "https://assets.strpst.com/assets/common/components/ui/CountryFlag/images/dk.svg",
         "country": "Denmark",
-        "countryCode": "DK"
+        "countryCode": "DK",
+        "languageCode": "da"
     },
     {
         "nationality": "Dutch",
         "flagUrl": "https://assets.strpst.com/assets/common/components/ui/CountryFlag/images/nl.svg",
         "country": "Netherlands",
-        "countryCode": "NL"
+        "countryCode": "NL",
+        "languageCode": "nl"
     },
     {
         "nationality": "Estonian",
         "flagUrl": "https://assets.strpst.com/assets/common/components/ui/CountryFlag/images/ee.svg",
         "country": "Estonia",
-        "countryCode": "EE"
+        "countryCode": "EE",
+        "languageCode": "et"
     },
     {
         "nationality": "Finnish",
         "flagUrl": "https://assets.strpst.com/assets/common/components/ui/CountryFlag/images/fi.svg",
         "country": "Finland",
-        "countryCode": "FI"
+        "countryCode": "FI",
+        "languageCode": "fi"
     },
     {
         "nationality": "French",
         "flagUrl": "https://assets.strpst.com/assets/common/components/ui/CountryFlag/images/fr.svg",
         "country": "France",
-        "countryCode": "FR"
+        "countryCode": "FR",
+        "languageCode": "fr"
     },
     {
         "nationality": "German",
         "flagUrl": "https://assets.strpst.com/assets/common/components/ui/CountryFlag/images/de.svg",
         "country": "Germany",
-        "countryCode": "DE"
+        "countryCode": "DE",
+        "languageCode": "de"
     },
     {
         "nationality": "Greek",
         "flagUrl": "https://assets.strpst.com/assets/common/components/ui/CountryFlag/images/gr.svg",
         "country": "Greece",
-        "countryCode": "GR"
+        "countryCode": "GR",
+        "languageCode": "el"
     },
     {
         "nationality": "Hungarian",
         "flagUrl": "https://assets.strpst.com/assets/common/components/ui/CountryFlag/images/hu.svg",
         "country": "Hungary",
-        "countryCode": "HU"
+        "countryCode": "HU",
+        "languageCode": "hu"
     },
     {
         "nationality": "Irish",
         "flagUrl": "https://assets.strpst.com/assets/common/components/ui/CountryFlag/images/ie.svg",
         "country": "Ireland",
-        "countryCode": "IE"
+        "countryCode": "IE",
+        "languageCode": "ga"
     },
     {
         "nationality": "Italian",
         "flagUrl": "https://assets.strpst.com/assets/common/components/ui/CountryFlag/images/it.svg",
         "country": "Italy",
-        "countryCode": "IT"
+        "countryCode": "IT",
+        "languageCode": "it"
     },
     {
         "nationality": "Lithuanian",
         "flagUrl": "https://assets.strpst.com/assets/common/components/ui/CountryFlag/images/lt.svg",
         "country": "Lithuania",
-        "countryCode": "LT"
+        "countryCode": "LT",
+        "languageCode": "lt"
     },
     {
         "nationality": "Nordic",
         "flagUrl": "https://assets.strpst.com/assets/common/components/ui/CountryFlag/images/scan.svg",
         "country": "Nordic Countries",
-        "countryCode": ""
+        "countryCode": "",
+        "languageCode": "en"
     },
     {
         "nationality": "Norwegian",
         "flagUrl": "https://assets.strpst.com/assets/common/components/ui/CountryFlag/images/no.svg",
         "country": "Norway",
-        "countryCode": "NO"
+        "countryCode": "NO",
+        "languageCode": "nb"
     },
     {
         "nationality": "Polish",
         "flagUrl": "https://assets.strpst.com/assets/common/components/ui/CountryFlag/images/pl.svg",
         "country": "Poland",
-        "countryCode": "PL"
+        "countryCode": "PL",
+        "languageCode": "pl"
     },
     {
         "nationality": "Portuguese",
         "flagUrl": "https://assets.strpst.com/assets/common/components/ui/CountryFlag/images/pt.svg",
         "country": "Portugal",
-        "countryCode": "PT"
+        "countryCode": "PT",
+        "languageCode": "pt"
     },
     {
         "nationality": "Romanian",
         "flagUrl": "https://assets.strpst.com/assets/common/components/ui/CountryFlag/images/ro.svg",
         "country": "Romania",
-        "countryCode": "RO"
+        "countryCode": "RO",
+        "languageCode": "ro"
     },
     {
         "nationality": "Serbian",
         "flagUrl": "https://assets.strpst.com/assets/common/components/ui/CountryFlag/images/rs.svg",
         "country": "Serbia",
-        "countryCode": "RS"
+        "countryCode": "RS",
+        "languageCode": "sr"
     },
     {
         "nationality": "Slovakian",
         "flagUrl": "https://assets.strpst.com/assets/common/components/ui/CountryFlag/images/sk.svg",
         "country": "Slovakia",
-        "countryCode": "SK"
+        "countryCode": "SK",
+        "languageCode": "sk"
     },
     {
         "nationality": "Spanish",
         "flagUrl": "https://assets.strpst.com/assets/common/components/ui/CountryFlag/images/es.svg",
         "country": "Spain",
-        "countryCode": "ES"
+        "countryCode": "ES",
+        "languageCode": "es"
     },
     {
         "nationality": "Swedish",
         "flagUrl": "https://assets.strpst.com/assets/common/components/ui/CountryFlag/images/se.svg",
         "country": "Sweden",
-        "countryCode": "SE"
+        "countryCode": "SE",
+        "languageCode": "sv"
     },
     {
         "nationality": "Swiss",
         "flagUrl": "https://assets.strpst.com/assets/common/components/ui/CountryFlag/images/ch.svg",
         "country": "Switzerland",
-        "countryCode": "CH"
+        "countryCode": "CH",
+        "languageCode": "de"
     },
     {
         "nationality": "UK",
         "flagUrl": "https://assets.strpst.com/assets/common/components/ui/CountryFlag/images/gb.svg",
         "country": "United Kingdom",
-        "countryCode": "GB"
+        "countryCode": "GB",
+        "languageCode": "en"
     },
     {
         "nationality": "Ukrainian",
         "flagUrl": "https://assets.strpst.com/assets/common/components/ui/CountryFlag/images/ua.svg",
         "country": "Ukraine",
-        "countryCode": "UA"
+        "countryCode": "UA",
+        "languageCode": "uk"
     },
     {
         "nationality": "Australian",
         "flagUrl": "https://assets.strpst.com/assets/common/components/ui/CountryFlag/images/au.svg",
         "country": "Australia",
-        "countryCode": "AU"
+        "countryCode": "AU",
+        "languageCode": "en"
     },
     {
         "nationality": "Chinese",
         "flagUrl": "https://assets.strpst.com/assets/common/components/ui/CountryFlag/images/cn.svg",
         "country": "China",
-        "countryCode": "CN"
+        "countryCode": "CN",
+        "languageCode": "zh-CN"
     },
     {
         "nationality": "Indian",
         "flagUrl": "https://assets.strpst.com/assets/common/components/ui/CountryFlag/images/in.svg",
         "country": "India",
-        "countryCode": "IN"
+        "countryCode": "IN",
+        "languageCode": "hi"
     },
     {
         "nationality": "Japanese",
         "flagUrl": "https://assets.strpst.com/assets/common/components/ui/CountryFlag/images/jp.svg",
         "country": "Japan",
-        "countryCode": "JP"
+        "countryCode": "JP",
+        "languageCode": "ja"
     },
     {
         "nationality": "Korean",
         "flagUrl": "https://assets.strpst.com/assets/common/components/ui/CountryFlag/images/kr.svg",
         "country": "South Korea",
-        "countryCode": "KR"
+        "countryCode": "KR",
+        "languageCode": "ko"
     },
     {
         "nationality": "SriLankan",
         "flagUrl": "https://assets.strpst.com/assets/common/components/ui/CountryFlag/images/lk.svg",
         "country": "Sri Lanka",
-        "countryCode": "LK"
+        "countryCode": "LK",
+        "languageCode": "si"
     },
     {
         "nationality": "Thai",
         "flagUrl": "https://assets.strpst.com/assets/common/components/ui/CountryFlag/images/th.svg",
         "country": "Thailand",
-        "countryCode": "TH"
+        "countryCode": "TH",
+        "languageCode": "th"
     },
     {
         "nationality": "Vietnamese",
         "flagUrl": "https://assets.strpst.com/assets/common/components/ui/CountryFlag/images/vn.svg",
         "country": "Vietnam",
-        "countryCode": "VN"
+        "countryCode": "VN",
+        "languageCode": "vi"
     },
     {
         "nationality": "African",
         "flagUrl": "https://assets.strpst.com/assets/common/components/ui/CountryFlag/images/afr.svg",
         "country": "African Countries",
-        "countryCode": ""
+        "countryCode": "",
+        "languageCode": "en"
     },
     {
         "nationality": "Kenyan",
         "flagUrl": "https://assets.strpst.com/assets/common/components/ui/CountryFlag/images/ke.svg",
         "country": "Kenya",
-        "countryCode": "KE"
+        "countryCode": "KE",
+        "languageCode": "sw"
     },
     {
         "nationality": "Malagasy",
         "flagUrl": "https://assets.strpst.com/assets/common/components/ui/CountryFlag/images/mg.svg",
         "country": "Madagascar",
-        "countryCode": "MG"
+        "countryCode": "MG",
+        "languageCode": "mg"
     },
     {
         "nationality": "Nigerian",
         "flagUrl": "https://assets.strpst.com/assets/common/components/ui/CountryFlag/images/ng.svg",
         "country": "Nigeria",
-        "countryCode": "NG"
+        "countryCode": "NG",
+        "languageCode": "en"
     },
     {
         "nationality": "South African",
         "flagUrl": "https://assets.strpst.com/assets/common/components/ui/CountryFlag/images/za.svg",
         "country": "South Africa",
-        "countryCode": "ZA"
+        "countryCode": "ZA",
+        "languageCode": "en"
     },
     {
         "nationality": "Ugandan",
         "flagUrl": "https://assets.strpst.com/assets/common/components/ui/CountryFlag/images/ug.svg",
         "country": "Uganda",
-        "countryCode": "UG"
+        "countryCode": "UG",
+        "languageCode": "sw"
     },
     {
         "nationality": "Zimbabwean",
         "flagUrl": "https://assets.strpst.com/assets/common/components/ui/CountryFlag/images/zw.svg",
         "country": "Zimbabwe",
-        "countryCode": "ZW"
+        "countryCode": "ZW",
+        "languageCode": "sn"
     },
     {
         "nationality": "Arab",
         "flagUrl": "https://assets.strpst.com/assets/common/components/ui/CountryFlag/images/arab.svg",
         "country": "Arab Countries",
-        "countryCode": ""
+        "countryCode": "",
+        "languageCode": "en"
     },
     {
         "nationality": "Israeli",
         "flagUrl": "https://assets.strpst.com/assets/common/components/ui/CountryFlag/images/il.svg",
         "country": "Israel",
-        "countryCode": "IL"
+        "countryCode": "IL",
+        "languageCode": "he"
     },
     {
         "nationality": "Turkish",
         "flagUrl": "https://assets.strpst.com/assets/common/components/ui/CountryFlag/images/tr.svg",
         "country": "Turkey",
-        "countryCode": "TR"
+        "countryCode": "TR",
+        "languageCode": "tr"
     },
     {
         "nationality": "Portuguese",
         "flagUrl": "https://assets.strpst.com/assets/common/components/ui/CountryFlag/images/pt.svg",
         "country": "Portugal",
-        "countryCode": "PT"
+        "countryCode": "PT",
+        "languageCode": "pt"
     },
     {
         "nationality": "Russian",
         "flagUrl": "https://assets.strpst.com/assets/common/components/ui/CountryFlag/images/ru.svg",
         "country": "Russia",
-        "countryCode": "RU"
+        "countryCode": "RU",
+        "languageCode": "ru"
     },
     {
         "nationality": "Spanish",
         "flagUrl": "https://assets.strpst.com/assets/common/components/ui/CountryFlag/images/es.svg",
         "country": "Spain",
-        "countryCode": "ES"
+        "countryCode": "ES",
+        "languageCode": "es"
     }
 ]

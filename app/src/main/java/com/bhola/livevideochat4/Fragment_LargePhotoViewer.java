@@ -1,5 +1,7 @@
 package com.bhola.livevideochat4;
 
+import android.app.Activity;
+import android.app.FragmentManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
@@ -14,9 +16,8 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.app.Fragment;
 
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.ViewPager2;
 
@@ -96,7 +97,7 @@ public class Fragment_LargePhotoViewer extends Fragment {
         cross.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                FragmentManager fragmentManager = requireActivity().getSupportFragmentManager();
+                FragmentManager fragmentManager= ((Activity) context).getFragmentManager();
                 fragmentManager.beginTransaction().remove(Fragment_LargePhotoViewer.this).commit();
 
                 getActivity().setRequestedOrientation(

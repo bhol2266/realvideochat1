@@ -29,9 +29,11 @@
             <TextView
                 android:id="@+id/userName"
                 android:layout_width="wrap_content"
+                android:maxWidth="150dp"
+                android:maxLines="1"
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/inter"
-                android:text="Sunaina Delhi :)"
+                android:text="Sunaina Delhi  dafasdf asdf:)"
                 android:textColor="@color/semiblack"
                 android:textSize="18dp" />
 

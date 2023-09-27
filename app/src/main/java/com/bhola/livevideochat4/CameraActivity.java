@@ -1,9 +1,12 @@
 package com.bhola.livevideochat4;
 
+import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
@@ -63,20 +66,25 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
 import com.airbnb.lottie.LottieAnimationView;
+import com.google.common.reflect.TypeToken;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
+import com.google.gson.Gson;
+import com.squareup.picasso.Picasso;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
+import de.hdodenhof.circleimageview.CircleImageView;
 
 
 public class CameraActivity extends AppCompatActivity {
@@ -89,7 +97,7 @@ public class CameraActivity extends AppCompatActivity {
     MediaPlayer mediaPlayer;
 
     int videoView_Height;
-
+    Model_Profile model_profile;
     //Camera stuffs
     private static final int CAMERA_PERMISSION_REQUEST_CODE = 123;
     private TextureView textureView;
@@ -136,6 +144,7 @@ public class CameraActivity extends AppCompatActivity {
     public static ArrayList<Girl> girlsList;
     androidx.appcompat.app.AlertDialog disclaimer_dialog = null;
     private CountDownTimer countDownTimer;
+    private long timeRemaining = 0; // Store remaining time when paused for coundown timer
 
     androidx.appcompat.app.AlertDialog block_user_dialog = null;
     androidx.appcompat.app.AlertDialog report_user_dialog = null;
@@ -222,7 +231,7 @@ public class CameraActivity extends AppCompatActivity {
         View layout = inflater.inflate(R.layout.custom_toast_layout, null);
 
         TextView profileName = layout.findViewById(R.id.profileName);
-        profileName.setText(girlsList.get(currentVideoIndex).getName().substring(0, girlsList.get(currentVideoIndex).getName().indexOf(" ")));
+        profileName.setText(model_profile.getName());
         // You can customize the text and other properties of the view elements here
 
         Toast toast = new Toast(getApplicationContext());
@@ -238,7 +247,10 @@ public class CameraActivity extends AppCompatActivity {
         if (SplashScreen.App_updating.equals("active")) {
             return;
         }
-        int index = currentVideoIndex;
+        //storing these variable again because the call will come after 10s. so after 10s the model_profile may gets udpated
+        String name = model_profile.getName();
+        String profileImage = model_profile.getProfilePhoto();
+        String usernamee = model_profile.getUsername();
         callhandler = new Handler();
         callRunnable = new Runnable() {
             @Override
@@ -253,7 +265,9 @@ public class CameraActivity extends AppCompatActivity {
                         Fragment_Calling fragment = new Fragment_Calling();
 
                         Bundle args = new Bundle();
-                        args.putString("name", girlsList.get(index).getName()); // Replace "key" with an appropriate key and "Your Data" with the data you want to pass
+                        args.putString("name", name); // Replace "key" with an appropriate key and "Your Data" with the data you want to pass
+                        args.putString("profile", profileImage); // Replace "key" with an appropriate key and "Your Data" with the data you want to pass
+                        args.putString("username", usernamee); // Replace "key" with an appropriate key and "Your Data" with the data you want to pass
 
                         fragment.setArguments(args);
                         fragmentTransaction.replace(R.id.player, fragment);
@@ -279,8 +293,8 @@ public class CameraActivity extends AppCompatActivity {
 
 
 // Set desired width and height in dp
-                int desiredWidthDp = 150;
-                int desiredHeightDp = 250;
+                int desiredWidthDp = 100;
+                int desiredHeightDp = 165;
 // Convert dp values to pixels
                 float scale = getResources().getDisplayMetrics().density;
                 int desiredWidthPx = (int) (desiredWidthDp * scale + 0.5f);
@@ -335,10 +349,7 @@ public class CameraActivity extends AppCompatActivity {
         girlsList = new ArrayList<>();
         if (SplashScreen.App_updating.equals("active")) {
             Girl girl = new Girl();
-            girl.setName("Amrita Desai");
-            girl.setAge(25);
-
-            girl.setVideoUrl(SplashScreen.databaseURL+"DesiChatVideos/Amrita%20Desai.mp4");
+            girl.setUsername("Artlimbo");
             girl.setCensored(true);
             girl.setSeen(false);
             girl.setLiked(false);
@@ -347,7 +358,16 @@ public class CameraActivity extends AppCompatActivity {
             playVideoinBackground();
 
         } else {
-            readGirlsVideo();  // json file
+
+            boolean girlList_available = save_retreive_Chatbots_insharedPrefrence("retreive");
+            if (girlList_available) {
+                filterGirlList(); // this is to remove uncensored video if app is not logged with google
+                playVideoinBackground();
+                return;
+            }
+
+            readGirlsVideo();
+
         }
 
     }
@@ -373,13 +393,11 @@ public class CameraActivity extends AppCompatActivity {
 
             }
         });
-
-        String baseUrl =SplashScreen.databaseURL+"DesiChatVideos/";
-        String videoPath = baseUrl + girlsList.get(currentVideoIndex).getName() + ".mp4";
+        String videoPath = SplashScreen.databaseURL_video + "InternationalChatVideos/" + girlsList.get(currentVideoIndex).getUsername() + ".mp4";
 
 
-        Log.d(SplashScreen.TAG, "loadDataArraylist: " + girlsList.get(0).getName());
-        Log.d(SplashScreen.TAG, "currentVideoIndex: " + currentVideoIndex);
+        getGirlProfile_DB(girlsList.get(currentVideoIndex).getUsername()); //this method is for reading single girl data from db top update name and use data for intent when user wants to goto profile
+
         Log.d(SplashScreen.TAG, "videoPath: " + videoPath);
 
 
@@ -427,8 +445,6 @@ public class CameraActivity extends AppCompatActivity {
 
 
                         progressBarLayout.setVisibility(View.GONE);
-                        TextView profilename = findViewById(R.id.profileName);
-                        profilename.setText(girlsList.get(currentVideoIndex).getName());
                         controlsLayout.setVisibility(View.VISIBLE);
                         tapToReplyView.setVisibility(View.GONE);
                         resetButtons();
@@ -443,19 +459,140 @@ public class CameraActivity extends AppCompatActivity {
     }
 
 
+    private void getGirlProfile_DB(String userName) {
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                Cursor cursor = new DatabaseHelper(CameraActivity.this, SplashScreen.DB_NAME, SplashScreen.DB_VERSION, "GirlsProfile").readSingleGirl(userName);
+                if (cursor.moveToFirst()) {
+                    // Extract data from the cursor and populate the Model_Profile object
+                    String Username = SplashScreen.decryption(cursor.getString(0));
+                    String Name = SplashScreen.decryption(cursor.getString(1));
+                    String Country = cursor.getString(2);
+                    String Languages = cursor.getString(3);
+                    String Age = cursor.getString(4);
+                    String InterestedIn = cursor.getString(5);
+                    String BodyType = cursor.getString(6);
+                    String Specifics = SplashScreen.decryption(cursor.getString(7));
+                    String Ethnicity = cursor.getString(8);
+                    String Hair = cursor.getString(9);
+                    String EyeColor = cursor.getString(10);
+                    String Subculture = cursor.getString(11);
+                    String profilePhoto = SplashScreen.decryption(cursor.getString(13));
+                    String coverPhoto = SplashScreen.decryption(cursor.getString(14));
+                    int censored = cursor.getInt(17);
+                    int like = cursor.getInt(18);
+                    int selectedBot = cursor.getInt(19);
+
+                    // Convert JSON strings back to arrays/lists using Gson
+                    Gson gson = new Gson();
+
+
+                    String interestsJson = SplashScreen.decryption(cursor.getString(12));
+                    List<Map<String, String>> Interests = gson.fromJson(interestsJson, new TypeToken<List<Map<String, String>>>() {
+                    }.getType());
+
+                    String imagesJson = SplashScreen.decryption(cursor.getString(15));
+                    List<String> images = gson.fromJson(imagesJson, new TypeToken<List<String>>() {
+                    }.getType());
+
+                    String videosJson = SplashScreen.decryption(cursor.getString(16));
+                    List<Map<String, String>> videos = gson.fromJson(videosJson, new TypeToken<List<Map<String, String>>>() {
+                    }.getType());
+
+                    // Create a new Model_Profile object and populate it
+                    model_profile = new Model_Profile(Username, Name, Country, Languages, Age, InterestedIn, BodyType, Specifics, Ethnicity, Hair, EyeColor, Subculture, profilePhoto, coverPhoto, Interests, images, videos, censored, like, selectedBot);
+
+                }
+                cursor.close();
+                ((Activity) CameraActivity.this).runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        new Handler().postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+
+                                TextView profileName = findViewById(R.id.profileName);
+                                profileName.setText(model_profile.getName());
+                                CircleImageView profileImage = findViewById(R.id.profileImage);
+
+                                profileName.setOnClickListener(new View.OnClickListener() {
+                                    @Override
+                                    public void onClick(View view) {
+                                        profileImage.performClick();
+                                    }
+                                });
+                                Picasso.get().load(model_profile.getProfilePhoto()).into(profileImage);
+                                profileImage.setOnClickListener(new View.OnClickListener() {
+                                    @Override
+                                    public void onClick(View view) {
+                                        Intent intent = new Intent(CameraActivity.this, Profile.class);
+                                        intent.putExtra("userName", girlsList.get(currentVideoIndex).getUsername());
+                                        intent.putExtra("online", true);
+                                        startActivity(intent);
+                                    }
+                                });
+                            }
+                        }, 200);
+
+                    }
+                });
+            }
+        }).start();
+
+
+    }
+
+
     private void setTimer() {
         TextView counterText = findViewById(R.id.counterText);
+        counterText.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                timeRemaining = 0;
+                if (currentVideoIndex < girlsList.size()) {
+
+                    if (SplashScreen.App_updating.equals("active")) {
+                        onBackPressed();
+                        return;
+                    }
+
+                    currentVideoIndex = currentVideoIndex + 1;
+                    videoView.stopPlayback();
+                    progressBarLayout.setVisibility(View.VISIBLE);
+                    controlsLayout.setVisibility(View.GONE);
+                    tapToReplyView.setVisibility(View.VISIBLE);
+                    String videoPath = SplashScreen.databaseURL_video + "InternationalChatVideos/" + girlsList.get(currentVideoIndex).getUsername() + ".mp4";
+
+
+                    Uri videoUri = Uri.parse(videoPath);
+                    videoView.setVideoURI(videoUri);
+                    // Start playing the new video
+                    videoView.start();
+                    getGirlProfile_DB(girlsList.get(currentVideoIndex).getUsername());
+                    countDownTimer.cancel();
+                }
+                if (currentVideoIndex == girlsList.size() - 1) {
+                    for (Girl girll : girlsList) {
+                        girll.setLiked(false);
+                    }
+                    currentVideoIndex = 0;
+                }
+            }
+        });
         TextView counterTextCircular = findViewById(R.id.counterTextCircular);
 
         // Set the initial value of the timer in seconds
-        int initialSeconds = 15;
+        int initialSeconds = (timeRemaining > 0) ? (int) timeRemaining : 20;
 
-        // Set up the CountDownTimer
-        countDownTimer = new CountDownTimer(initialSeconds * 1000, 1000) {
+        countDownTimer = new CountDownTimer(initialSeconds * 1000L, 1000) {
             @Override
             public void onTick(long millisUntilFinished) {
                 // Update the timerTextView with the remaining seconds
+
                 int seconds = (int) (millisUntilFinished / 1000);
+                timeRemaining = seconds;
                 counterText.setText("Your dream girl will be gone in " + String.valueOf(seconds) + " seconds");
                 counterTextCircular.setText(String.valueOf(seconds));
 
@@ -471,14 +608,14 @@ public class CameraActivity extends AppCompatActivity {
                     progressBarLayout.setVisibility(View.VISIBLE);
                     controlsLayout.setVisibility(View.GONE);
                     tapToReplyView.setVisibility(View.VISIBLE);
-                    String baseUrl = SplashScreen.databaseURL+"DesiChatVideos/";
-                    String videoPath = baseUrl + girlsList.get(currentVideoIndex).getName() + ".mp4";// Replace with your actual video URL
+                    String videoPath = SplashScreen.databaseURL_video + "InternationalChatVideos/" + girlsList.get(currentVideoIndex).getUsername() + ".mp4";
 
 
                     Uri videoUri = Uri.parse(videoPath);
                     videoView.setVideoURI(videoUri);
                     // Start playing the new video
                     videoView.start();
+                    getGirlProfile_DB(girlsList.get(currentVideoIndex).getUsername());
                     countDownTimer.cancel();
                 }
                 if (currentVideoIndex == girlsList.size() - 1) {
@@ -495,93 +632,102 @@ public class CameraActivity extends AppCompatActivity {
             }
         };
 
-        // Start the timer
         countDownTimer.start();
+
     }
 
 
     private void readGirlsVideo() {
 
+
 //         Read and parse the JSON file
-        try {
-            JSONObject jsonObject = new JSONObject(loadJSONFromAsset());
-            JSONArray girlsArray = jsonObject.getJSONArray("girls");
 
-            // Iterate through the girls array
-            for (int i = 0; i < girlsArray.length(); i++) {
-                JSONObject girlObject = girlsArray.getJSONObject(i);
+        DatabaseReference usersRef = FirebaseDatabase.getInstance().getReference("VideoItems");
+        usersRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
 
-                // Create a Girl object and set its properties
-                Girl girl = new Girl();
-                girl.setName(girlObject.getString("name"));
-                girl.setAge(girlObject.getInt("age"));
-                girl.setVideoUrl(girlObject.getString("videoUrl"));
-                girl.setCensored(girlObject.getBoolean("censored"));
-                girl.setSeen(girlObject.getBoolean("seen"));
-                girl.setLiked(girlObject.getBoolean("liked"));
 
-                // Add the Girl object to the ArrayList
-                girlsList.add(girl);
+                for (DataSnapshot userSnapshot : dataSnapshot.getChildren()) {
+
+                    String username = (String) userSnapshot.child("username").getValue();
+                    String censorship = (String) userSnapshot.child("censorship").getValue();
+                    boolean censored = true;
+                    if (censorship.equals("uncensored")) {
+                        censored = false;
+                    }
+
+                    boolean seen = false;
+                    boolean liked = false;
+
+                    Girl girl = new Girl();
+                    girl.setUsername(username);
+                    girl.setCensored(censored);
+                    girl.setSeen(seen);
+                    girl.setLiked(liked);
+
+
+                    girlsList.add(girl);
+
+                }
+                Collections.shuffle(girlsList);
+                save_retreive_Chatbots_insharedPrefrence("save");
+                filterGirlList(); // this is to remove uncensored video if app is not logged with google
+
+                playVideoinBackground();
             }
 
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Log.d(SplashScreen.TAG, " userList.size(): " + databaseError.getMessage());
 
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
+            }
+        });
 
+
+    }
+
+    private void filterGirlList() {
+        Iterator<Girl> iterator = girlsList.iterator();
         if (SplashScreen.userLoggedIn && SplashScreen.userLoggedIAs.equals("Google") && SplashScreen.App_updating.equals("inactive")) {
-            DatabaseReference usersRef = FirebaseDatabase.getInstance().getReference("Girls_Video/girls");
-            usersRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(DataSnapshot dataSnapshot) {
-
-
-                    for (DataSnapshot userSnapshot : dataSnapshot.getChildren()) {
-
-                        String name = (String) userSnapshot.child("name").getValue();
-
-                        Long longValue = (Long) userSnapshot.child("age").getValue();
-                        int age = longValue.intValue();
-
-                        String videoUrl = (String) userSnapshot.child("videoUrl").getValue();
-
-                        Boolean booleanValue_censored = userSnapshot.child("censored").getValue(Boolean.class);
-                        boolean censored = booleanValue_censored.booleanValue();
-
-                        Boolean booleanValue_seen = userSnapshot.child("seen").getValue(Boolean.class);
-                        boolean seen = booleanValue_seen.booleanValue();
-
-                        Boolean booleanValue_liked = userSnapshot.child("liked").getValue(Boolean.class);
-                        boolean liked = booleanValue_liked.booleanValue();
-
-                        Girl girl = new Girl();
-                        girl.setName(name);
-                        girl.setAge(age);
-                        girl.setVideoUrl(videoUrl);
-                        girl.setCensored(censored);
-                        girl.setSeen(seen);
-                        girl.setLiked(liked);
-
-                        // Add the Girl object to the ArrayList
-                        girlsList.add(0, girl);
-
-                    }
-                    playVideoinBackground();
-                }
-
-                @Override
-                public void onCancelled(DatabaseError databaseError) {
-                    Log.d(SplashScreen.TAG, " userList.size(): " + databaseError.getMessage());
-                    playVideoinBackground();
-
-                }
-            });
         } else {
-            playVideoinBackground();
 
+            while (iterator.hasNext()) {
+                Girl girl = iterator.next();
+                if (!girl.isCensored()) {
+                    iterator.remove(); // Removes the current girl from the list
+                }
+            }
         }
+    }
+
+    private boolean save_retreive_Chatbots_insharedPrefrence(String saveORretreive) {
+        SharedPreferences sharedPreferences = CameraActivity.this.getSharedPreferences("Firebase_VideoItems", MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+
+        if (saveORretreive.equals("save")) {
+            Gson gson = new Gson();
+            String json = gson.toJson(girlsList);
+            editor.putString("girlsList", json);
+            editor.apply();
+            return true;
+        } else {
+            // Retrieve the JSON string from SharedPreferences
+            String json = sharedPreferences.getString("girlsList", null);
+            // Convert the JSON string back to ArrayList
+            Gson gson = new Gson();
+            Type type = new TypeToken<ArrayList<Girl>>() {
+            }.getType();
 
 
+            if (json == null) {
+                // Handle case when no ArrayList is saved in SharedPreferences
+                return false;
+            } else {
+                girlsList = gson.fromJson(json, type);
+                return true;
+            }
+        }
     }
 
     private String loadJSONFromAsset() {
@@ -894,7 +1040,7 @@ public class CameraActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        super.onBackPressed();
+        finish();
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             if (handler2 != null && handler2.hasCallbacks(runnable2)) {
@@ -967,6 +1113,10 @@ public class CameraActivity extends AppCompatActivity {
 
         }
 
+        if (timeRemaining > 0) {
+            setTimer(); // Resume the timer with remaining time
+        }
+
     }
 
     @Override
@@ -978,21 +1128,14 @@ public class CameraActivity extends AppCompatActivity {
                 currentSeekPosition = videoView.getCurrentPosition();
                 videoView.pause();
             }
+            if (countDownTimer != null) {
+                countDownTimer.cancel(); // Pause the timer
+            }
         } catch (Exception e) {
 
         }
 
         closeBackgroundHandler();
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-
-        // Cancel the CountDownTimer to prevent memory leaks
-        if (countDownTimer != null) {
-            countDownTimer.cancel();
-        }
     }
 
 
@@ -1130,9 +1273,7 @@ public class CameraActivity extends AppCompatActivity {
 }
 
 class Girl {
-    private String name;
-    private int age;
-    private String videoUrl;
+    private String username;
     private boolean censored;
     private boolean seen;
     private boolean liked;
@@ -1140,37 +1281,19 @@ class Girl {
     public Girl() {
     }
 
-    public Girl(String name, int age, String videoUrl, boolean censored, boolean seen, boolean liked) {
-        this.name = name;
-        this.age = age;
-        this.videoUrl = videoUrl;
+    public Girl(String username, boolean censored, boolean seen, boolean liked) {
+        this.username = username;
         this.censored = censored;
         this.seen = seen;
         this.liked = liked;
     }
 
-    public String getName() {
-        return name;
+    public String getUsername() {
+        return username;
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public int getAge() {
-        return age;
-    }
-
-    public void setAge(int age) {
-        this.age = age;
-    }
-
-    public String getVideoUrl() {
-        return videoUrl;
-    }
-
-    public void setVideoUrl(String videoUrl) {
-        this.videoUrl = videoUrl;
+    public void setUsername(String username) {
+        this.username = username;
     }
 
     public boolean isCensored() {

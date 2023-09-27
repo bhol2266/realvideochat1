@@ -10,6 +10,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,13 +23,16 @@ import android.widget.VideoView;
 import androidx.fragment.app.Fragment;
 
 import com.airbnb.lottie.LottieAnimationView;
+import com.squareup.picasso.Picasso;
+
+import de.hdodenhof.circleimageview.CircleImageView;
 
 public class Fragment_Calling extends Fragment {
 
 
     View view;
     Context context;
-    String name;
+    String name,profileImage,username;
     MediaPlayer mediaPlayer;
     int videoView_Height;
     ImageView endcall;
@@ -45,6 +49,8 @@ public class Fragment_Calling extends Fragment {
         Bundle args = getArguments();
         if (args != null) {
             name = args.getString("name");
+            username = args.getString("username");
+            profileImage = args.getString("profile");
         }
 
         view = inflater.inflate(R.layout.fragment_calling, container, false);
@@ -103,9 +109,11 @@ public class Fragment_Calling extends Fragment {
 
         TextView profileName = view.findViewById(R.id.profileName);
         profileName.setText(name);
+        CircleImageView profileImageView=view.findViewById(R.id.profileImageView);
+        Picasso.get().load(profileImage).into(profileImageView);
 
         TextView message = view.findViewById(R.id.message);
-        message.setText(name.substring(0, name.indexOf(" ")) + " invites you for a video call");
+        message.setText(name + " invites you for a video call");
 
         FrameLayout playerLayout = view.findViewById(R.id.fragment_container);
         playerLayout.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
@@ -122,7 +130,8 @@ public class Fragment_Calling extends Fragment {
         });
 
         VideoView videoView = view.findViewById(R.id.videoView);
-        String videoPath = SplashScreen.databaseURL+"DesiChatVideos/" + name + ".mp4";
+        String videoPath = SplashScreen.databaseURL_video + "InternationalChatVideos/" + username + ".mp4";
+        Log.d(SplashScreen.TAG, "init: "+videoPath);
         Uri videoUri = Uri.parse(videoPath);
         videoView.setVideoURI(videoUri);
         videoView.setBackgroundColor(getResources().getColor(R.color.color_333333));

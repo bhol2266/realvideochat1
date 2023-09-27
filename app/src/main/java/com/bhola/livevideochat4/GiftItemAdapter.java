@@ -50,7 +50,7 @@ public class GiftItemAdapter extends RecyclerView.Adapter<GiftItemAdapter.ViewHo
         } catch (IOException e) {
             e.printStackTrace();
         }
-
+        holder.giftName.setText(giftItemModel.getGiftName());
         holder.coin.setText(String.valueOf(coin));
 
 
@@ -60,6 +60,7 @@ public class GiftItemAdapter extends RecyclerView.Adapter<GiftItemAdapter.ViewHo
             holder.giftLayout.setBackground(null);
 
         }
+
         holder.giftLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -93,7 +94,7 @@ public class GiftItemAdapter extends RecyclerView.Adapter<GiftItemAdapter.ViewHo
 
     public class ViewHolder extends RecyclerView.ViewHolder {
         ImageView giftImage;
-        TextView coin;
+        TextView coin, giftName;
         LinearLayout giftLayout;
 
         public ViewHolder(@NonNull View itemView) {
@@ -101,6 +102,7 @@ public class GiftItemAdapter extends RecyclerView.Adapter<GiftItemAdapter.ViewHo
             giftImage = itemView.findViewById(R.id.giftImage);
             coin = itemView.findViewById(R.id.coin);
             giftLayout = itemView.findViewById(R.id.giftLayout);
+            giftName = itemView.findViewById(R.id.giftName);
         }
     }
 }

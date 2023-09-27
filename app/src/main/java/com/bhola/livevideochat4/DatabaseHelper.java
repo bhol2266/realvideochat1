@@ -144,11 +144,23 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     }
 
+    //this method is especially created for the moving images in Fragment_Homepage to read images
+    public Cursor readRandomGirlsForMovingImages() {
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        String query = "SELECT * FROM " + Database_tableNo + " WHERE LENGTH(images) > 50 AND censored = 1 ORDER BY RANDOM() LIMIT 100";
+        Cursor cursor = db.rawQuery(query, null);
+        return cursor;
+    }
     public Cursor readRandomGirls() {
         SQLiteDatabase db = this.getWritableDatabase();
 
         if (SplashScreen.App_updating.equals("inactive") && SplashScreen.userLoggedIn && SplashScreen.userLoggedIAs.equals("Google")) {
-            String query = "SELECT * FROM " + Database_tableNo + " WHERE LENGTH(images) > 50 ORDER BY RANDOM() LIMIT 30";
+//            String query = "SELECT * FROM " + Database_tableNo + " WHERE LENGTH(videos) > 50 ORDER BY RANDOM() LIMIT 1000";
+//            Cursor cursor = db.rawQuery(query, null);
+//            return cursor;
+//
+            String query = "SELECT * FROM " + Database_tableNo + " WHERE LENGTH(images) > 50 AND censored = 1 ORDER BY RANDOM() LIMIT 30";
             Cursor cursor = db.rawQuery(query, null);
             return cursor;
 
@@ -241,6 +253,30 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         SQLiteDatabase sQLiteDatabase = getWritableDatabase();
         ContentValues contentValues = new ContentValues();
         contentValues.put("censored", censoredValue);
+
+        float res = sQLiteDatabase.update(Database_tableNo, contentValues, "Username = ?", new String[]{encryption(username)});
+        if (res == -1)
+            return "Failed";
+        else
+            return "Success";
+    }
+
+    public String selectedBot(String username, int selectedBot_Value) {
+        SQLiteDatabase sQLiteDatabase = getWritableDatabase();
+        ContentValues contentValues = new ContentValues();
+        contentValues.put("selectedBot", selectedBot_Value);
+
+        float res = sQLiteDatabase.update(Database_tableNo, contentValues, "Username = ?", new String[]{encryption(username)});
+        if (res == -1)
+            return "Failed";
+        else
+            return "Success";
+    }
+
+    public String updateLike(String username, int likeValue) {
+        SQLiteDatabase sQLiteDatabase = getWritableDatabase();
+        ContentValues contentValues = new ContentValues();
+        contentValues.put("like", likeValue);
 
         float res = sQLiteDatabase.update(Database_tableNo, contentValues, "Username = ?", new String[]{encryption(username)});
         if (res == -1)

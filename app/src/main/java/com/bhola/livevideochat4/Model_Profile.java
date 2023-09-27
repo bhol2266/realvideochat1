@@ -21,13 +21,12 @@ public class Model_Profile {
     private List<Map<String, String>> interests;
     private List<String> images;
     private List<Map<String, String>> videos;
-    int censored,like;
+    int censored,like,selectedBot;
 
     public Model_Profile() {
     }
 
-
-    public Model_Profile(String username, String name, String from, String languages, String age, String interestedIn, String bodyType, String specifics, String ethnicity, String hair, String eyeColor, String subculture, String profilePhoto, String coverPhoto, List<Map<String, String>> interests, List<String> images, List<Map<String, String>> videos, int censored, int like) {
+    public Model_Profile(String username, String name, String from, String languages, String age, String interestedIn, String bodyType, String specifics, String ethnicity, String hair, String eyeColor, String subculture, String profilePhoto, String coverPhoto, List<Map<String, String>> interests, List<String> images, List<Map<String, String>> videos, int censored, int like, int selectedBot) {
         this.username = username;
         this.name = name;
         this.from = from;
@@ -47,6 +46,7 @@ public class Model_Profile {
         this.videos = videos;
         this.censored = censored;
         this.like = like;
+        this.selectedBot = selectedBot;
     }
 
     public String getUsername() {
@@ -199,5 +199,13 @@ public class Model_Profile {
 
     public void setLike(int like) {
         this.like = like;
+    }
+
+    public int getSelectedBot() {
+        return selectedBot;
+    }
+
+    public void setSelectedBot(int selectedBot) {
+        this.selectedBot = selectedBot;
     }
 }

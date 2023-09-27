@@ -20,6 +20,7 @@
             android:layout_centerInParent="true" />
 
         <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/profileImageView"
             android:layout_width="130dp"
             android:layout_height="130dp"
             android:layout_alignParentTop="true"

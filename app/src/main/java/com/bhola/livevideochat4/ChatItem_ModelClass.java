@@ -4,15 +4,11 @@ import java.util.ArrayList;
 
 
 public class ChatItem_ModelClass {
-    private int id;
-    private String userName;
-    private String gender;
-    private String age;
-    private String country;
-    private  ArrayList<String> contentImages;
-    private String users;
-    private String answerRate;
-    private String userProfile;
+
+    private String name;
+    private String username;
+    private String profileImage;
+    private ArrayList<String> contentImages;
     private boolean containsQuestion;
     private String recommendationType;
     private ArrayList<UserBotMsg> userBotMsg;
@@ -21,60 +17,39 @@ public class ChatItem_ModelClass {
     public ChatItem_ModelClass() {
     }
 
-    public ChatItem_ModelClass(int id, String userName, String gender, String age, String country, ArrayList<String> contentImages, String users, String answerRate, String userProfile, boolean containsQuestion, String recommendationType, ArrayList<UserBotMsg> userBotMsg, UserQuestionWithAns questionWithAns) {
-        this.id = id;
-        this.userName = userName;
-        this.gender = gender;
-        this.age = age;
-        this.country = country;
+    public ChatItem_ModelClass(String name, String username, String profileImage, ArrayList<String> contentImages, boolean containsQuestion, String recommendationType, ArrayList<UserBotMsg> userBotMsg, UserQuestionWithAns questionWithAns) {
+        this.name = name;
+        this.username = username;
+        this.profileImage = profileImage;
         this.contentImages = contentImages;
-        this.users = users;
-        this.answerRate = answerRate;
-        this.userProfile = userProfile;
         this.containsQuestion = containsQuestion;
         this.recommendationType = recommendationType;
         this.userBotMsg = userBotMsg;
         this.questionWithAns = questionWithAns;
     }
 
-    public int getId() {
-        return id;
+    public String getName() {
+        return name;
     }
 
-    public void setId(int id) {
-        this.id = id;
+    public void setName(String name) {
+        this.name = name;
     }
 
-    public String getUserName() {
-        return userName;
+    public String getUsername() {
+        return username;
     }
 
-    public void setUserName(String userName) {
-        this.userName = userName;
+    public void setUsername(String username) {
+        this.username = username;
     }
 
-    public String getGender() {
-        return gender;
+    public String getProfileImage() {
+        return profileImage;
     }
 
-    public void setGender(String gender) {
-        this.gender = gender;
-    }
-
-    public String getAge() {
-        return age;
-    }
-
-    public void setAge(String age) {
-        this.age = age;
-    }
-
-    public String getCountry() {
-        return country;
-    }
-
-    public void setCountry(String country) {
-        this.country = country;
+    public void setProfileImage(String profileImage) {
+        this.profileImage = profileImage;
     }
 
     public ArrayList<String> getContentImages() {
@@ -83,30 +58,6 @@ public class ChatItem_ModelClass {
 
     public void setContentImages(ArrayList<String> contentImages) {
         this.contentImages = contentImages;
-    }
-
-    public String getUsers() {
-        return users;
-    }
-
-    public void setUsers(String users) {
-        this.users = users;
-    }
-
-    public String getAnswerRate() {
-        return answerRate;
-    }
-
-    public void setAnswerRate(String answerRate) {
-        this.answerRate = answerRate;
-    }
-
-    public String getUserProfile() {
-        return userProfile;
-    }
-
-    public void setUserProfile(String userProfile) {
-        this.userProfile = userProfile;
     }
 
     public boolean isContainsQuestion() {

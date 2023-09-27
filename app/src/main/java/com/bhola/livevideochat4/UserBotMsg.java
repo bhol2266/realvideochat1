@@ -1,7 +1,6 @@
 package com.bhola.livevideochat4;
 
 public class UserBotMsg {
-    private int id;
     private String msg;
     private String mimeType;
     private String extraMsg;
@@ -13,8 +12,7 @@ public class UserBotMsg {
     public UserBotMsg() {
     }
 
-    public UserBotMsg(int id, String msg, String mimeType, String extraMsg, String dateTime, int nextMsgDelay, int read, int sent) {
-        this.id = id;
+    public UserBotMsg(String msg, String mimeType, String extraMsg, String dateTime, int nextMsgDelay, int read, int sent) {
         this.msg = msg;
         this.mimeType = mimeType;
         this.extraMsg = extraMsg;
@@ -22,14 +20,6 @@ public class UserBotMsg {
         this.nextMsgDelay = nextMsgDelay;
         this.read = read;
         this.sent = sent;
-    }
-
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
     }
 
     public String getMsg() {

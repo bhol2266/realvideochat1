@@ -61,6 +61,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="30dp"
+            android:layout_marginLeft="5dp"
             app:cardCornerRadius="10dp">
 
             <RelativeLayout
@@ -68,17 +69,30 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentTop="true"
                 android:background="@color/themeColor"
-                android:padding="10dp">
+                android:padding="7dp">
+
+
+                <de.hdodenhof.circleimageview.CircleImageView
+                    android:layout_width="60dp"
+                    android:id="@+id/profileImage"
+                    android:layout_marginRight="5dp"
+                    android:layout_alignParentStart="true"
+                    android:layout_centerVertical="true"
+                    android:src="@drawable/woman"
+                    android:layout_height="60dp"/>
+
 
                 <TextView
                     android:id="@+id/profileName"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_alignParentLeft="true"
+                    android:layout_marginLeft="5dp"
+                    android:layout_toRightOf="@id/profileImage"
+                    android:maxWidth="120dp"
+                    android:maxLines="1"
                     android:text="searching..."
                     android:textColor="@color/white"
                     android:textSize="20dp" />
-
 
                 <LinearLayout
                     android:layout_width="wrap_content"
@@ -110,6 +124,8 @@
                 <androidx.cardview.widget.CardView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_toRightOf="@id/profileImage"
+
                     android:layout_below="@+id/profileName"
                     android:layout_marginTop="5dp"
 
@@ -311,7 +327,7 @@
                 android:gravity="center"
                 android:paddingTop="5dp"
                 android:paddingBottom="5dp"
-                android:text="Your dream girl will be gone in 10 seconds"
+                android:text="Your dream girl will be gone in 60 seconds"
                 android:textColor="@color/white"
                 android:textSize="14dp" />
 

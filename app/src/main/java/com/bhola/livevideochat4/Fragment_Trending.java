@@ -1,11 +1,14 @@
 package com.bhola.livevideochat4;
 
+import static android.content.Context.MODE_PRIVATE;
+
 import android.Manifest;
 import android.animation.ObjectAnimator;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -53,6 +56,10 @@ import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.squareup.picasso.Picasso;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -87,17 +94,20 @@ public class Fragment_Trending extends Fragment {
     public static SwipeRefreshLayout swipeRefreshLayout;
     NearByAdapter nearByAdapter;
     RecyclerView recyclerview_NearBy;
+    ArrayList<CountryInfo_Model> countrylist_forRecyclerview;
+    CountryRecyclerViewAdapter countryRecyclerViewAdapter;
+    String currentSelectedView="Hot";  //hot fragment or nearbyFragment . we need this because when click hottextview even hot view is already there, it creates error when location permission is denied
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
 
-        getUserLocation();
+        getUserLocation_Permission();
 
         view = inflater.inflate(R.layout.fragment_trending, container, false);
 
         context = getContext();
-    
+
         TextView HotTextview = view.findViewById(R.id.HotTextview);
         ImageView HotTextview_line = view.findViewById(R.id.HotTextview_line);
 
@@ -108,6 +118,10 @@ public class Fragment_Trending extends Fragment {
         HotTextview.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                if(currentSelectedView.equals("Hot")){
+                    return;
+                }
+                currentSelectedView="Hot";
                 recyclerview_NearBy.setVisibility(View.GONE);
                 swipeRefreshLayout.setVisibility(View.VISIBLE);
                 swipeRefreshLayout.setEnabled(true);
@@ -140,6 +154,17 @@ public class Fragment_Trending extends Fragment {
                     return;
                 }
 
+                if (SplashScreen.currentCountry.equals("")) {
+                    return;
+                }
+                if (ContextCompat.checkSelfPermission(requireActivity(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                } else {
+                    // Permission not granted, request it
+                    requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION);
+
+                }
+
+                currentSelectedView="Nearby";
 
                 recyclerview_NearBy.setVisibility(View.VISIBLE);
                 swipeRefreshLayout.setVisibility(View.GONE);
@@ -185,8 +210,7 @@ public class Fragment_Trending extends Fragment {
         });
         setUpSlider();
         setupRecycerView();
-        showNearBy();
-        
+
         return view;
     }
 
@@ -215,8 +239,7 @@ public class Fragment_Trending extends Fragment {
             }
         });
 
-
-        ArrayList<CountryInfo_Model> newList = new ArrayList<>(SplashScreen.countryList);
+        countrylist_forRecyclerview = new ArrayList<>(SplashScreen.countryList);
 
 
         CountryInfo_Model countryInfoModel = new CountryInfo_Model();
@@ -225,66 +248,15 @@ public class Fragment_Trending extends Fragment {
         countryInfoModel.setCountry("All");
         countryInfoModel.setSelected(true);
 
-        newList.add(0, countryInfoModel);
+        countrylist_forRecyclerview.add(0, countryInfoModel);
 
-
-        CountryRecyclerViewAdapter adapter = new CountryRecyclerViewAdapter(requireContext(), newList);
-        getLocation(newList, adapter); // this is to get current current country location and move that country to top of the list in slider layout
+        countryRecyclerViewAdapter = new CountryRecyclerViewAdapter(requireContext(), countrylist_forRecyclerview);
 
         RecyclerView recyclerView = view.findViewById(R.id.recycler_view);
         recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
-        recyclerView.setAdapter(adapter);
+        recyclerView.setAdapter(countryRecyclerViewAdapter);
 
 
-    }
-
-
-    private void getLocation(ArrayList<CountryInfo_Model> newList, CountryRecyclerViewAdapter adapter) {
-        FusedLocationProviderClient fusedLocationClient = LocationServices.getFusedLocationProviderClient(context);
-
-        if (ActivityCompat.checkSelfPermission(context, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            return;
-        }
-        fusedLocationClient.getLastLocation()
-                .addOnSuccessListener((Activity) context, location -> {
-                    if (location != null) {
-                        // Use the location data
-                        double latitude = location.getLatitude();
-                        double longitude = location.getLongitude();
-
-                        // Call reverse geocoding to get the city and country
-                        getAddressFromLocation(latitude, longitude, newList, adapter);
-                    }
-                });
-
-
-    }
-
-    private void getAddressFromLocation(double latitude, double longitude, ArrayList<CountryInfo_Model> newList, CountryRecyclerViewAdapter adapter) {
-        Geocoder geocoder = new Geocoder(context, Locale.getDefault());
-        try {
-            List<Address> addresses = geocoder.getFromLocation(latitude, longitude, 1);
-            if (addresses.size() > 0) {
-                SplashScreen.currentCity = addresses.get(0).getLocality();
-                SplashScreen.currentCountry = addresses.get(0).getCountryName();
-                // Now you have the city and country information
-
-                int fromIndex = -1;
-                for (int i = 0; i < newList.size(); i++) {
-                    CountryInfo_Model countryInfoModel1 = newList.get(i);
-                    if (SplashScreen.currentCountry.equals(countryInfoModel1.getCountry())) {
-                        fromIndex = i; // Index of the item to move
-                    }
-                }
-                if (fromIndex != -1) {
-                    CountryInfo_Model countryInfoModel2 = newList.remove(fromIndex);
-                    newList.add(1, countryInfoModel2);
-                    adapter.notifyDataSetChanged();
-                }
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 
 
@@ -292,7 +264,7 @@ public class Fragment_Trending extends Fragment {
         girlsList_nearBy = new ArrayList<>();
 
 
-         recyclerview_NearBy = view.findViewById(R.id.recyclerview_NearBy);
+        recyclerview_NearBy = view.findViewById(R.id.recyclerview_NearBy);
 
 
         if (SplashScreen.currentCountry.length() != 0) {
@@ -377,6 +349,7 @@ public class Fragment_Trending extends Fragment {
                         String coverPhoto = SplashScreen.decryption(cursor.getString(14));
                         int censored = cursor.getInt(17);
                         int like = cursor.getInt(18);
+                        int selectedBot = cursor.getInt(19);
 
                         // Convert JSON strings back to arrays/lists using Gson
                         Gson gson = new Gson();
@@ -395,7 +368,7 @@ public class Fragment_Trending extends Fragment {
                         }.getType());
 
                         // Create a new Model_Profile object and populate it
-                        Model_Profile model_profile = new Model_Profile(Username, Name, Country, Languages, Age, InterestedIn, BodyType, Specifics, Ethnicity, Hair, EyeColor, Subculture, profilePhoto, coverPhoto, Interests, images, videos, censored, like);
+                        Model_Profile model_profile = new Model_Profile(Username, Name, Country, Languages, Age, InterestedIn, BodyType, Specifics, Ethnicity, Hair, EyeColor, Subculture, profilePhoto, coverPhoto, Interests, images, videos, censored, like, selectedBot);
                         girlsList_slider.add(model_profile);
                     } while (cursor.moveToNext());
 
@@ -480,6 +453,7 @@ public class Fragment_Trending extends Fragment {
                         String coverPhoto = SplashScreen.decryption(cursor.getString(14));
                         int censored = cursor.getInt(17);
                         int like = cursor.getInt(18);
+                        int selectedBot = cursor.getInt(19);
 
                         // Convert JSON strings back to arrays/lists using Gson
                         Gson gson = new Gson();
@@ -498,8 +472,9 @@ public class Fragment_Trending extends Fragment {
                         }.getType());
 
                         // Create a new Model_Profile object and populate it
-                        Model_Profile model_profile = new Model_Profile(Username, Name, Country, Languages, Age, InterestedIn, BodyType, Specifics, Ethnicity, Hair, EyeColor, Subculture, profilePhoto, coverPhoto, Interests, images, videos, censored, like);
+                        Model_Profile model_profile = new Model_Profile(Username, Name, Country, Languages, Age, InterestedIn, BodyType, Specifics, Ethnicity, Hair, EyeColor, Subculture, profilePhoto, coverPhoto, Interests, images, videos, censored, like, selectedBot);
                         girlsList.add(model_profile);
+
                     } while (cursor.moveToNext());
 
                 }
@@ -517,6 +492,9 @@ public class Fragment_Trending extends Fragment {
                                         girlsList.subList(6, girlsList.size()).clear();
                                     }
                                 }
+
+//                                createJSON(); //this json is for creating chat bots
+
                                 adapter.notifyDataSetChanged();
                             }
                         }, 200);
@@ -525,6 +503,40 @@ public class Fragment_Trending extends Fragment {
                 });
             }
         }).start();
+
+
+    }
+
+    private void createJSON() {
+        try {
+            JSONArray jsonArray = new JSONArray();
+
+            for (Model_Profile model_profile : girlsList) {
+
+                JSONObject object1 = new JSONObject();
+                object1.put("name", model_profile.getName());
+                object1.put("username", model_profile.getUsername());
+
+
+                JSONArray videosArray = new JSONArray();
+
+
+                for (int i = 0; i < model_profile.getVideos().size(); i++) {
+
+                    videosArray.put(model_profile.getVideos().get(i).get("videoUrl"));
+                }
+                object1.put("videos", videosArray);
+                jsonArray.put(object1);
+            }
+
+
+            FileWriter fileWriter = new FileWriter(context.getFilesDir() + "/myjsonfile.json");
+            fileWriter.write(jsonArray.toString());
+            fileWriter.close();
+
+        } catch (Exception e) {
+            Log.d(SplashScreen.TAG, "run: " + e.getMessage());
+        }
 
 
     }
@@ -563,12 +575,27 @@ public class Fragment_Trending extends Fragment {
                 SplashScreen.currentCity = addresses.get(0).getLocality();
                 SplashScreen.currentCountry = addresses.get(0).getCountryName();
                 // Now you have the city and country information
+                showNearBy();
 
                 for (int i = 0; i < SplashScreen.countryList.size(); i++) {
                     CountryInfo_Model countryInfo_model = SplashScreen.countryList.get(i);
                     if (SplashScreen.currentCountry.equalsIgnoreCase(countryInfo_model.getCountry().trim())) {
                         loadDatabase_Country(countryInfo_model.getCountry().trim());
                     }
+                }
+
+
+                int fromIndex = -1;
+                for (int i = 0; i < countrylist_forRecyclerview.size(); i++) {
+                    CountryInfo_Model countryInfoModel1 = countrylist_forRecyclerview.get(i);
+                    if (SplashScreen.currentCountry.equals(countryInfoModel1.getCountry())) {
+                        fromIndex = i; // Index of the item to move
+                    }
+                }
+                if (fromIndex != -1) {
+                    CountryInfo_Model countryInfoModel2 = countrylist_forRecyclerview.remove(fromIndex);
+                    countrylist_forRecyclerview.add(1, countryInfoModel2);
+                    countryRecyclerViewAdapter.notifyDataSetChanged();
                 }
 
             }
@@ -580,7 +607,7 @@ public class Fragment_Trending extends Fragment {
 
     private void loadDatabase_Country(String selectedCountry) {
 
-       girlsList.clear();
+        girlsList.clear();
 
         new Thread(new Runnable() {
             @Override
@@ -605,6 +632,7 @@ public class Fragment_Trending extends Fragment {
                         String coverPhoto = SplashScreen.decryption(cursor.getString(14));
                         int censored = cursor.getInt(17);
                         int like = cursor.getInt(18);
+                        int selectedBot = cursor.getInt(19);
 
                         // Convert JSON strings back to arrays/lists using Gson
                         Gson gson = new Gson();
@@ -623,11 +651,11 @@ public class Fragment_Trending extends Fragment {
                         }.getType());
 
                         // Create a new Model_Profile object and populate it
-                        Model_Profile model_profile = new Model_Profile(Username, Name, Country, Languages, Age, InterestedIn, BodyType, Specifics, Ethnicity, Hair, EyeColor, Subculture, profilePhoto, coverPhoto, Interests, images, videos, censored, like);
+                        Model_Profile model_profile = new Model_Profile(Username, Name, Country, Languages, Age, InterestedIn, BodyType, Specifics, Ethnicity, Hair, EyeColor, Subculture, profilePhoto, coverPhoto, Interests, images, videos, censored, like, selectedBot);
                         if (model_profile.getImages().size() != 0) {
-                           girlsList.add(0, model_profile);
+                            girlsList.add(0, model_profile);
                         } else {
-                          girlsList.add(model_profile);
+                            girlsList.add(model_profile);
                         }
                     } while (cursor.moveToNext());
 
@@ -636,7 +664,7 @@ public class Fragment_Trending extends Fragment {
                 ((Activity) context).runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                       swipeRefreshLayout.setRefreshing(false);
+                        swipeRefreshLayout.setRefreshing(false);
                         new Handler().postDelayed(new Runnable() {
                             @Override
                             public void run() {
@@ -645,7 +673,7 @@ public class Fragment_Trending extends Fragment {
                                         girlsList.subList(6, girlsList.size()).clear();
                                     }
                                 }
-                              adapter.notifyDataSetChanged();
+                                adapter.notifyDataSetChanged();
                             }
                         }, 200);
 
@@ -666,13 +694,11 @@ public class Fragment_Trending extends Fragment {
         }
     }
 
-    private void getUserLocation() {
+    private void getUserLocation_Permission() {
 
         if (ContextCompat.checkSelfPermission(requireActivity(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
         } else {
             // Permission not granted, request it
-//            ActivityCompat.requestPermissions((Activity) requireActivity(), new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION_PERMISSION_REQUEST_CODE);
-
             requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION);
 
         }
@@ -705,6 +731,7 @@ public class Fragment_Trending extends Fragment {
                         String coverPhoto = SplashScreen.decryption(cursor.getString(14));
                         int censored = cursor.getInt(17);
                         int like = cursor.getInt(18);
+                        int selectedBot = cursor.getInt(19);
 
                         // Convert JSON strings back to arrays/lists using Gson
                         Gson gson = new Gson();
@@ -723,7 +750,7 @@ public class Fragment_Trending extends Fragment {
                         }.getType());
 
                         // Create a new Model_Profile object and populate it
-                        Model_Profile model_profile = new Model_Profile(Username, Name, Country, Languages, Age, InterestedIn, BodyType, Specifics, Ethnicity, Hair, EyeColor, Subculture, profilePhoto, coverPhoto, Interests, images, videos, censored, like);
+                        Model_Profile model_profile = new Model_Profile(Username, Name, Country, Languages, Age, InterestedIn, BodyType, Specifics, Ethnicity, Hair, EyeColor, Subculture, profilePhoto, coverPhoto, Interests, images, videos, censored, like, selectedBot);
                         girlsList_nearBy.add(model_profile);
 
                     } while (cursor.moveToNext());
@@ -780,6 +807,7 @@ public class Fragment_Trending extends Fragment {
                         String coverPhoto = SplashScreen.decryption(cursor.getString(14));
                         int censored = cursor.getInt(17);
                         int like = cursor.getInt(18);
+                        int selectedBot = cursor.getInt(19);
 
                         // Convert JSON strings back to arrays/lists using Gson
                         Gson gson = new Gson();
@@ -798,7 +826,7 @@ public class Fragment_Trending extends Fragment {
                         }.getType());
 
                         // Create a new Model_Profile object and populate it
-                        Model_Profile model_profile = new Model_Profile(Username, Name, Country, Languages, Age, InterestedIn, BodyType, Specifics, Ethnicity, Hair, EyeColor, Subculture, profilePhoto, coverPhoto, Interests, images, videos, censored, like);
+                        Model_Profile model_profile = new Model_Profile(Username, Name, Country, Languages, Age, InterestedIn, BodyType, Specifics, Ethnicity, Hair, EyeColor, Subculture, profilePhoto, coverPhoto, Interests, images, videos, censored, like, selectedBot);
                         girlsList_nearBy.add(model_profile);
                     } while (cursor.moveToNext());
 
@@ -897,6 +925,21 @@ class GirlsCardAdapter extends RecyclerView.Adapter<GirlsCardAdapter.GridViewHol
                 intent.putExtra("userName", item.getUsername());
                 intent.putExtra("online", false);
                 context.startActivity(intent);
+            }
+        });
+
+        holder.hello.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                SharedPreferences sharedPreferences = view.getContext().getSharedPreferences("UserInfo", MODE_PRIVATE);
+                SharedPreferences.Editor editor = sharedPreferences.edit();
+                editor.putString("userName", item.getUsername());
+                editor.apply(); // Apply the changes to SharedPreferences
+
+                Intent intent = new Intent(context, ChatScreen_User.class);
+                context.startActivity(intent);
+
             }
         });
 
@@ -1296,6 +1339,7 @@ class CountryRecyclerViewAdapter extends RecyclerView.Adapter<CountryRecyclerVie
                         String coverPhoto = SplashScreen.decryption(cursor.getString(14));
                         int censored = cursor.getInt(17);
                         int like = cursor.getInt(18);
+                        int selectedBot = cursor.getInt(19);
 
                         // Convert JSON strings back to arrays/lists using Gson
                         Gson gson = new Gson();
@@ -1314,7 +1358,7 @@ class CountryRecyclerViewAdapter extends RecyclerView.Adapter<CountryRecyclerVie
                         }.getType());
 
                         // Create a new Model_Profile object and populate it
-                        Model_Profile model_profile = new Model_Profile(Username, Name, Country, Languages, Age, InterestedIn, BodyType, Specifics, Ethnicity, Hair, EyeColor, Subculture, profilePhoto, coverPhoto, Interests, images, videos, censored, like);
+                        Model_Profile model_profile = new Model_Profile(Username, Name, Country, Languages, Age, InterestedIn, BodyType, Specifics, Ethnicity, Hair, EyeColor, Subculture, profilePhoto, coverPhoto, Interests, images, videos, censored, like, selectedBot);
                         if (model_profile.getImages().size() != 0) {
                             Fragment_Trending.girlsList.add(0, model_profile);
                         } else {

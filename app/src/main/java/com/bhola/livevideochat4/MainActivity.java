@@ -68,7 +68,6 @@ public class MainActivity extends AppCompatActivity {
         if (SplashScreen.Ads_State.equals("active")) {
             showAds();
         }
-
         initializeBottonFragments();
     }
 
@@ -94,18 +93,20 @@ public class MainActivity extends AppCompatActivity {
                         View view5 = getLayoutInflater().inflate(R.layout.customtab, null);
                         view5.findViewById(R.id.icon).setBackgroundResource(R.drawable.trending);
                         tab.setCustomView(view5);
-                        break;
-                    case 1:
-                        tab.setIcon(R.drawable.videocall);
-
-                        View view1 = getLayoutInflater().inflate(R.layout.customtab, null);
-                        view1.findViewById(R.id.icon).setBackgroundResource(R.drawable.videocall);
-                        tab.setCustomView(view1);
 
                         //By default tab 0 will be selected to change the tint of that tab
                         View tabView = tab.getCustomView();
                         ImageView tabIcon = tabView.findViewById(R.id.icon);
                         tabIcon.setBackgroundTintList(ContextCompat.getColorStateList(MainActivity.this, R.color.themeColor));
+
+                        break;
+                    case 1:
+                        tab.setIcon(R.drawable.videocall2);
+
+                        View view1 = getLayoutInflater().inflate(R.layout.customtab, null);
+                        view1.findViewById(R.id.icon).setBackgroundResource(R.drawable.videocall2);
+                        tab.setCustomView(view1);
+
                         break;
                     case 2:
                         tab.setIcon(R.drawable.chat);

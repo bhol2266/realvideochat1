@@ -13,13 +13,15 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.squareup.picasso.Picasso;
+
 import java.util.List;
 
 public class ImageAdapter extends RecyclerView.Adapter<ImageViewHolder> {
     private Context context;
-    private List<Integer> imageList;
+    private List<String> imageList;
 
-    public ImageAdapter(Context context, List<Integer> imageList) {
+    public ImageAdapter(Context context, List<String> imageList) {
         this.context = context;
         this.imageList = imageList;
     }
@@ -35,10 +37,9 @@ public class ImageAdapter extends RecyclerView.Adapter<ImageViewHolder> {
     public void onBindViewHolder(@NonNull ImageViewHolder holder, int position) {
         // Get the current image resource ID
         int positionInList = position % imageList.size();
-        int imageResId = imageList.get(positionInList);
+//        int imageResId = imageList.get(positionInList);
 
-        // Set the image resource for the ImageView
-        holder.imageView.setImageResource(imageResId);
+        Picasso.get().load(imageList.get(positionInList)).into(holder.imageView);
     }
 
     @Override

@@ -1,6 +1,7 @@
 package com.bhola.livevideochat4;
 
 import android.app.Activity;
+import android.app.FragmentManager;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
@@ -14,6 +15,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -52,6 +54,7 @@ public class Profile extends AppCompatActivity {
     GridLayout gridLayout;
     Model_Profile model_profile;
     public static TextView send;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -67,7 +70,96 @@ public class Profile extends AppCompatActivity {
         getGirlProfile_DB();
         actionbar();
         lottieGift();
+
+
     }
+
+    private void selectBot() {
+
+        TextView selectBotBtn = findViewById(R.id.selectBotBtn);
+        TextView likeBtn = findViewById(R.id.likeBtn);
+
+        if (model_profile.getCensored() == 1) {
+            selectBotBtn.setVisibility(View.GONE);
+        } else {
+            likeBtn.setVisibility(View.GONE);
+
+        }
+        selectedbotBtn(selectBotBtn);
+        likeButton(likeBtn);
+
+    }
+
+    private void selectedbotBtn(TextView selectBotBtn) {
+        if (model_profile.getSelectedBot() == 0) {
+            selectBotBtn.setBackgroundColor(getResources().getColor(R.color.themeColor));
+            selectBotBtn.setText("Not Selected");
+        } else {
+            selectBotBtn.setBackgroundColor(getResources().getColor(R.color.green)); // Assumes you have a green color defined in your resources
+            selectBotBtn.setText("Selected Bot");
+
+        }
+
+        selectBotBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                if (model_profile.getSelectedBot() == 0) {
+                    String res = new DatabaseHelper(Profile.this, SplashScreen.DB_NAME, SplashScreen.DB_VERSION, "GirlsProfile").selectedBot(model_profile.getUsername(), 1);
+
+                    selectBotBtn.setBackgroundColor(getResources().getColor(R.color.green));
+                    selectBotBtn.setText("Selected Bot");
+                    model_profile.setSelectedBot(1);
+
+                } else {
+                    String res = new DatabaseHelper(Profile.this, SplashScreen.DB_NAME, SplashScreen.DB_VERSION, "GirlsProfile").selectedBot(model_profile.getUsername(), 0);
+
+                    selectBotBtn.setBackgroundColor(getResources().getColor(R.color.themeColor)); // Assumes you have a green color defined in your resources
+                    selectBotBtn.setText("Not Selected");
+
+                    model_profile.setSelectedBot(0);
+
+                }
+
+            }
+        });
+    }
+
+    private void likeButton(TextView likeBtn) {
+        if (model_profile.getLike() == 0) {
+            likeBtn.setBackgroundColor(getResources().getColor(R.color.themeColor));
+            likeBtn.setText("Not liked");
+        } else {
+            likeBtn.setBackgroundColor(getResources().getColor(R.color.green)); // Assumes you have a green color defined in your resources
+            likeBtn.setText("liked Bot");
+
+        }
+
+        likeBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                if (model_profile.getLike() == 0) {
+                    String res = new DatabaseHelper(Profile.this, SplashScreen.DB_NAME, SplashScreen.DB_VERSION, "GirlsProfile").selectedBot(model_profile.getUsername(), 1);
+
+                    likeBtn.setBackgroundColor(getResources().getColor(R.color.green));
+                    likeBtn.setText("liked Bot");
+                    model_profile.setLike(1);
+
+                } else {
+                    String res = new DatabaseHelper(Profile.this, SplashScreen.DB_NAME, SplashScreen.DB_VERSION, "GirlsProfile").selectedBot(model_profile.getUsername(), 0);
+
+                    likeBtn.setBackgroundColor(getResources().getColor(R.color.themeColor)); // Assumes you have a green color defined in your resources
+                    likeBtn.setText("Not liked");
+
+                    model_profile.setLike(0);
+
+                }
+
+            }
+        });
+    }
+
 
     private void lottieGift() {
         LottieAnimationView lottiegift = findViewById(R.id.lottiegift);
@@ -87,7 +179,7 @@ public class Profile extends AppCompatActivity {
         bottomSheetDialog.setContentView(view);
         bottomSheetDialog.show();
 
-         send = view.findViewById(R.id.send);
+        send = view.findViewById(R.id.send);
         send.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -387,6 +479,7 @@ public class Profile extends AppCompatActivity {
                     String coverPhoto = SplashScreen.decryption(cursor.getString(14));
                     int censored = cursor.getInt(17);
                     int like = cursor.getInt(18);
+                    int selectedBot = cursor.getInt(19);
 
                     // Convert JSON strings back to arrays/lists using Gson
                     Gson gson = new Gson();
@@ -405,7 +498,7 @@ public class Profile extends AppCompatActivity {
                     }.getType());
 
                     // Create a new Model_Profile object and populate it
-                    model_profile = new Model_Profile(Username, Name, Country, Languages, Age, InterestedIn, BodyType, Specifics, Ethnicity, Hair, EyeColor, Subculture, profilePhoto, coverPhoto, Interests, images, videos, censored, like);
+                    model_profile = new Model_Profile(Username, Name, Country, Languages, Age, InterestedIn, BodyType, Specifics, Ethnicity, Hair, EyeColor, Subculture, profilePhoto, coverPhoto, Interests, images, videos, censored, like, selectedBot);
                 }
                 cursor.close();
                 ((Activity) Profile.this).runOnUiThread(new Runnable() {
@@ -416,6 +509,7 @@ public class Profile extends AppCompatActivity {
                             public void run() {
                                 bindDetails();
                                 setImageinGridLayout();
+                                selectBot();
 
                             }
                         }, 200);
@@ -435,21 +529,22 @@ public class Profile extends AppCompatActivity {
         }
         ArrayList<Map<String, String>> imageList = new ArrayList<>();
 
-        for (int i = 0; i < model_profile.getImages().size(); i++) {
-            Map<String, String> stringMap1 = new HashMap<>();
-            stringMap1.put("url", model_profile.getImages().get(i).replace("thumb", "full"));
-            stringMap1.put("type", "premium");  //premium
-            imageList.add(stringMap1);
-        }
+//        for (int i = 0; i < model_profile.getImages().size(); i++) {
+//            Map<String, String> stringMap1 = new HashMap<>();
+//            stringMap1.put("url", model_profile.getImages().get(i).replace("thumb", "full"));
+//            stringMap1.put("type", "free");  //premium
+//            imageList.add(stringMap1);
+//        }
 
         for (int i = 0; i < model_profile.getVideos().size(); i++) {
             Map<String, String> stringMap1 = new HashMap<>();
             stringMap1.put("url", model_profile.getVideos().get(i).get("imageUrl"));
-            stringMap1.put("type", "premium");  //premium
+            stringMap1.put("type", "free");  //premium
             imageList.add(stringMap1);
         }
-
-
+        for (int i = 0; i < model_profile.getVideos().size(); i++) {
+            Log.d("asdf", "setImageinGridLayout: "+model_profile.getVideos().get(i));
+        }
         RecyclerView recyclerView = findViewById(R.id.recyclerView); // Replace with your RecyclerView's ID
         recyclerView.setLayoutManager(new GridLayoutManager(this, 4));
 
@@ -464,10 +559,6 @@ public class Profile extends AppCompatActivity {
         int screenWidth = (int) (originalScreenWidth * 0.85);
 //        int cardViewWidth = screenWidth / numColumns;
 
-
-        for (int i = 0; i < imageList.size(); i++) {
-
-        }
     }
 
 
@@ -517,15 +608,12 @@ class ProfileGirlImageAdapter extends RecyclerView.Adapter<ProfileGirlImageAdapt
         Map<String, String> imageItem = imageList.get(position);
 //        holder.bind(imageItem);
 
+        holder.positon.setText(String.valueOf(position));
         Picasso.get().load(imageItem.get("url")).resize(150, 0) // Set the width in pixels and let Picasso calculate the height
                 .into(holder.imageView);
 
         int widthInPixels = holder.imageView.getWidth(); // Get the current width
         int heightInPixels = (int) (widthInPixels * 3.5 / 4); // Calculate the height
-
-//        ViewGroup.LayoutParams layoutParams = holder.imageView.getLayoutParams();
-//        layoutParams.height = heightInPixels;
-//        holder.imageView.setLayoutParams(layoutParams);
 
 
         if (SplashScreen.coins == 0) {
@@ -550,9 +638,10 @@ class ProfileGirlImageAdapter extends RecyclerView.Adapter<ProfileGirlImageAdapt
                 // Decrease the screen width by 15%
                 int screenWidth = (int) (originalScreenWidth * 0.85);
 
-                AppCompatActivity activity = (AppCompatActivity) v.getContext();
+                FragmentManager fragmentManager = ((Activity) context).getFragmentManager();
+
                 Fragment_LargePhotoViewer fragment = Fragment_LargePhotoViewer.newInstance(context, (ArrayList<Map<String, String>>) imageList, holder.getAbsoluteAdapterPosition(), screenWidth, screenHeight);
-                activity.getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, fragment) // Replace with your container ID
+                fragmentManager.beginTransaction().replace(R.id.fragment_container, fragment) // Replace with your container ID
                         .addToBackStack(null) // Optional, for back navigation
                         .commit();
             }
@@ -568,11 +657,13 @@ class ProfileGirlImageAdapter extends RecyclerView.Adapter<ProfileGirlImageAdapt
     public class ImageViewHolder extends RecyclerView.ViewHolder {
         private final CardView cardView;
         private final ImageView imageView;
+        TextView positon;
 
         public ImageViewHolder(@NonNull View itemView) {
             super(itemView);
             cardView = itemView.findViewById(R.id.cardView);
             imageView = itemView.findViewById(R.id.imageView);
+            positon = itemView.findViewById(R.id.positon);
         }
 
     }

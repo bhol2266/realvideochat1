@@ -27,8 +27,6 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.core.view.WindowInsetsControllerCompat;
 
 import com.airbnb.lottie.LottieAnimationView;
-import com.google.android.gms.auth.api.signin.GoogleSignIn;
-import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.auth.FirebaseAuth;
@@ -63,7 +61,8 @@ public class SplashScreen extends AppCompatActivity {
     public static String Refer_App_url2 = "https://play.google.com/store/apps/developer?id=UK+DEVELOPERS";
     public static String Ads_State = "inactive";
     public static String App_updating = "active";
-    public static String databaseURL = "https://bucket2266.s3.ap-south-1.amazonaws.com/"; //default
+    public static String databaseURL_video = "https://bhola2266.ap-south-1.linodeobjects.com//"; //default
+    public static String databaseURL_images = "https://bucket2266.blr1.digitaloceanspaces.com/"; //default
     public static ArrayList<CountryInfo_Model> countryList;
 
     public static String exit_Refer_appNavigation = "inactive";
@@ -92,12 +91,12 @@ public class SplashScreen extends AppCompatActivity {
     public static String userLoggedIAs = "not set";
     public static String authProviderName = "";
     public static String userEmail = "";
-
+    FirebaseUser firebaseUser;
     private FirebaseAnalytics mFirebaseAnalytics;
 
     //location
-    public static String currentCity  = "";
-    public static String currentCountry  = "";
+    public static String currentCity = "";
+    public static String currentCountry = "";
 
 
     @Override
@@ -162,6 +161,18 @@ public class SplashScreen extends AppCompatActivity {
         generateFCMToken();
 
 //        startTransferProcess();
+
+        clearChats();
+    }
+
+    private void clearChats() {
+        SharedPreferences sharedPreferences = SplashScreen.this.getSharedPreferences("messenger_chats", MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+
+// Clear the SharedPreferences
+        editor.clear();
+        editor.apply();
+
     }
 
 
@@ -209,7 +220,8 @@ public class SplashScreen extends AppCompatActivity {
                     Ad_Network_Name = (String) snapshot.child("Ad_Network").getValue();
                     App_updating = (String) snapshot.child("App_updating").getValue();
                     Notification_ImageURL = (String) snapshot.child("Notification_ImageURL").getValue();
-                    databaseURL = (String) snapshot.child("databaseURL").getValue();
+                    databaseURL_video = (String) snapshot.child("databaseURL_video").getValue();
+                    databaseURL_images = (String) snapshot.child("databaseURL_images").getValue();
 
 
                     if (animationCompleted) {
@@ -257,6 +269,119 @@ public class SplashScreen extends AppCompatActivity {
 
     }
 
+
+
+
+    private void generateFCMToken() {
+
+        if (getIntent() != null && getIntent().hasExtra("KEY1")) {
+            if (getIntent().getExtras().getString("KEY1").equals("Notification_Story")) {
+                Notification_Intent_Firebase = "active";
+            }
+        }
+    }
+
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        if (facebook_IntertitialAds != null) {
+            facebook_IntertitialAds.destroy();
+
+        }
+    }
+
+    private void generateNotification() {
+        FirebaseMessaging.getInstance().subscribeToTopic("all").addOnCompleteListener(task -> {
+
+            if (!task.isSuccessful()) {
+                String msg = "Failed";
+                Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+
+    private void handler_forIntent() {
+
+        if (!isInternetAvailable(SplashScreen.this)) {
+            createSnackBar();
+            return;
+        }
+        if (SplashScreen.userLoggedIn && firebaseUser != null) {
+            Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+            startActivity(intent);
+        } else {
+            Intent intent = new Intent(getApplicationContext(), LoginScreen.class);
+            startActivity(intent);
+        }
+        overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
+
+        finish();
+    }
+
+    private void createSnackBar() {
+
+        Snackbar snackbar = Snackbar.make(findViewById(android.R.id.content), "No Internet Connection!", Snackbar.LENGTH_INDEFINITE);
+        snackbar.setAction("Retry", new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(SplashScreen.this, SplashScreen.class));
+                snackbar.dismiss();
+            }
+        });
+        snackbar.show();
+    }
+
+
+    private void startTransferProcess() {
+        String[] countries = {
+                "African", "American", "Arab", "Argentinian", "Australian", "Belgian", "Brazilian", "Bulgarian",
+                "Canadian", "Chilean", "Chinese", "Colombian", "Croatian", "Czech", "Danish", "Dutch", "Ecuadorian",
+                "Estonian", "Finnish", "French", "German", "Greek", "Hungarian", "Indian", "Irish", "Israeli", "Italian",
+                "Japanese", "Kenyan", "Korean", "Lithuanian", "Malagasy", "Mexican", "Nigerian", "Nordic", "Norwegian",
+                "Peruvian", "Polish", "Portuguese", "Romanian", "Russian", "Serbian", "Slovakian", "South African",
+                "Spanish", "SriLankan", "Swedish", "Swiss", "Thai", "Turkish", "UK", "Ugandan", "Ukrainian", "Uruguayan",
+                "Venezuelan", "Vietnamese", "Zimbabwean"
+        };
+
+//        for (String country : countries) {
+//            List<String> filenames = new ArrayList<>();
+//            filenames = getusers_fromSingleCountry("data/" + country);
+//            for (String filename : filenames) {
+//                readJSON("data/" + country + "/" + filename, filename);
+//            }
+//        }
+
+
+        List<String> filenames = new ArrayList<>();
+        filenames = getusers_fromSingleCountry("videoProfiles");
+        Log.d("TAGAA", "startTransferProcess: " + filenames);
+
+        for (String filename : filenames) {
+            readJSON("videoProfiles/" + filename, filename);
+        }
+
+
+    }
+
+    private List<String> getusers_fromSingleCountry(String path) {
+        List<String> filenames = new ArrayList<>();
+        AssetManager assetManager = getAssets(); // Get the AssetManager
+        try {
+            String[] assetFiles = assetManager.list(path); // Replace with the subfolder name you want to list
+
+
+            for (String fileName : assetFiles) {
+                filenames.add(fileName); // Remove the trailing slash
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            Log.d("TAGAA", "e: " + e.getMessage());
+        }
+        return filenames;
+    }
 
     private void readJSON(String path, String username) {
         try {
@@ -315,121 +440,16 @@ public class SplashScreen extends AppCompatActivity {
             }
 
             Model_Profile model_profile = new Model_Profile(Username, Name, From, Languages, Age, InterestedIn, BodyType, Specifics,
-                    Ethnicity, Hair, EyeColor, Subculture, profilePhoto, coverPhoto, interestArraylist, imagesArray, videosArraylist,0,0);
+                    Ethnicity, Hair, EyeColor, Subculture, profilePhoto, coverPhoto, interestArraylist, imagesArray, videosArraylist, 0, 0, 0);
 
             String res = new DatabaseHelper(SplashScreen.this, DB_NAME, DB_VERSION, "Profiles").addProfiles(model_profile);
-            Log.d(TAG, "onSuccess: " + res);
-
+            Log.d(TAG, "onSuccess: " + res + ":   " + SplashScreen.encryption(Username));
         } catch (JSONException e) {
             e.printStackTrace();
             Log.d("TAGAA", "JSONException: " + e.getMessage());
         }
     }
 
-
-    private void generateFCMToken() {
-
-        if (getIntent() != null && getIntent().hasExtra("KEY1")) {
-            if (getIntent().getExtras().getString("KEY1").equals("Notification_Story")) {
-                Notification_Intent_Firebase = "active";
-            }
-        }
-    }
-
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-
-        if (facebook_IntertitialAds != null) {
-            facebook_IntertitialAds.destroy();
-
-        }
-    }
-
-    private void generateNotification() {
-        FirebaseMessaging.getInstance().subscribeToTopic("all").addOnCompleteListener(task -> {
-
-            if (!task.isSuccessful()) {
-                String msg = "Failed";
-                Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_SHORT).show();
-            }
-        });
-    }
-
-
-    private void handler_forIntent() {
-
-        if (!isInternetAvailable(SplashScreen.this)) {
-            createSnackBar();
-            return;
-        }
-        if (SplashScreen.userLoggedIn) {
-            Intent intent = new Intent(getApplicationContext(), MainActivity.class);
-            startActivity(intent);
-        } else {
-            Intent intent = new Intent(getApplicationContext(), LoginScreen.class);
-            startActivity(intent);
-        }
-        overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
-
-        finish();
-    }
-
-    private void createSnackBar() {
-
-        Snackbar snackbar = Snackbar.make(findViewById(android.R.id.content), "No Internet Connection!", Snackbar.LENGTH_INDEFINITE);
-        snackbar.setAction("Retry", new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startActivity(new Intent(SplashScreen.this, SplashScreen.class));
-                snackbar.dismiss();
-            }
-        });
-        snackbar.show();
-    }
-
-
-    private void startTransferProcess() {
-        String[] countries = {
-                "African", "American", "Arab", "Argentinian", "Australian", "Belgian", "Brazilian", "Bulgarian",
-                "Canadian", "Chilean", "Chinese", "Colombian", "Croatian", "Czech", "Danish", "Dutch", "Ecuadorian",
-                "Estonian", "Finnish", "French", "German", "Greek", "Hungarian", "Indian", "Irish", "Israeli", "Italian",
-                "Japanese", "Kenyan", "Korean", "Lithuanian", "Malagasy", "Mexican", "Nigerian", "Nordic", "Norwegian",
-                "Peruvian", "Polish", "Portuguese", "Romanian", "Russian", "Serbian", "Slovakian", "South African",
-                "Spanish", "SriLankan", "Swedish", "Swiss", "Thai", "Turkish", "UK", "Ugandan", "Ukrainian", "Uruguayan",
-                "Venezuelan", "Vietnamese", "Zimbabwean"
-        };
-
-        for (String country : countries) {
-
-            List<String> filenames = new ArrayList<>();
-            filenames = getusers_fromSingleCountry("data/" + country);
-//            Log.d("TAGAA", "startTransferProcess: " + filenames);
-
-            for (String filename : filenames) {
-                readJSON("data/" + country + "/" + filename, filename);
-            }
-        }
-
-    }
-
-    private List<String> getusers_fromSingleCountry(String path) {
-        List<String> filenames = new ArrayList<>();
-        AssetManager assetManager = getAssets(); // Get the AssetManager
-        try {
-            String[] assetFiles = assetManager.list(path); // Replace with the subfolder name you want to list
-
-
-            for (String fileName : assetFiles) {
-                filenames.add(fileName); // Remove the trailing slash
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-            Log.d("TAGAA", "e: " + e.getMessage());
-        }
-        return filenames;
-    }
 
     public String loadJSONFromAsset(String path) {
         String json = null;
@@ -539,18 +559,11 @@ public class SplashScreen extends AppCompatActivity {
 
     protected void onStart() {
         super.onStart();
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-        if (user != null) {
-            authProviderName = user.getProviderData().get(user.getProviderData().size() - 1).getProviderId();
-            Log.d(TAG, "AuthProvider: " + authProviderName);
+        firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
+        if (firebaseUser != null) {
+            authProviderName = firebaseUser.getProviderData().get(firebaseUser.getProviderData().size() - 1).getProviderId();
             userLoggedIn = true;
-
         }
-
-        GoogleSignInAccount acct = GoogleSignIn.getLastSignedInAccount(this);
-        Log.d(TAG, "FirebaseUser: " + user);
-        Log.d(TAG, "GoogleSignInAccount: " + acct);
-
     }
 
 
