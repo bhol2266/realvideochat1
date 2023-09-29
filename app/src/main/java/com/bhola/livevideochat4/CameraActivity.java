@@ -81,8 +81,6 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
@@ -466,44 +464,7 @@ public class CameraActivity extends AppCompatActivity {
             public void run() {
                 Cursor cursor = new DatabaseHelper(CameraActivity.this, SplashScreen.DB_NAME, SplashScreen.DB_VERSION, "GirlsProfile").readSingleGirl(userName);
                 if (cursor.moveToFirst()) {
-                    // Extract data from the cursor and populate the Model_Profile object
-                    String Username = SplashScreen.decryption(cursor.getString(0));
-                    String Name = SplashScreen.decryption(cursor.getString(1));
-                    String Country = cursor.getString(2);
-                    String Languages = cursor.getString(3);
-                    String Age = cursor.getString(4);
-                    String InterestedIn = cursor.getString(5);
-                    String BodyType = cursor.getString(6);
-                    String Specifics = SplashScreen.decryption(cursor.getString(7));
-                    String Ethnicity = cursor.getString(8);
-                    String Hair = cursor.getString(9);
-                    String EyeColor = cursor.getString(10);
-                    String Subculture = cursor.getString(11);
-                    String profilePhoto = SplashScreen.decryption(cursor.getString(13));
-                    String coverPhoto = SplashScreen.decryption(cursor.getString(14));
-                    int censored = cursor.getInt(17);
-                    int like = cursor.getInt(18);
-                    int selectedBot = cursor.getInt(19);
-
-                    // Convert JSON strings back to arrays/lists using Gson
-                    Gson gson = new Gson();
-
-
-                    String interestsJson = SplashScreen.decryption(cursor.getString(12));
-                    List<Map<String, String>> Interests = gson.fromJson(interestsJson, new TypeToken<List<Map<String, String>>>() {
-                    }.getType());
-
-                    String imagesJson = SplashScreen.decryption(cursor.getString(15));
-                    List<String> images = gson.fromJson(imagesJson, new TypeToken<List<String>>() {
-                    }.getType());
-
-                    String videosJson = SplashScreen.decryption(cursor.getString(16));
-                    List<Map<String, String>> videos = gson.fromJson(videosJson, new TypeToken<List<Map<String, String>>>() {
-                    }.getType());
-
-                    // Create a new Model_Profile object and populate it
-                    model_profile = new Model_Profile(Username, Name, Country, Languages, Age, InterestedIn, BodyType, Specifics, Ethnicity, Hair, EyeColor, Subculture, profilePhoto, coverPhoto, Interests, images, videos, censored, like, selectedBot);
-
+                    model_profile = SplashScreen.readCursor(cursor);
                 }
                 cursor.close();
                 ((Activity) CameraActivity.this).runOnUiThread(new Runnable() {
@@ -690,6 +651,7 @@ public class CameraActivity extends AppCompatActivity {
     private void filterGirlList() {
         Iterator<Girl> iterator = girlsList.iterator();
         if (SplashScreen.userLoggedIn && SplashScreen.userLoggedIAs.equals("Google") && SplashScreen.App_updating.equals("inactive")) {
+
         } else {
 
             while (iterator.hasNext()) {

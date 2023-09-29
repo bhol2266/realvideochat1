@@ -104,8 +104,6 @@ public class Fragment_UserProfile extends Fragment {
                     editor.putString("loginAs", "not set");
                     editor.apply();
 
-                
-
                 }
 
 

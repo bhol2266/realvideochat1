@@ -8,10 +8,10 @@
 
     <RelativeLayout
         android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"
 
-        android:layout_height="wrap_content">
+        android:layout_centerHorizontal="true">
 
         <ImageView
             android:id="@+id/back_arrow"
@@ -38,16 +38,22 @@
     </RelativeLayout>
 
 
-
-
-    <de.hdodenhof.circleimageview.CircleImageView
+    <androidx.cardview.widget.CardView
         android:id="@+id/appicon"
         android:layout_width="130dp"
         android:layout_height="130dp"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
+        android:layout_gravity="center"
         android:layout_marginTop="170dp"
-        android:src="@drawable/app_icon" />
+        app:cardCornerRadius="30dp">
+
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:src="@drawable/app_icon" />
+    </androidx.cardview.widget.CardView>
+
 
     <TextView
         android:id="@+id/appname"
@@ -57,17 +63,17 @@
         android:layout_centerInParent="true"
         android:layout_marginTop="20dp"
         android:fontFamily="@font/inter"
-        android:text="Desi Girls - Video Chat App"
+        android:text="@string/app_name"
         android:textColor="@color/themeColor"
         android:textSize="18dp" />
 
     <TextView
         android:id="@+id/versionName"
-        android:layout_below="@id/appname"
-        android:layout_marginTop="5dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_below="@id/appname"
         android:layout_centerHorizontal="true"
+        android:layout_marginTop="5dp"
         android:fontFamily="@font/inter"
         android:text="v1.0"
         android:textColor="@color/gmts_light_gray"
@@ -75,25 +81,25 @@
 
 
     <TextView
-        android:layout_above="@id/bttomTextview"
-        android:layout_marginTop="20dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_above="@id/bttomTextview"
         android:layout_centerHorizontal="true"
+        android:layout_marginTop="20dp"
         android:fontFamily="@font/inter"
-        android:text="Desi Girls Team"
+        android:text="SAX Team"
         android:textColor="@color/semiblack"
-        android:textStyle="bold"
-        android:textSize="17dp" />
+        android:textSize="17dp"
+        android:textStyle="bold" />
 
     <TextView
         android:id="@+id/bttomTextview"
-        android:layout_alignParentBottom="true"
-        android:layout_marginBottom="100dp"
-        android:layout_marginTop="3dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
+        android:layout_marginTop="3dp"
+        android:layout_marginBottom="100dp"
         android:fontFamily="@font/inter"
         android:text="Copyright @2023"
         android:textColor="@color/gmts_light_gray"

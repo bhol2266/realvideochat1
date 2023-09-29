@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.AssetManager;
+import android.database.Cursor;
 import android.net.ConnectivityManager;
 import android.net.NetworkCapabilities;
 import android.net.NetworkInfo;
@@ -28,6 +29,7 @@ import androidx.core.view.WindowInsetsControllerCompat;
 
 import com.airbnb.lottie.LottieAnimationView;
 import com.google.android.material.snackbar.Snackbar;
+import com.google.common.reflect.TypeToken;
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -37,6 +39,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.messaging.FirebaseMessaging;
+import com.google.gson.Gson;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -162,7 +165,7 @@ public class SplashScreen extends AppCompatActivity {
 
 //        startTransferProcess();
 
-        clearChats();
+//        clearChats();
     }
 
     private void clearChats() {
@@ -270,8 +273,6 @@ public class SplashScreen extends AppCompatActivity {
     }
 
 
-
-
     private void generateFCMToken() {
 
         if (getIntent() != null && getIntent().hasExtra("KEY1")) {
@@ -313,8 +314,14 @@ public class SplashScreen extends AppCompatActivity {
             Intent intent = new Intent(getApplicationContext(), MainActivity.class);
             startActivity(intent);
         } else {
-            Intent intent = new Intent(getApplicationContext(), LoginScreen.class);
-            startActivity(intent);
+
+            if (SplashScreen.userLoggedIn && SplashScreen.userLoggedIAs.equals("Guest")) {
+                Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+                startActivity(intent);
+            } else {
+                Intent intent = new Intent(getApplicationContext(), LoginScreen.class);
+                startActivity(intent);
+            }
         }
         overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
 
@@ -566,6 +573,13 @@ public class SplashScreen extends AppCompatActivity {
         }
     }
 
+    public static List<String> editImagesLinks(List<String> images) {
+        //this method change the original images and video stripchat url from the DB to own database url
+
+
+        return images;
+    }
+
 
     private ArrayList<CountryInfo_Model> loadCountryListFromAsset(Context context, String fileName) {
         ArrayList<CountryInfo_Model> countryList = new ArrayList<>();
@@ -600,6 +614,71 @@ public class SplashScreen extends AppCompatActivity {
         }
 
         return countryList;
+    }
+
+    public static Model_Profile readCursor(Cursor cursor) {
+
+        // Extract data from the cursor and populate the Model_Profile object
+        String Username = SplashScreen.decryption(cursor.getString(0));
+        String Name = SplashScreen.decryption(cursor.getString(1));
+        String Country = cursor.getString(2);
+        String Languages = cursor.getString(3);
+        String Age = cursor.getString(4);
+        String InterestedIn = cursor.getString(5);
+        String BodyType = cursor.getString(6);
+        String Specifics = SplashScreen.decryption(cursor.getString(7));
+        String Ethnicity = cursor.getString(8);
+        String Hair = cursor.getString(9);
+        String EyeColor = cursor.getString(10);
+        String Subculture = cursor.getString(11);
+        String profilePhoto = SplashScreen.decryption(cursor.getString(13));
+        String coverPhoto = SplashScreen.decryption(cursor.getString(14));
+        int censored = cursor.getInt(17);
+        int like = cursor.getInt(18);
+        int selectedBot = cursor.getInt(19);
+
+        // Convert JSON strings back to arrays/lists using Gson
+        Gson gson = new Gson();
+
+
+        String interestsJson = SplashScreen.decryption(cursor.getString(12));
+        List<Map<String, String>> Interests = gson.fromJson(interestsJson, new TypeToken<List<Map<String, String>>>() {
+        }.getType());
+
+        String nationality = "";
+        for (CountryInfo_Model countryInfo_model : SplashScreen.countryList) {
+            if (Country.equals(countryInfo_model.getCountry())) {
+                nationality = countryInfo_model.getNationality();
+            }
+        }
+
+        String imagesJson = SplashScreen.decryption(cursor.getString(15));
+        List<String> images = new ArrayList<>();
+
+        String videosJson = SplashScreen.decryption(cursor.getString(16));
+        List<Map<String, String>> videos = new ArrayList<>();
+        try {
+            JSONArray imagesArray = new JSONArray(imagesJson);
+            for (int i = 0; i < imagesArray.length(); i++) {
+                images.add(SplashScreen.databaseURL_images + "VideoChatProfiles/" + nationality + "/" + Username + "/" + String.valueOf(i) + ".jpg");
+            }
+
+            JSONArray videoArray = new JSONArray(videosJson);
+            for (int i = 0; i < videoArray.length(); i++) {
+                Map map = new HashMap<>();
+                map.put("imageUrl", "");
+                map.put("videoUrl", "");
+                videos.add(map);
+            }
+
+        } catch (JSONException e) {
+            throw new RuntimeException(e);
+        }
+
+        // Create a new Model_Profile object and populate it
+        Model_Profile model_profile = new Model_Profile(Username, Name, Country, Languages, Age, InterestedIn, BodyType, Specifics, Ethnicity, Hair, EyeColor, Subculture, profilePhoto, coverPhoto, Interests, images, videos, censored, like, selectedBot);
+
+        return model_profile;
     }
 
 }

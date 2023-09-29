@@ -14,7 +14,7 @@
         android:layout_height="wrap_content"
         android:background="@color/white"
         android:orientation="vertical"
-        android:paddingTop="25dp"
+        android:paddingTop="5dp"
         android:paddingBottom="25dp">
 
 
@@ -74,7 +74,7 @@
                 android:elevation="10dp"
                 android:fontFamily="@font/rubrik_semibold"
                 android:gravity="center"
-                android:text="cancel"
+                android:text="later"
                 android:textColor="@color/themeColor"
                 android:textSize="18dp" />
 

@@ -18,6 +18,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
@@ -256,18 +257,18 @@ public class Fragment_Messenger extends Fragment {
     }
 
     private boolean save_retreive_Chatbots_insharedPrefrence(String saveORretreive) {
-        SharedPreferences sharedPreferences = context.getSharedPreferences("Firebase_Chatbots", MODE_PRIVATE);
+        SharedPreferences sharedPreferences = context.getSharedPreferences("messenger_chats", MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
 
         if (saveORretreive.equals("save")) {
             Gson gson = new Gson();
             String json = gson.toJson(userList);
-            editor.putString("userList", json);
+            editor.putString("userList_Firebase_Chatbots", json);
             editor.apply();
             return true;
         } else {
             // Retrieve the JSON string from SharedPreferences
-            String json = sharedPreferences.getString("userList", null);
+            String json = sharedPreferences.getString("userList_Firebase_Chatbots", null);
             // Convert the JSON string back to ArrayList
             Gson gson = new Gson();
             Type type = new TypeToken<ArrayList<ChatItem_ModelClass>>() {
@@ -321,18 +322,15 @@ public class Fragment_Messenger extends Fragment {
             return;
         }
 
-        Log.d(SplashScreen.TAG, "sendDataToRecyclerview: " + userList.size());
-        for (int i = 0; i < 3; i++) {
+        for (int i = 0; i < 4; i++) {
 
             int finalI = i;
-            int delayTime = finalI * 2000;
+            int delayTime = finalI * 20000;
 
             new Handler().postDelayed(new Runnable() {
                 @Override
                 public void run() {
-                    if (userList.get(finalI).isContainsQuestion()) {
-                        return;
-                    }
+
                     userListTemp.add(0, userList.get(finalI));
                     adapter.notifyItemInserted(0);
 
@@ -380,7 +378,7 @@ public class Fragment_Messenger extends Fragment {
             }
         }
         Fragment_Messenger.adapter.userList.clear();
-        Fragment_Messenger.adapter.userList=uniqueList;
+        Fragment_Messenger.adapter.userList.addAll(uniqueList);
 
 
         SharedPreferences sharedPreferences = context.getSharedPreferences("messenger_chats", MODE_PRIVATE);
@@ -423,7 +421,7 @@ public class Fragment_Messenger extends Fragment {
             return false;
         } else {
             userListTemp = gson.fromJson(json, type);
-            return true;
+            Log.d("ASdfsdfa", "retreive_sharedPreferences: "+userListTemp.size());            return true;
         }
 
 
@@ -625,6 +623,8 @@ class MessengeItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
             }
             if(!messageFound){
                 userItem_viewholder.lastMessage.setText(modelClass.getUserBotMsg().get(0).getMsg());
+                setMessageCount(modelClass.getUserBotMsg(), userItem_viewholder.messageCount, modelClass.getUsername());//set messageCount
+
             }
         }
     }

@@ -22,6 +22,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -371,7 +372,7 @@ class MessageAdapter extends RecyclerView.Adapter {
             SenderVierwHolder senderVierwHolder = (MessageAdapter.SenderVierwHolder) holder;
             senderVierwHolder.msgtxt.setText(messages.getMessage());
             senderVierwHolder.timeStamp.setText(formattedDate);
-
+senderVierwHolder.errorLayout.setVisibility(View.GONE);
 
             if (SplashScreen.userLoggedIAs.equals("Google")) {
                 SharedPreferences sh = context.getSharedPreferences("UserInfo", MODE_PRIVATE);
@@ -523,6 +524,7 @@ class MessageAdapter extends RecyclerView.Adapter {
         CircleImageView profile;
         TextView msgtxt;
         TextView timeStamp;
+        FrameLayout errorLayout;
 
         public SenderVierwHolder(@NonNull View itemView) {
             super(itemView);
@@ -530,6 +532,7 @@ class MessageAdapter extends RecyclerView.Adapter {
             profile = itemView.findViewById(R.id.profileImage);
             msgtxt = itemView.findViewById(R.id.message);
             timeStamp = itemView.findViewById(R.id.timeStamp);
+            errorLayout = itemView.findViewById(R.id.errorLayout);
 
         }
     }

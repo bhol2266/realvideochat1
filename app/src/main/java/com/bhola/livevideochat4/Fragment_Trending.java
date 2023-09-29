@@ -52,8 +52,6 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
-import com.google.common.reflect.TypeToken;
-import com.google.gson.Gson;
 import com.squareup.picasso.Picasso;
 
 import org.json.JSONArray;
@@ -66,7 +64,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Random;
 
 import de.hdodenhof.circleimageview.CircleImageView;
@@ -96,7 +93,7 @@ public class Fragment_Trending extends Fragment {
     RecyclerView recyclerview_NearBy;
     ArrayList<CountryInfo_Model> countrylist_forRecyclerview;
     CountryRecyclerViewAdapter countryRecyclerViewAdapter;
-    String currentSelectedView="Hot";  //hot fragment or nearbyFragment . we need this because when click hottextview even hot view is already there, it creates error when location permission is denied
+    String currentSelectedView = "Hot";  //hot fragment or nearbyFragment . we need this because when click hottextview even hot view is already there, it creates error when location permission is denied
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -118,10 +115,10 @@ public class Fragment_Trending extends Fragment {
         HotTextview.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(currentSelectedView.equals("Hot")){
+                if (currentSelectedView.equals("Hot")) {
                     return;
                 }
-                currentSelectedView="Hot";
+                currentSelectedView = "Hot";
                 recyclerview_NearBy.setVisibility(View.GONE);
                 swipeRefreshLayout.setVisibility(View.VISIBLE);
                 swipeRefreshLayout.setEnabled(true);
@@ -164,7 +161,7 @@ public class Fragment_Trending extends Fragment {
 
                 }
 
-                currentSelectedView="Nearby";
+                currentSelectedView = "Nearby";
 
                 recyclerview_NearBy.setVisibility(View.VISIBLE);
                 swipeRefreshLayout.setVisibility(View.GONE);
@@ -332,44 +329,7 @@ public class Fragment_Trending extends Fragment {
                 Cursor cursor = new DatabaseHelper(context, SplashScreen.DB_NAME, SplashScreen.DB_VERSION, "GirlsProfile").readRandomGirls();
                 if (cursor.moveToFirst()) {
                     do {
-                        // Extract data from the cursor and populate the Model_Profile object
-                        String Username = SplashScreen.decryption(cursor.getString(0));
-                        String Name = SplashScreen.decryption(cursor.getString(1));
-                        String Country = cursor.getString(2);
-                        String Languages = cursor.getString(3);
-                        String Age = cursor.getString(4);
-                        String InterestedIn = cursor.getString(5);
-                        String BodyType = cursor.getString(6);
-                        String Specifics = SplashScreen.decryption(cursor.getString(7));
-                        String Ethnicity = cursor.getString(8);
-                        String Hair = cursor.getString(9);
-                        String EyeColor = cursor.getString(10);
-                        String Subculture = cursor.getString(11);
-                        String profilePhoto = SplashScreen.decryption(cursor.getString(13));
-                        String coverPhoto = SplashScreen.decryption(cursor.getString(14));
-                        int censored = cursor.getInt(17);
-                        int like = cursor.getInt(18);
-                        int selectedBot = cursor.getInt(19);
-
-                        // Convert JSON strings back to arrays/lists using Gson
-                        Gson gson = new Gson();
-
-
-                        String interestsJson = SplashScreen.decryption(cursor.getString(12));
-                        List<Map<String, String>> Interests = gson.fromJson(interestsJson, new TypeToken<List<Map<String, String>>>() {
-                        }.getType());
-
-                        String imagesJson = SplashScreen.decryption(cursor.getString(15));
-                        List<String> images = gson.fromJson(imagesJson, new TypeToken<List<String>>() {
-                        }.getType());
-
-                        String videosJson = SplashScreen.decryption(cursor.getString(16));
-                        List<Map<String, String>> videos = gson.fromJson(videosJson, new TypeToken<List<Map<String, String>>>() {
-                        }.getType());
-
-                        // Create a new Model_Profile object and populate it
-                        Model_Profile model_profile = new Model_Profile(Username, Name, Country, Languages, Age, InterestedIn, BodyType, Specifics, Ethnicity, Hair, EyeColor, Subculture, profilePhoto, coverPhoto, Interests, images, videos, censored, like, selectedBot);
-                        girlsList_slider.add(model_profile);
+                        girlsList_slider.add(SplashScreen.readCursor(cursor));
                     } while (cursor.moveToNext());
 
                 }
@@ -436,45 +396,7 @@ public class Fragment_Trending extends Fragment {
                 Cursor cursor = new DatabaseHelper(context, SplashScreen.DB_NAME, SplashScreen.DB_VERSION, "GirlsProfile").readRandomGirls();
                 if (cursor.moveToFirst()) {
                     do {
-                        // Extract data from the cursor and populate the Model_Profile object
-                        String Username = SplashScreen.decryption(cursor.getString(0));
-                        String Name = SplashScreen.decryption(cursor.getString(1));
-                        String Country = cursor.getString(2);
-                        String Languages = cursor.getString(3);
-                        String Age = cursor.getString(4);
-                        String InterestedIn = cursor.getString(5);
-                        String BodyType = cursor.getString(6);
-                        String Specifics = SplashScreen.decryption(cursor.getString(7));
-                        String Ethnicity = cursor.getString(8);
-                        String Hair = cursor.getString(9);
-                        String EyeColor = cursor.getString(10);
-                        String Subculture = cursor.getString(11);
-                        String profilePhoto = SplashScreen.decryption(cursor.getString(13));
-                        String coverPhoto = SplashScreen.decryption(cursor.getString(14));
-                        int censored = cursor.getInt(17);
-                        int like = cursor.getInt(18);
-                        int selectedBot = cursor.getInt(19);
-
-                        // Convert JSON strings back to arrays/lists using Gson
-                        Gson gson = new Gson();
-
-
-                        String interestsJson = SplashScreen.decryption(cursor.getString(12));
-                        List<Map<String, String>> Interests = gson.fromJson(interestsJson, new TypeToken<List<Map<String, String>>>() {
-                        }.getType());
-
-                        String imagesJson = SplashScreen.decryption(cursor.getString(15));
-                        List<String> images = gson.fromJson(imagesJson, new TypeToken<List<String>>() {
-                        }.getType());
-
-                        String videosJson = SplashScreen.decryption(cursor.getString(16));
-                        List<Map<String, String>> videos = gson.fromJson(videosJson, new TypeToken<List<Map<String, String>>>() {
-                        }.getType());
-
-                        // Create a new Model_Profile object and populate it
-                        Model_Profile model_profile = new Model_Profile(Username, Name, Country, Languages, Age, InterestedIn, BodyType, Specifics, Ethnicity, Hair, EyeColor, Subculture, profilePhoto, coverPhoto, Interests, images, videos, censored, like, selectedBot);
-                        girlsList.add(model_profile);
-
+                        girlsList.add(SplashScreen.readCursor(cursor));
                     } while (cursor.moveToNext());
 
                 }
@@ -482,11 +404,18 @@ public class Fragment_Trending extends Fragment {
                 getActivity().runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        swipeRefreshLayout.setRefreshing(false);
 
                         new Handler().postDelayed(new Runnable() {
                             @Override
                             public void run() {
+                                swipeRefreshLayout.setRefreshing(false);
+
+                            }
+                        },1500);
+                        new Handler().postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+
                                 if (SplashScreen.App_updating.equals("active")) {
                                     if (girlsList.size() > 6) {
                                         girlsList.subList(6, girlsList.size()).clear();
@@ -513,19 +442,23 @@ public class Fragment_Trending extends Fragment {
 
             for (Model_Profile model_profile : girlsList) {
 
+                String nationality = "";
+                for (CountryInfo_Model countryInfo_model : SplashScreen.countryList) {
+                    if (model_profile.getFrom().equals(countryInfo_model.getCountry())) {
+                        nationality = countryInfo_model.getNationality();
+                    }
+                }
+
+
                 JSONObject object1 = new JSONObject();
                 object1.put("name", model_profile.getName());
                 object1.put("username", model_profile.getUsername());
 
-
-                JSONArray videosArray = new JSONArray();
-
-
-                for (int i = 0; i < model_profile.getVideos().size(); i++) {
-
-                    videosArray.put(model_profile.getVideos().get(i).get("videoUrl"));
+                JSONArray imagesArray = new JSONArray();
+                for (int i = 0; i < model_profile.getImages().size(); i++) {
+                    imagesArray.put(SplashScreen.databaseURL_images + "VideoChatProfiles/" + nationality + "/" + model_profile.getUsername() + "/" + String.valueOf(i) + ".jpg");
                 }
-                object1.put("videos", videosArray);
+                object1.put("images", imagesArray);
                 jsonArray.put(object1);
             }
 
@@ -615,43 +548,8 @@ public class Fragment_Trending extends Fragment {
                 Cursor cursor = new DatabaseHelper(context, SplashScreen.DB_NAME, SplashScreen.DB_VERSION, "GirlsProfile").readGirls_Country(selectedCountry);
                 if (cursor.moveToFirst()) {
                     do {
-                        // Extract data from the cursor and populate the Model_Profile object
-                        String Username = SplashScreen.decryption(cursor.getString(0));
-                        String Name = SplashScreen.decryption(cursor.getString(1));
-                        String Country = cursor.getString(2);
-                        String Languages = cursor.getString(3);
-                        String Age = cursor.getString(4);
-                        String InterestedIn = cursor.getString(5);
-                        String BodyType = cursor.getString(6);
-                        String Specifics = SplashScreen.decryption(cursor.getString(7));
-                        String Ethnicity = cursor.getString(8);
-                        String Hair = cursor.getString(9);
-                        String EyeColor = cursor.getString(10);
-                        String Subculture = cursor.getString(11);
-                        String profilePhoto = SplashScreen.decryption(cursor.getString(13));
-                        String coverPhoto = SplashScreen.decryption(cursor.getString(14));
-                        int censored = cursor.getInt(17);
-                        int like = cursor.getInt(18);
-                        int selectedBot = cursor.getInt(19);
 
-                        // Convert JSON strings back to arrays/lists using Gson
-                        Gson gson = new Gson();
-
-
-                        String interestsJson = SplashScreen.decryption(cursor.getString(12));
-                        List<Map<String, String>> Interests = gson.fromJson(interestsJson, new TypeToken<List<Map<String, String>>>() {
-                        }.getType());
-
-                        String imagesJson = SplashScreen.decryption(cursor.getString(15));
-                        List<String> images = gson.fromJson(imagesJson, new TypeToken<List<String>>() {
-                        }.getType());
-
-                        String videosJson = SplashScreen.decryption(cursor.getString(16));
-                        List<Map<String, String>> videos = gson.fromJson(videosJson, new TypeToken<List<Map<String, String>>>() {
-                        }.getType());
-
-                        // Create a new Model_Profile object and populate it
-                        Model_Profile model_profile = new Model_Profile(Username, Name, Country, Languages, Age, InterestedIn, BodyType, Specifics, Ethnicity, Hair, EyeColor, Subculture, profilePhoto, coverPhoto, Interests, images, videos, censored, like, selectedBot);
+                        Model_Profile model_profile = SplashScreen.readCursor(cursor);
                         if (model_profile.getImages().size() != 0) {
                             girlsList.add(0, model_profile);
                         } else {
@@ -714,44 +612,7 @@ public class Fragment_Trending extends Fragment {
                 Cursor cursor = new DatabaseHelper(context, SplashScreen.DB_NAME, SplashScreen.DB_VERSION, "GirlsProfile").readGirls_Country(selectedCountry);
                 if (cursor.moveToFirst()) {
                     do {
-                        // Extract data from the cursor and populate the Model_Profile object
-                        String Username = SplashScreen.decryption(cursor.getString(0));
-                        String Name = SplashScreen.decryption(cursor.getString(1));
-                        String Country = cursor.getString(2);
-                        String Languages = cursor.getString(3);
-                        String Age = cursor.getString(4);
-                        String InterestedIn = cursor.getString(5);
-                        String BodyType = cursor.getString(6);
-                        String Specifics = SplashScreen.decryption(cursor.getString(7));
-                        String Ethnicity = cursor.getString(8);
-                        String Hair = cursor.getString(9);
-                        String EyeColor = cursor.getString(10);
-                        String Subculture = cursor.getString(11);
-                        String profilePhoto = SplashScreen.decryption(cursor.getString(13));
-                        String coverPhoto = SplashScreen.decryption(cursor.getString(14));
-                        int censored = cursor.getInt(17);
-                        int like = cursor.getInt(18);
-                        int selectedBot = cursor.getInt(19);
-
-                        // Convert JSON strings back to arrays/lists using Gson
-                        Gson gson = new Gson();
-
-
-                        String interestsJson = SplashScreen.decryption(cursor.getString(12));
-                        List<Map<String, String>> Interests = gson.fromJson(interestsJson, new TypeToken<List<Map<String, String>>>() {
-                        }.getType());
-
-                        String imagesJson = SplashScreen.decryption(cursor.getString(15));
-                        List<String> images = gson.fromJson(imagesJson, new TypeToken<List<String>>() {
-                        }.getType());
-
-                        String videosJson = SplashScreen.decryption(cursor.getString(16));
-                        List<Map<String, String>> videos = gson.fromJson(videosJson, new TypeToken<List<Map<String, String>>>() {
-                        }.getType());
-
-                        // Create a new Model_Profile object and populate it
-                        Model_Profile model_profile = new Model_Profile(Username, Name, Country, Languages, Age, InterestedIn, BodyType, Specifics, Ethnicity, Hair, EyeColor, Subculture, profilePhoto, coverPhoto, Interests, images, videos, censored, like, selectedBot);
-                        girlsList_nearBy.add(model_profile);
+                        girlsList_nearBy.add(SplashScreen.readCursor(cursor));
 
                     } while (cursor.moveToNext());
 
@@ -790,44 +651,7 @@ public class Fragment_Trending extends Fragment {
                 Cursor cursor = new DatabaseHelper(context, SplashScreen.DB_NAME, SplashScreen.DB_VERSION, "GirlsProfile").readRandomGirls();
                 if (cursor.moveToFirst()) {
                     do {
-                        // Extract data from the cursor and populate the Model_Profile object
-                        String Username = SplashScreen.decryption(cursor.getString(0));
-                        String Name = SplashScreen.decryption(cursor.getString(1));
-                        String Country = cursor.getString(2);
-                        String Languages = cursor.getString(3);
-                        String Age = cursor.getString(4);
-                        String InterestedIn = cursor.getString(5);
-                        String BodyType = cursor.getString(6);
-                        String Specifics = SplashScreen.decryption(cursor.getString(7));
-                        String Ethnicity = cursor.getString(8);
-                        String Hair = cursor.getString(9);
-                        String EyeColor = cursor.getString(10);
-                        String Subculture = cursor.getString(11);
-                        String profilePhoto = SplashScreen.decryption(cursor.getString(13));
-                        String coverPhoto = SplashScreen.decryption(cursor.getString(14));
-                        int censored = cursor.getInt(17);
-                        int like = cursor.getInt(18);
-                        int selectedBot = cursor.getInt(19);
-
-                        // Convert JSON strings back to arrays/lists using Gson
-                        Gson gson = new Gson();
-
-
-                        String interestsJson = SplashScreen.decryption(cursor.getString(12));
-                        List<Map<String, String>> Interests = gson.fromJson(interestsJson, new TypeToken<List<Map<String, String>>>() {
-                        }.getType());
-
-                        String imagesJson = SplashScreen.decryption(cursor.getString(15));
-                        List<String> images = gson.fromJson(imagesJson, new TypeToken<List<String>>() {
-                        }.getType());
-
-                        String videosJson = SplashScreen.decryption(cursor.getString(16));
-                        List<Map<String, String>> videos = gson.fromJson(videosJson, new TypeToken<List<Map<String, String>>>() {
-                        }.getType());
-
-                        // Create a new Model_Profile object and populate it
-                        Model_Profile model_profile = new Model_Profile(Username, Name, Country, Languages, Age, InterestedIn, BodyType, Specifics, Ethnicity, Hair, EyeColor, Subculture, profilePhoto, coverPhoto, Interests, images, videos, censored, like, selectedBot);
-                        girlsList_nearBy.add(model_profile);
+                        girlsList_nearBy.add(SplashScreen.readCursor(cursor));
                     } while (cursor.moveToNext());
 
                 }
@@ -1161,7 +985,7 @@ class NearByAdapter extends RecyclerView.Adapter<NearByAdapter.ViewHolder> {
             public void onClick(View view) {
                 Intent intent = new Intent(context, Profile.class);
                 intent.putExtra("userName", model_profile.getUsername());
-                intent.putExtra("online", true);
+                intent.putExtra("online", false);
                 context.startActivity(intent);
             }
         });
@@ -1322,43 +1146,8 @@ class CountryRecyclerViewAdapter extends RecyclerView.Adapter<CountryRecyclerVie
                 Cursor cursor = new DatabaseHelper(context, SplashScreen.DB_NAME, SplashScreen.DB_VERSION, "GirlsProfile").readGirls_Country(selectedCountry);
                 if (cursor.moveToFirst()) {
                     do {
-                        // Extract data from the cursor and populate the Model_Profile object
-                        String Username = SplashScreen.decryption(cursor.getString(0));
-                        String Name = SplashScreen.decryption(cursor.getString(1));
-                        String Country = cursor.getString(2);
-                        String Languages = cursor.getString(3);
-                        String Age = cursor.getString(4);
-                        String InterestedIn = cursor.getString(5);
-                        String BodyType = cursor.getString(6);
-                        String Specifics = SplashScreen.decryption(cursor.getString(7));
-                        String Ethnicity = cursor.getString(8);
-                        String Hair = cursor.getString(9);
-                        String EyeColor = cursor.getString(10);
-                        String Subculture = cursor.getString(11);
-                        String profilePhoto = SplashScreen.decryption(cursor.getString(13));
-                        String coverPhoto = SplashScreen.decryption(cursor.getString(14));
-                        int censored = cursor.getInt(17);
-                        int like = cursor.getInt(18);
-                        int selectedBot = cursor.getInt(19);
 
-                        // Convert JSON strings back to arrays/lists using Gson
-                        Gson gson = new Gson();
-
-
-                        String interestsJson = SplashScreen.decryption(cursor.getString(12));
-                        List<Map<String, String>> Interests = gson.fromJson(interestsJson, new TypeToken<List<Map<String, String>>>() {
-                        }.getType());
-
-                        String imagesJson = SplashScreen.decryption(cursor.getString(15));
-                        List<String> images = gson.fromJson(imagesJson, new TypeToken<List<String>>() {
-                        }.getType());
-
-                        String videosJson = SplashScreen.decryption(cursor.getString(16));
-                        List<Map<String, String>> videos = gson.fromJson(videosJson, new TypeToken<List<Map<String, String>>>() {
-                        }.getType());
-
-                        // Create a new Model_Profile object and populate it
-                        Model_Profile model_profile = new Model_Profile(Username, Name, Country, Languages, Age, InterestedIn, BodyType, Specifics, Ethnicity, Hair, EyeColor, Subculture, profilePhoto, coverPhoto, Interests, images, videos, censored, like, selectedBot);
+                        Model_Profile model_profile = SplashScreen.readCursor(cursor);
                         if (model_profile.getImages().size() != 0) {
                             Fragment_Trending.girlsList.add(0, model_profile);
                         } else {

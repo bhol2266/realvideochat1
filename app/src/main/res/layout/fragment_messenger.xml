@@ -48,7 +48,7 @@
                     android:id="@+id/profileUrl"
                     android:layout_width="70dp"
                     android:layout_height="70dp"
-                    android:src="@drawable/d" />
+                    android:src="@drawable/s" />
 
                 <LinearLayout
                     android:layout_width="0dp"
@@ -68,7 +68,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:fontFamily="@font/inter"
-                            android:text="Team Desi Video Chat"
+                            android:text="SAX Team Chat"
                             android:textColor="@color/semiblack"
                             android:textSize="18dp" />
 

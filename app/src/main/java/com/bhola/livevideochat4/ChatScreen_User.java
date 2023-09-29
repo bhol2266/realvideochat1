@@ -78,7 +78,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -92,7 +91,6 @@ public class ChatScreen_User extends Activity {
     ChatItem_ModelClass modelClass = null;
     AlertDialog block_user_dialog = null;
     AlertDialog report_user_dialog = null;
-    AlertDialog recharge_dialog = null;
     AlertDialog report_userSucessfully_dialog = null;
     ArrayList<Chats_Modelclass> chatsArrayList;
     ChatsAdapter chatAdapter;
@@ -173,7 +171,7 @@ public class ChatScreen_User extends Activity {
         ArrayList<UserBotMsg> userBotMsgList = new ArrayList<>();
         Date currentTime = new Date();
 
-        UserBotMsg userBotMsg = new UserBotMsg("hi!", "mimeType/text", "", String.valueOf(currentTime.getTime()), 5555, 1, 1);
+        UserBotMsg userBotMsg = new UserBotMsg("hi", "mimeType/text", "hi", String.valueOf(currentTime.getTime()), 5555, 1, 1);
         userBotMsgList.add(userBotMsg);
 
 
@@ -202,44 +200,7 @@ public class ChatScreen_User extends Activity {
             public void run() {
                 Cursor cursor = new DatabaseHelper(ChatScreen_User.this, SplashScreen.DB_NAME, SplashScreen.DB_VERSION, "GirlsProfile").readSingleGirl(userName);
                 if (cursor.moveToFirst()) {
-                    // Extract data from the cursor and populate the Model_Profile object
-                    String Username = SplashScreen.decryption(cursor.getString(0));
-                    String Name = SplashScreen.decryption(cursor.getString(1));
-                    String Country = cursor.getString(2);
-                    String Languages = cursor.getString(3);
-                    String Age = cursor.getString(4);
-                    String InterestedIn = cursor.getString(5);
-                    String BodyType = cursor.getString(6);
-                    String Specifics = SplashScreen.decryption(cursor.getString(7));
-                    String Ethnicity = cursor.getString(8);
-                    String Hair = cursor.getString(9);
-                    String EyeColor = cursor.getString(10);
-                    String Subculture = cursor.getString(11);
-                    String profilePhoto = SplashScreen.decryption(cursor.getString(13));
-                    String coverPhoto = SplashScreen.decryption(cursor.getString(14));
-                    int censored = cursor.getInt(17);
-                    int like = cursor.getInt(18);
-                    int selectedBot = cursor.getInt(19);
-
-                    // Convert JSON strings back to arrays/lists using Gson
-                    Gson gson = new Gson();
-
-
-                    String interestsJson = SplashScreen.decryption(cursor.getString(12));
-                    List<Map<String, String>> Interests = gson.fromJson(interestsJson, new TypeToken<List<Map<String, String>>>() {
-                    }.getType());
-
-                    String imagesJson = SplashScreen.decryption(cursor.getString(15));
-                    List<String> images = gson.fromJson(imagesJson, new TypeToken<List<String>>() {
-                    }.getType());
-
-                    String videosJson = SplashScreen.decryption(cursor.getString(16));
-                    List<Map<String, String>> videos = gson.fromJson(videosJson, new TypeToken<List<Map<String, String>>>() {
-                    }.getType());
-
-                    // Create a new Model_Profile object and populate it
-                    model_profile[0] = new Model_Profile(Username, Name, Country, Languages, Age, InterestedIn, BodyType, Specifics, Ethnicity, Hair, EyeColor, Subculture, profilePhoto, coverPhoto, Interests, images, videos, censored, like, selectedBot);
-
+                    model_profile[0] = SplashScreen.readCursor(cursor);
                 }
                 cursor.close();
                 ((Activity) ChatScreen_User.this).runOnUiThread(new Runnable() {
@@ -330,13 +291,13 @@ public class ChatScreen_User extends Activity {
         videoCall.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                rechargeDialog();
+                rechargeDialog(view.getContext());
             }
         });
         voiceCall.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                rechargeDialog();
+                rechargeDialog(view.getContext());
             }
         });
 
@@ -449,7 +410,13 @@ public class ChatScreen_User extends Activity {
                 // Start the task on the new thread
                 StorageReference storageReference = FirebaseStorage.getInstance().getReference("VoiceRecordings/" + modelClass.getUsername() + System.currentTimeMillis());
                 Uri audioUri = Uri.fromFile(audioFile);
-                insertCustomMsginChats(audioUri.toString(), "mimeType/audio", "premium");
+
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        insertCustomMsginChats(audioUri.toString(), "mimeType/audio", "premium");
+                    }
+                });
 
                 storageReference.putFile(audioUri).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                     @Override
@@ -692,6 +659,7 @@ public class ChatScreen_User extends Activity {
         chatsArrayList.add(chats_modelclass);
         chatAdapter.notifyItemInserted(chatsArrayList.size() - 1);
 
+
         int index = -1;
         for (int i = 0; i < Fragment_Messenger.adapter.userList.size(); i++) {
 
@@ -778,7 +746,6 @@ public class ChatScreen_User extends Activity {
         update_userListTemp();
 
 
-
         Fragment_Messenger.adapter.userList.remove(index);
         Fragment_Messenger.adapter.userList.add(0, modelClass);
         Fragment_Messenger.adapter.notifyItemMoved(index, 0);
@@ -819,8 +786,9 @@ public class ChatScreen_User extends Activity {
                     if (userBotMsg.getSent() == 1) {
                         if (userBotMsg.getNextMsgDelay() == 5555) {
                             //this msg is custom message sent by mobile user and is identified if getNextMsgDelay == 5555
-                            Chats_Modelclass chats_modelclass3 = new Chats_Modelclass(userBotMsg.getMsg(), userBotMsg.getMimeType(), userBotMsg.getExtraMsg(), "", modelClass.getProfileImage(), userBotMsg.getDateTime(), 1);
+                            Chats_Modelclass chats_modelclass3 = new Chats_Modelclass(userBotMsg.getMsg(), userBotMsg.getMimeType(), userBotMsg.getExtraMsg(), "premium", modelClass.getProfileImage(), userBotMsg.getDateTime(), 1);
                             chatsArrayList.add(chats_modelclass3);
+
                         } else {
                             Chats_Modelclass chats_modelclass3 = new Chats_Modelclass(userBotMsg.getMsg(), userBotMsg.getMimeType(), userBotMsg.getExtraMsg(), "", modelClass.getProfileImage(), userBotMsg.getDateTime(), 2);
                             chatsArrayList.add(chats_modelclass3);
@@ -839,8 +807,15 @@ public class ChatScreen_User extends Activity {
                     UserBotMsg userBotMsg = modelClass.getUserBotMsg().get(i);
                     if (userBotMsg.getNextMsgDelay() == 5555) {
                         //this msg is custom message sent by mobile user and is identified if getNextMsgDelay == 0
-                        Chats_Modelclass chats_modelclass = new Chats_Modelclass(userBotMsg.getMsg(), userBotMsg.getMimeType(), userBotMsg.getExtraMsg(), "", modelClass.getProfileImage(), userBotMsg.getDateTime(), 1);
-                        chatsArrayList.add(chats_modelclass);
+
+                        if (userBotMsg.getExtraMsg().equals("hi")) { //this is the direct hi message when user clicks on hello image
+                            Chats_Modelclass chats_modelclass3 = new Chats_Modelclass(userBotMsg.getMsg(), userBotMsg.getMimeType(), userBotMsg.getExtraMsg(), "", modelClass.getProfileImage(), userBotMsg.getDateTime(), 1);
+                            chatsArrayList.add(chats_modelclass3);
+                        } else {
+                            Chats_Modelclass chats_modelclass = new Chats_Modelclass(userBotMsg.getMsg(), userBotMsg.getMimeType(), userBotMsg.getExtraMsg(), "premium", modelClass.getProfileImage(), userBotMsg.getDateTime(), 1);
+                            chatsArrayList.add(chats_modelclass);
+                        }
+
                     } else {
                         Chats_Modelclass chats_modelclass = new Chats_Modelclass(userBotMsg.getMsg(), userBotMsg.getMimeType(), userBotMsg.getExtraMsg(), "", modelClass.getProfileImage(), userBotMsg.getDateTime(), 2);
                         chatsArrayList.add(chats_modelclass);
@@ -1041,11 +1016,17 @@ public class ChatScreen_User extends Activity {
         ImageView warningSign = findViewById(R.id.warningSign);
         ImageView menuDots = findViewById(R.id.menuDots);
         RelativeLayout alertBar = findViewById(R.id.alertBar);
-        TextView profileName = findViewById(R.id.profileName);
         TextView viewProfile = findViewById(R.id.viewProfile);
+        TextView profileName = findViewById(R.id.profileName);
 
 
         profileName.setText(modelClass.getName());
+        profileName.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                viewProfile.performClick();
+            }
+        });
 
         ImageView profileImage = findViewById(R.id.profileImage);
         Picasso.get().load(modelClass.getProfileImage()).into(profileImage);
@@ -1155,10 +1136,12 @@ public class ChatScreen_User extends Activity {
 
     }
 
-    private void rechargeDialog() {
+    public static void rechargeDialog(Context context) {
 
-        final androidx.appcompat.app.AlertDialog.Builder builder = new androidx.appcompat.app.AlertDialog.Builder(ChatScreen_User.this);
-        LayoutInflater inflater = LayoutInflater.from(getApplicationContext());
+        AlertDialog recharge_dialog = null;
+
+        final androidx.appcompat.app.AlertDialog.Builder builder = new androidx.appcompat.app.AlertDialog.Builder(context);
+        LayoutInflater inflater = LayoutInflater.from(context);
         View promptView = inflater.inflate(R.layout.dialog_recharge, null);
         builder.setView(promptView);
         builder.setCancelable(true);
@@ -1174,14 +1157,15 @@ public class ChatScreen_User extends Activity {
         recharge.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                startActivity(new Intent(ChatScreen_User.this, VipMembership.class));
+                context.startActivity(new Intent(context, VipMembership.class));
             }
         });
 
+        AlertDialog finalRecharge_dialog = recharge_dialog;
         cancel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                recharge_dialog.dismiss();
+                finalRecharge_dialog.dismiss();
             }
         });
 
@@ -1273,7 +1257,7 @@ public class ChatScreen_User extends Activity {
         send.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                rechargeDialog();
+                rechargeDialog(view.getContext());
 
             }
         });
@@ -1679,6 +1663,12 @@ class ChatsAdapter extends RecyclerView.Adapter {
             @Override
             public void run() {
                 errorIcon.setVisibility(View.VISIBLE);
+                errorIcon.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        ChatScreen_User.rechargeDialog(view.getContext());
+                    }
+                });
             }
         }, 3000);
     }

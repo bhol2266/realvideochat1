@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.FragmentManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.graphics.RenderEffect;
@@ -15,13 +16,13 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.GridLayout;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -36,8 +37,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.airbnb.lottie.LottieAnimationView;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
-import com.google.common.reflect.TypeToken;
-import com.google.gson.Gson;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
@@ -140,14 +139,14 @@ public class Profile extends AppCompatActivity {
             public void onClick(View view) {
 
                 if (model_profile.getLike() == 0) {
-                    String res = new DatabaseHelper(Profile.this, SplashScreen.DB_NAME, SplashScreen.DB_VERSION, "GirlsProfile").selectedBot(model_profile.getUsername(), 1);
+                    String res = new DatabaseHelper(Profile.this, SplashScreen.DB_NAME, SplashScreen.DB_VERSION, "GirlsProfile").updateLike(model_profile.getUsername(), 1);
 
                     likeBtn.setBackgroundColor(getResources().getColor(R.color.green));
                     likeBtn.setText("liked Bot");
                     model_profile.setLike(1);
 
                 } else {
-                    String res = new DatabaseHelper(Profile.this, SplashScreen.DB_NAME, SplashScreen.DB_VERSION, "GirlsProfile").selectedBot(model_profile.getUsername(), 0);
+                    String res = new DatabaseHelper(Profile.this, SplashScreen.DB_NAME, SplashScreen.DB_VERSION, "GirlsProfile").updateLike(model_profile.getUsername(), 0);
 
                     likeBtn.setBackgroundColor(getResources().getColor(R.color.themeColor)); // Assumes you have a green color defined in your resources
                     likeBtn.setText("Not liked");
@@ -183,7 +182,7 @@ public class Profile extends AppCompatActivity {
         send.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                startActivity(new Intent(Profile.this, VipMembership.class));
+                rechargeDialog(view.getContext());
 
             }
         });
@@ -242,7 +241,7 @@ public class Profile extends AppCompatActivity {
         voiceCall.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                startActivity(new Intent(Profile.this, VipMembership.class));
+                rechargeDialog(view.getContext());
             }
         });
 
@@ -250,7 +249,7 @@ public class Profile extends AppCompatActivity {
         videoCall.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                startActivity(new Intent(Profile.this, VipMembership.class));
+                rechargeDialog(view.getContext());
 
             }
         });
@@ -259,31 +258,78 @@ public class Profile extends AppCompatActivity {
         chat.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                startActivity(new Intent(Profile.this, VipMembership.class));
+                SharedPreferences sharedPreferences = view.getContext().getSharedPreferences("UserInfo", MODE_PRIVATE);
+                SharedPreferences.Editor editor = sharedPreferences.edit();
+                editor.putString("userName", model_profile.getUsername());
+                editor.apply(); // Apply the changes to SharedPreferences
+
+                Intent intent = new Intent(Profile.this, ChatScreen_User.class);
+                startActivity(intent);
             }
         });
 
         TextView Languages = findViewById(R.id.Languages);
         Languages.setText(model_profile.getLanguages());
+        LinearLayout Languageslayout = findViewById(R.id.Languageslayout);
+        if (model_profile.getLanguages().length() == 0) {
+            Languageslayout.setVisibility(View.GONE);
+        }
 
         TextView InterestedIn = findViewById(R.id.InterestedIn);
         InterestedIn.setText(model_profile.getInterestedIn());
+        LinearLayout InterestedInlayout = findViewById(R.id.InterestedInlayout);
+        if (model_profile.getInterestedIn().length() == 0) {
+            InterestedInlayout.setVisibility(View.GONE);
+        }
 
         TextView BodyType = findViewById(R.id.BodyType);
         BodyType.setText(model_profile.getBodyType());
+        LinearLayout BodyTypelayout = findViewById(R.id.BodyTypelayout);
+        if (model_profile.getBodyType().length() == 0) {
+            BodyTypelayout.setVisibility(View.GONE);
+        }
+        TextView Specifics = findViewById(R.id.Specifics);
+        Specifics.setText(model_profile.getSpecifics());
+        LinearLayout Specificslayout = findViewById(R.id.Specificslayout);
+        if (model_profile.getSpecifics().length() == 0 || SplashScreen.App_updating.equals("active") || !SplashScreen.userLoggedIAs.equals("Google")) {
+            Specificslayout.setVisibility(View.GONE);
+        }
 
         TextView Ethnicity = findViewById(R.id.Ethnicity);
         Ethnicity.setText(model_profile.getEthnicity());
+        LinearLayout Ethnicitylayout = findViewById(R.id.Ethnicitylayout);
+        if (model_profile.getEthnicity().length() == 0) {
+            Ethnicitylayout.setVisibility(View.GONE);
+        }
+
 
         TextView Hair = findViewById(R.id.Hair);
         Hair.setText(model_profile.getHair());
+        Ethnicity.setText(model_profile.getEthnicity());
+        LinearLayout Hairlayout = findViewById(R.id.Hairlayout);
+        if (model_profile.getHair().length() == 0) {
+            Hairlayout.setVisibility(View.GONE);
+        }
 
         TextView EyeColor = findViewById(R.id.EyeColor);
         EyeColor.setText(model_profile.getEyeColor());
+        LinearLayout EyeColorlayout = findViewById(R.id.EyeColorlayout);
+        if (model_profile.getEyeColor().length() == 0) {
+            EyeColorlayout.setVisibility(View.GONE);
+        }
 
         TextView Subculture = findViewById(R.id.Subculture);
         Subculture.setText(model_profile.getSubculture());
+        LinearLayout Subculturelayout = findViewById(R.id.Subculturelayout);
+        if (model_profile.getSubculture().length() == 0) {
+            Subculturelayout.setVisibility(View.GONE);
+        }
 
+        LinearLayout onlineLayout = findViewById(R.id.onlineLayout);
+        boolean isOnline = getIntent().getBooleanExtra("online", false);
+        if (isOnline) {
+            onlineLayout.setVisibility(View.VISIBLE);
+        }
 
     }
 
@@ -462,43 +508,8 @@ public class Profile extends AppCompatActivity {
             public void run() {
                 Cursor cursor = new DatabaseHelper(Profile.this, SplashScreen.DB_NAME, SplashScreen.DB_VERSION, "GirlsProfile").readSingleGirl(userName);
                 if (cursor.moveToFirst()) {
-                    // Extract data from the cursor and populate the Model_Profile object
-                    String Username = SplashScreen.decryption(cursor.getString(0));
-                    String Name = SplashScreen.decryption(cursor.getString(1));
-                    String Country = cursor.getString(2);
-                    String Languages = cursor.getString(3);
-                    String Age = cursor.getString(4);
-                    String InterestedIn = cursor.getString(5);
-                    String BodyType = cursor.getString(6);
-                    String Specifics = SplashScreen.decryption(cursor.getString(7));
-                    String Ethnicity = cursor.getString(8);
-                    String Hair = cursor.getString(9);
-                    String EyeColor = cursor.getString(10);
-                    String Subculture = cursor.getString(11);
-                    String profilePhoto = SplashScreen.decryption(cursor.getString(13));
-                    String coverPhoto = SplashScreen.decryption(cursor.getString(14));
-                    int censored = cursor.getInt(17);
-                    int like = cursor.getInt(18);
-                    int selectedBot = cursor.getInt(19);
 
-                    // Convert JSON strings back to arrays/lists using Gson
-                    Gson gson = new Gson();
-
-
-                    String interestsJson = SplashScreen.decryption(cursor.getString(12));
-                    List<Map<String, String>> Interests = gson.fromJson(interestsJson, new TypeToken<List<Map<String, String>>>() {
-                    }.getType());
-
-                    String imagesJson = SplashScreen.decryption(cursor.getString(15));
-                    List<String> images = gson.fromJson(imagesJson, new TypeToken<List<String>>() {
-                    }.getType());
-
-                    String videosJson = SplashScreen.decryption(cursor.getString(16));
-                    List<Map<String, String>> videos = gson.fromJson(videosJson, new TypeToken<List<Map<String, String>>>() {
-                    }.getType());
-
-                    // Create a new Model_Profile object and populate it
-                    model_profile = new Model_Profile(Username, Name, Country, Languages, Age, InterestedIn, BodyType, Specifics, Ethnicity, Hair, EyeColor, Subculture, profilePhoto, coverPhoto, Interests, images, videos, censored, like, selectedBot);
+                    model_profile = SplashScreen.readCursor(cursor);
                 }
                 cursor.close();
                 ((Activity) Profile.this).runOnUiThread(new Runnable() {
@@ -529,22 +540,20 @@ public class Profile extends AppCompatActivity {
         }
         ArrayList<Map<String, String>> imageList = new ArrayList<>();
 
-//        for (int i = 0; i < model_profile.getImages().size(); i++) {
+        for (int i = 0; i < model_profile.getImages().size(); i++) {
+            Map<String, String> stringMap1 = new HashMap<>();
+            stringMap1.put("url", model_profile.getImages().get(i).replace("thumb", "full"));
+            stringMap1.put("type", "free");  //premium
+            imageList.add(stringMap1);
+        }
+
+//        for (int i = 0; i < model_profile.getVideos().size(); i++) {
 //            Map<String, String> stringMap1 = new HashMap<>();
-//            stringMap1.put("url", model_profile.getImages().get(i).replace("thumb", "full"));
+//            stringMap1.put("url", model_profile.getVideos().get(i).get("imageUrl"));
 //            stringMap1.put("type", "free");  //premium
 //            imageList.add(stringMap1);
 //        }
 
-        for (int i = 0; i < model_profile.getVideos().size(); i++) {
-            Map<String, String> stringMap1 = new HashMap<>();
-            stringMap1.put("url", model_profile.getVideos().get(i).get("imageUrl"));
-            stringMap1.put("type", "free");  //premium
-            imageList.add(stringMap1);
-        }
-        for (int i = 0; i < model_profile.getVideos().size(); i++) {
-            Log.d("asdf", "setImageinGridLayout: "+model_profile.getVideos().get(i));
-        }
         RecyclerView recyclerView = findViewById(R.id.recyclerView); // Replace with your RecyclerView's ID
         recyclerView.setLayoutManager(new GridLayoutManager(this, 4));
 
@@ -583,6 +592,44 @@ public class Profile extends AppCompatActivity {
         }
     }
 
+    public static void rechargeDialog(Context context) {
+
+        AlertDialog recharge_dialog = null;
+
+        final androidx.appcompat.app.AlertDialog.Builder builder = new androidx.appcompat.app.AlertDialog.Builder(context);
+        LayoutInflater inflater = LayoutInflater.from(context);
+        View promptView = inflater.inflate(R.layout.dialog_recharge, null);
+        builder.setView(promptView);
+        builder.setCancelable(true);
+
+        TextView recharge = promptView.findViewById(R.id.recharge);
+        TextView cancel = promptView.findViewById(R.id.cancel);
+
+
+        recharge_dialog = builder.create();
+        recharge_dialog.show();
+
+
+        recharge.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                context.startActivity(new Intent(context, VipMembership.class));
+            }
+        });
+
+        AlertDialog finalRecharge_dialog = recharge_dialog;
+        cancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                finalRecharge_dialog.dismiss();
+            }
+        });
+
+        ColorDrawable back = new ColorDrawable(Color.TRANSPARENT);
+        InsetDrawable inset = new InsetDrawable(back, 20);
+        recharge_dialog.getWindow().setBackgroundDrawable(inset);
+
+    }
 
 }
 

@@ -120,29 +120,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
 
-    public Cursor readsingleRow(String title) {
-        SQLiteDatabase db = this.getWritableDatabase();
-        Cursor cursor = db.query(Database_tableNo, null, "Title=?", new String[]{encryption(title)}, null, null, null, null);
-        return cursor;
-
-    }
-
-    public Cursor readFakeStory(String category) {
-        SQLiteDatabase db = this.getWritableDatabase();
-        Cursor cursor = db.query("FakeStory", null, "category=?", new String[]{category}, null, null, null, "10");
-        return cursor;
-
-    }
-
-    public int readLatestStoryDate() {
-        SQLiteDatabase db = this.getWritableDatabase();
-        Cursor cursor = db.query("StoryItems", null, null, null, null, null, "completeDate DESC", "1");
-        cursor.moveToFirst();
-        int completeDate = cursor.getInt(9);
-        cursor.close();
-        return completeDate;
-
-    }
 
     //this method is especially created for the moving images in Fragment_Homepage to read images
     public Cursor readRandomGirlsForMovingImages() {
@@ -160,7 +137,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 //            Cursor cursor = db.rawQuery(query, null);
 //            return cursor;
 //
-            String query = "SELECT * FROM " + Database_tableNo + " WHERE LENGTH(images) > 50 AND censored = 1 ORDER BY RANDOM() LIMIT 30";
+
+
+            String query = "SELECT * FROM " + Database_tableNo + " WHERE LENGTH(images) > 50 AND censored = 1 ORDER BY RANDOM()";
             Cursor cursor = db.rawQuery(query, null);
             return cursor;
 
@@ -180,7 +159,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return cursor;
 
     }
-
     public Cursor readGirls_Country(String countryName) {
         SQLiteDatabase db = this.getWritableDatabase();
         if (SplashScreen.App_updating.equals("inactive") && SplashScreen.userLoggedIn && SplashScreen.userLoggedIAs.equals("Google")) {
@@ -213,40 +191,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     }
 
-    public Cursor readAudioStories(String category) {
-        SQLiteDatabase db = this.getWritableDatabase();
-        Cursor cursor;
-        if (category.equals("AdultContent")) {
-            //all means full adunt contents from StoryItems table
 
-            cursor = db.query(Database_tableNo, null, "audio=?", new String[]{"1"}, null, null, "completeDate DESC", null);
-        } else {
-
-            if (category.equals("mix")) {
-                //all means both "Audio_Story_Fake" and "Audio_Story"
-                cursor = db.query(Database_tableNo, null, "audio=?", new String[]{"1"}, null, null, null, "30");
-            } else {
-                cursor = db.query(Database_tableNo, null, "category=?", new String[]{category}, null, null, null, null);
-            }
-        }
-
-        return cursor;
-
-    }
-
-
-    public Cursor readLikedStories() {
-        return getWritableDatabase().query(Database_tableNo, null, "like=?", new String[]{String.valueOf(1)}, null, null, "completeDate DESC", null);
-    }
-
-
-    public Cursor readaDataByCategory(String category, int page) {
-        page = (page - 1) * 15;
-        SQLiteDatabase sQLiteDatabase = getWritableDatabase();
-        if (category.equals("Latest Stories"))
-            return sQLiteDatabase.query(Database_tableNo, null, null, null, null, null, "completeDate DESC", String.valueOf(page) + ",15");
-        return sQLiteDatabase.query(Database_tableNo, null, "category=?", new String[]{category}, null, null, "completeDate DESC", String.valueOf(page) + ",15");
-    }
 
 
     public String updateCensored(String username, int censoredValue) {
