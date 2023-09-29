@@ -18,7 +18,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
@@ -105,7 +104,7 @@ public class Fragment_Messenger extends Fragment {
         chatItemClick.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                MainActivity.viewPager2.setCurrentItem(2); // Switch to Fragment B
+                MainActivity.viewPager2.setCurrentItem(3); // Switch to Fragment B
             }
         });
 
@@ -132,9 +131,9 @@ public class Fragment_Messenger extends Fragment {
 
         String databaseRef = "";
         if (SplashScreen.userLoggedIn && SplashScreen.userLoggedIAs.equals("Google") && SplashScreen.App_updating.equals("inactive")) {
-            databaseRef = "Chatbots/chatbots_uncensored";
+            databaseRef = "Chatbots_UnCensored/chatbots_uncensored";
         } else {
-            databaseRef = "Chatbots/chatbots_uncensored";
+            databaseRef = "Chatbots_Censored/chatbots_censored";
         }
         userList = new ArrayList<>();
         String finalDatabaseRef = databaseRef;
@@ -211,6 +210,7 @@ public class Fragment_Messenger extends Fragment {
                             for (int i = 0; i < userBotMsgList.size(); i++) {
                                 UserBotMsg userBotMsg = userBotMsgList.get(i);
                                 if (userBotMsg.getMimeType().equals("mimeType/image")) {
+                                    Log.d("ASDfasd", "username: " + username);
                                     userBotMsgList.get(i).setExtraMsg(SplashScreen.databaseURL_images + contentImages.get(Integer.parseInt(userBotMsg.getExtraMsg())));
                                 }
                             }
@@ -421,7 +421,8 @@ public class Fragment_Messenger extends Fragment {
             return false;
         } else {
             userListTemp = gson.fromJson(json, type);
-            Log.d("ASdfsdfa", "retreive_sharedPreferences: "+userListTemp.size());            return true;
+            Log.d("ASdfsdfa", "retreive_sharedPreferences: " + userListTemp.size());
+            return true;
         }
 
 
@@ -461,7 +462,6 @@ public class Fragment_Messenger extends Fragment {
         }
 
     }
-
 
 
     @Override
@@ -547,7 +547,7 @@ class MessengeItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
             boolean messageFound = false; // the below forloop only works if the  UserBotMsg()
             for (int i = 0; i < modelClass.getUserBotMsg().size() - 1; i++) {
                 if (modelClass.getUserBotMsg().get(i).getSent() == 0) {
-                    messageFound=true;
+                    messageFound = true;
                     userItem_viewholder.lastMessage.setText(modelClass.getUserBotMsg().get(i).getMsg());
                     modelClass.getUserBotMsg().get(i).setSent(1);
                     modelClass.getUserBotMsg().get(i).setDateTime(String.valueOf(currentTime.getTime()));
@@ -580,10 +580,13 @@ class MessengeItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
                                         }
                                     }
 
+                                    try {
+                                        userList.remove(currentPostion);
+                                        userList.add(0, modelClass);
+                                        notifyItemMoved(currentPostion, 0);
 
-                                    userList.remove(currentPostion);
-                                    userList.add(0, modelClass);
-                                    notifyItemMoved(currentPostion, 0);
+                                    } catch (Exception e) {
+                                    }
                                     notifyItemChanged(0);
 
                                     recyclerview.smoothScrollToPosition(0);
@@ -611,7 +614,7 @@ class MessengeItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
                     break;
                 }
                 if (i == modelClass.getUserBotMsg().size() - 2) { //last loop
-                    messageFound=true;
+                    messageFound = true;
 
                     userItem_viewholder.lastMessage.setText(modelClass.getUserBotMsg().get(i + 1).getMsg());
                     modelClass.getUserBotMsg().get(modelClass.getUserBotMsg().size() - 1).setSent(1);
@@ -621,7 +624,7 @@ class MessengeItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
                     setMessageCount(modelClass.getUserBotMsg(), userItem_viewholder.messageCount, modelClass.getUsername());//set messageCount
                 }
             }
-            if(!messageFound){
+            if (!messageFound) {
                 userItem_viewholder.lastMessage.setText(modelClass.getUserBotMsg().get(0).getMsg());
                 setMessageCount(modelClass.getUserBotMsg(), userItem_viewholder.messageCount, modelClass.getUsername());//set messageCount
 

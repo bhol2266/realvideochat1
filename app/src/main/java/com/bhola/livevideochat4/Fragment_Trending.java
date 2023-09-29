@@ -14,7 +14,9 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.InsetDrawable;
 import android.location.Address;
 import android.location.Geocoder;
 import android.os.Build;
@@ -38,6 +40,7 @@ import android.widget.Toast;
 import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.appcompat.app.AlertDialog;
 import androidx.cardview.widget.CardView;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -270,7 +273,7 @@ public class Fragment_Trending extends Fragment {
             loadDatabase_NearBy();
         }
 
-        nearByAdapter = new NearByAdapter(context, girlsList);
+        nearByAdapter = new NearByAdapter(context, girlsList_nearBy);
 
         LinearLayoutManager layoutManager = new LinearLayoutManager(context);
         recyclerview_NearBy.setLayoutManager(layoutManager);
@@ -697,6 +700,46 @@ public class Fragment_Trending extends Fragment {
             }
     );
 
+    public static void rechargeDialog(Context context) {
+
+        AlertDialog recharge_dialog = null;
+
+        final androidx.appcompat.app.AlertDialog.Builder builder = new androidx.appcompat.app.AlertDialog.Builder(context);
+        LayoutInflater inflater = LayoutInflater.from(context);
+        View promptView = inflater.inflate(R.layout.dialog_recharge, null);
+        builder.setView(promptView);
+        builder.setCancelable(true);
+
+        TextView recharge = promptView.findViewById(R.id.recharge);
+        TextView cancel = promptView.findViewById(R.id.cancel);
+
+
+        recharge_dialog = builder.create();
+        recharge_dialog.show();
+
+
+        recharge.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                context.startActivity(new Intent(context, VipMembership.class));
+            }
+        });
+
+        AlertDialog finalRecharge_dialog = recharge_dialog;
+        cancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                finalRecharge_dialog.dismiss();
+            }
+        });
+
+        ColorDrawable back = new ColorDrawable(Color.TRANSPARENT);
+        InsetDrawable inset = new InsetDrawable(back, 20);
+        recharge_dialog.getWindow().setBackgroundDrawable(inset);
+
+    }
+
+
 
 }
 
@@ -992,15 +1035,21 @@ class NearByAdapter extends RecyclerView.Adapter<NearByAdapter.ViewHolder> {
         holder.message.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                showCustomToast();
+//                showCustomToast();
+                SharedPreferences sharedPreferences = view.getContext().getSharedPreferences("UserInfo", MODE_PRIVATE);
+                SharedPreferences.Editor editor = sharedPreferences.edit();
+                editor.putString("userName", model_profile.getUsername());
+                editor.apply(); // Apply the changes to SharedPreferences
+
+                Intent intent = new Intent(context, ChatScreen_User.class);
+                context.startActivity(intent);
             }
         });
 
         holder.videocall.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                context.startActivity(new Intent(context, VipMembership.class));
-            }
+                Fragment_Trending.rechargeDialog(view.getContext());            }
         });
     }
 

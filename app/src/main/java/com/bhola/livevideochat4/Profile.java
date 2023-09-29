@@ -543,7 +543,7 @@ public class Profile extends AppCompatActivity {
         for (int i = 0; i < model_profile.getImages().size(); i++) {
             Map<String, String> stringMap1 = new HashMap<>();
             stringMap1.put("url", model_profile.getImages().get(i).replace("thumb", "full"));
-            stringMap1.put("type", "free");  //premium
+            stringMap1.put("type", "premium");  //premium
             imageList.add(stringMap1);
         }
 
@@ -655,7 +655,6 @@ class ProfileGirlImageAdapter extends RecyclerView.Adapter<ProfileGirlImageAdapt
         Map<String, String> imageItem = imageList.get(position);
 //        holder.bind(imageItem);
 
-        holder.positon.setText(String.valueOf(position));
         Picasso.get().load(imageItem.get("url")).resize(150, 0) // Set the width in pixels and let Picasso calculate the height
                 .into(holder.imageView);
 
@@ -704,13 +703,11 @@ class ProfileGirlImageAdapter extends RecyclerView.Adapter<ProfileGirlImageAdapt
     public class ImageViewHolder extends RecyclerView.ViewHolder {
         private final CardView cardView;
         private final ImageView imageView;
-        TextView positon;
 
         public ImageViewHolder(@NonNull View itemView) {
             super(itemView);
             cardView = itemView.findViewById(R.id.cardView);
             imageView = itemView.findViewById(R.id.imageView);
-            positon = itemView.findViewById(R.id.positon);
         }
 
     }

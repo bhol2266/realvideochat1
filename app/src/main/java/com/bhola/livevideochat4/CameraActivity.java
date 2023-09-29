@@ -545,7 +545,7 @@ public class CameraActivity extends AppCompatActivity {
         TextView counterTextCircular = findViewById(R.id.counterTextCircular);
 
         // Set the initial value of the timer in seconds
-        int initialSeconds = (timeRemaining > 0) ? (int) timeRemaining : 20;
+        int initialSeconds = (timeRemaining > 0) ? (int) timeRemaining : 5;
 
         countDownTimer = new CountDownTimer(initialSeconds * 1000L, 1000) {
             @Override

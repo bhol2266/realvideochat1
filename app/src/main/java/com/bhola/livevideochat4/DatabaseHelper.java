@@ -120,7 +120,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
 
-
     //this method is especially created for the moving images in Fragment_Homepage to read images
     public Cursor readRandomGirlsForMovingImages() {
         SQLiteDatabase db = this.getWritableDatabase();
@@ -129,17 +128,13 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         Cursor cursor = db.rawQuery(query, null);
         return cursor;
     }
+
     public Cursor readRandomGirls() {
         SQLiteDatabase db = this.getWritableDatabase();
 
         if (SplashScreen.App_updating.equals("inactive") && SplashScreen.userLoggedIn && SplashScreen.userLoggedIAs.equals("Google")) {
-//            String query = "SELECT * FROM " + Database_tableNo + " WHERE LENGTH(videos) > 50 ORDER BY RANDOM() LIMIT 1000";
-//            Cursor cursor = db.rawQuery(query, null);
-//            return cursor;
-//
 
-
-            String query = "SELECT * FROM " + Database_tableNo + " WHERE LENGTH(images) > 50 AND censored = 1 ORDER BY RANDOM()";
+            String query = "SELECT * FROM " + Database_tableNo + " WHERE LENGTH(images) > 50 ORDER BY RANDOM() LIMIT 30";
             Cursor cursor = db.rawQuery(query, null);
             return cursor;
 
@@ -159,6 +154,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return cursor;
 
     }
+
     public Cursor readGirls_Country(String countryName) {
         SQLiteDatabase db = this.getWritableDatabase();
         if (SplashScreen.App_updating.equals("inactive") && SplashScreen.userLoggedIn && SplashScreen.userLoggedIAs.equals("Google")) {
@@ -192,14 +188,15 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
 
-
-
     public String updateCensored(String username, int censoredValue) {
         SQLiteDatabase sQLiteDatabase = getWritableDatabase();
         ContentValues contentValues = new ContentValues();
         contentValues.put("censored", censoredValue);
 
-        float res = sQLiteDatabase.update(Database_tableNo, contentValues, "Username = ?", new String[]{encryption(username)});
+        float res = sQLiteDatabase.update(Database_tableNo, contentValues, "Username = ?", new String[]{SplashScreen.encryption(username)});
+        Log.d("sdafdsaf", "updateCensored: " + DbName);
+        Log.d("sdafdsaf", "updateCensored: " + res);
+        Log.d("sdafdsaf", "updateCensored: " + SplashScreen.encryption(username));
         if (res == -1)
             return "Failed";
         else

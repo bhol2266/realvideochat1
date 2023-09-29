@@ -213,7 +213,7 @@ public class SplashScreen extends AppCompatActivity {
 
             return;
         } else {
-            url_mref = FirebaseDatabase.getInstance().getReference().child("Desi_Girls_Video_Chat");
+            url_mref = FirebaseDatabase.getInstance().getReference().child("LiveVideoChat4");
             url_mref.addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -305,7 +305,6 @@ public class SplashScreen extends AppCompatActivity {
 
 
     private void handler_forIntent() {
-
         if (!isInternetAvailable(SplashScreen.this)) {
             createSnackBar();
             return;
