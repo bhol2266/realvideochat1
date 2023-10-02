@@ -6,10 +6,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-
-import androidx.annotation.NonNull;
-import androidx.fragment.app.Fragment;
-
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -18,6 +14,9 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.fragment.app.Fragment;
 
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
@@ -31,11 +30,12 @@ public class Fragment_UserProfile extends Fragment {
     ImageView profileImage;
     TextView name, coins;
     LinearLayout logout;
+    View view;
+    Context context;
 
     public Fragment_UserProfile() {
         // Required empty public constructor
     }
-
 
 
     @Override
@@ -43,14 +43,14 @@ public class Fragment_UserProfile extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
 
-        View view = inflater.inflate(R.layout.fragment_user__profile, container, false);
+        view = inflater.inflate(R.layout.fragment_user__profile, container, false);
 
-        Context context = getContext();
+        context = getContext();
 
         profileImage = view.findViewById(R.id.profileUrl);
         name = view.findViewById(R.id.profileName);
         coins = view.findViewById(R.id.coins);
-        coins.setText(String.valueOf("Coins: "+SplashScreen.coins));
+        coins.setText(String.valueOf("Coins: " + SplashScreen.coins));
         logout = view.findViewById(R.id.logout);
         SharedPreferences sh = context.getSharedPreferences("UserInfo", MODE_PRIVATE);
 
@@ -59,7 +59,7 @@ public class Fragment_UserProfile extends Fragment {
 
             String fullname = sh.getString("name", "not set");
             name.setText(fullname);
-            Log.d(SplashScreen.TAG, "onCreateView: "+fullname);
+            Log.d(SplashScreen.TAG, "onCreateView: " + fullname);
 
             if (SplashScreen.userLoggedIAs.equals("Google")) {
                 String urll = sh.getString("photoUrl", "not set");
@@ -107,10 +107,6 @@ public class Fragment_UserProfile extends Fragment {
                 }
 
 
-
-
-
-
                 Toast.makeText(context, "Logged Out!", Toast.LENGTH_SHORT).show();
                 startActivity(new Intent(context, LoginScreen.class));
 
@@ -121,13 +117,13 @@ public class Fragment_UserProfile extends Fragment {
         memberShip.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                startActivity(new Intent(context,VipMembership.class ));
+                startActivity(new Intent(context, VipMembership.class));
             }
         });
 
-        oprnPrivacy_Terms(view,context);
+        oprnPrivacy_Terms(view, context);
 
-        LinearLayout about=view.findViewById(R.id.about);
+        LinearLayout about = view.findViewById(R.id.about);
         about.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -135,23 +131,35 @@ public class Fragment_UserProfile extends Fragment {
             }
         });
 
+        profileEdit();
+
         return view;
     }
 
+    private void profileEdit() {
+        TextView edit = view.findViewById(R.id.edit);
+        edit.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+            }
+        });
+    }
+
     private void oprnPrivacy_Terms(View view, Context context) {
-        LinearLayout terms=view.findViewById(R.id.terms);
+        LinearLayout terms = view.findViewById(R.id.terms);
         terms.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                startActivity(new Intent(context,Terms_Conditions.class));
+                startActivity(new Intent(context, Terms_Conditions.class));
             }
         });
 
-        LinearLayout privacy=view.findViewById(R.id.privacy);
+        LinearLayout privacy = view.findViewById(R.id.privacy);
         privacy.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                startActivity(new Intent(context,PrivacyPolicy.class));
+                startActivity(new Intent(context, PrivacyPolicy.class));
             }
         });
     }

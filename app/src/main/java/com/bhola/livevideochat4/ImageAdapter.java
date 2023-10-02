@@ -1,16 +1,12 @@
 package com.bhola.livevideochat4;
 
-import android.animation.ObjectAnimator;
 import android.content.Context;
-import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.LinearInterpolator;
 import android.widget.ImageView;
 
 import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.squareup.picasso.Picasso;
@@ -39,7 +35,16 @@ public class ImageAdapter extends RecyclerView.Adapter<ImageViewHolder> {
         int positionInList = position % imageList.size();
 //        int imageResId = imageList.get(positionInList);
 
-        Picasso.get().load(imageList.get(positionInList)).into(holder.imageView);
+        // Calculate the pixel values from dp
+        float dpWidth = 80f; // Replace with your desired width in dp
+        float dpHeight = 80f; // Replace with your desired height in dp
+
+        float density = context.getResources().getDisplayMetrics().density;
+        int widthInPixels = (int) (dpWidth * density);
+        int heightInPixels = (int) (dpHeight * density);
+
+        Picasso.get().load(imageList.get(positionInList)).resize(widthInPixels, heightInPixels)
+                .into(holder.imageView);
     }
 
     @Override

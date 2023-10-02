@@ -214,15 +214,15 @@ public class VipMembership extends AppCompatActivity {
         List<QueryProductDetailsParams.Product> list = new ArrayList<>();
 
         productIds.add("coins200");
-        productIds.add("coins500");
-        productIds.add("coins1200");
-        productIds.add("coins3000");
+        productIds.add("coins450");
+        productIds.add("coins1000");
+        productIds.add("coins2500");
         productIds.add("coins5000");
         productIds.add("coins10000");
         productIds.add("coins200_offer");
-        productIds.add("coins500_offer");
-        productIds.add("coins1200_offer");
-        productIds.add("coins3000_offer");
+        productIds.add("coins450_offer");
+        productIds.add("coins1000_offer");
+        productIds.add("coins2500_offer");
         productIds.add("coins5000_offer");
         productIds.add("coins10000_offer");
 
@@ -290,13 +290,13 @@ public class VipMembership extends AppCompatActivity {
 
         GridItem_ModelClass item_modelClass2 = new GridItem_ModelClass();
         for (ProductDetails productDetails : productDetailsList) {
-            item_modelClass2.setCoins("500");
-            if (productDetails.getProductId().equals("coins500")) {
+            item_modelClass2.setCoins("450");
+            if (productDetails.getProductId().equals("coins450")) {
                 item_modelClass2.setMRP(productDetails.getOneTimePurchaseOfferDetails().getFormattedPrice().replace(".00", ""));
                 productlist.add(productDetails);
 
             }
-            if (productDetails.getProductId().equals("coins500_offer")) {
+            if (productDetails.getProductId().equals("coins450_offer")) {
                 item_modelClass2.setDISCOUNTED_PRICE(productDetails.getOneTimePurchaseOfferDetails().getFormattedPrice().replace(".00", ""));
                 productlist_offer.add(productDetails);
 
@@ -307,13 +307,13 @@ public class VipMembership extends AppCompatActivity {
 
         GridItem_ModelClass item_modelClass3 = new GridItem_ModelClass();
         for (ProductDetails productDetails : productDetailsList) {
-            item_modelClass3.setCoins("1200");
-            if (productDetails.getProductId().equals("coins1200")) {
+            item_modelClass3.setCoins("1000");
+            if (productDetails.getProductId().equals("coins1000")) {
                 item_modelClass3.setMRP(productDetails.getOneTimePurchaseOfferDetails().getFormattedPrice().replace(".00", ""));
                 productlist.add(productDetails);
 
             }
-            if (productDetails.getProductId().equals("coins1200_offer")) {
+            if (productDetails.getProductId().equals("coins1000_offer")) {
                 item_modelClass3.setDISCOUNTED_PRICE(productDetails.getOneTimePurchaseOfferDetails().getFormattedPrice().replace(".00", ""));
                 productlist_offer.add(productDetails);
 
@@ -324,13 +324,13 @@ public class VipMembership extends AppCompatActivity {
 
         GridItem_ModelClass item_modelClass4 = new GridItem_ModelClass();
         for (ProductDetails productDetails : productDetailsList) {
-            item_modelClass4.setCoins("3000");
-            if (productDetails.getProductId().equals("coins3000")) {
+            item_modelClass4.setCoins("2500");
+            if (productDetails.getProductId().equals("coins2500")) {
                 item_modelClass4.setMRP(productDetails.getOneTimePurchaseOfferDetails().getFormattedPrice().replace(".00", ""));
                 productlist.add(productDetails);
 
             }
-            if (productDetails.getProductId().equals("coins3000_offer")) {
+            if (productDetails.getProductId().equals("coins2500_offer")) {
                 item_modelClass4.setDISCOUNTED_PRICE(productDetails.getOneTimePurchaseOfferDetails().getFormattedPrice().replace(".00", ""));
                 productlist_offer.add(productDetails);
 

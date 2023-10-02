@@ -56,7 +56,7 @@ public class admin_panel extends AppCompatActivity {
 
     private void initViews() {
 
-        mref = FirebaseDatabase.getInstance().getReference().child("Desi_Girls_Video_Chat");
+        mref = FirebaseDatabase.getInstance().getReference().child("LiveVideoChat4");
         notificationMref = FirebaseDatabase.getInstance().getReference();
         Ad_Network = findViewById(R.id.Ad_Network);
         switch_Activate_Ads = findViewById(R.id.Activate_Ads);

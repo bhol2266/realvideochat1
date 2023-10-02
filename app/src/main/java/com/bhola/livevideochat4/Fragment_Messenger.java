@@ -79,6 +79,7 @@ public class Fragment_Messenger extends Fragment {
         // Inflate the layout for this fragment
 
 
+
         setRecyclerView();
         setup_CustomerCare_Chat();
 

@@ -57,7 +57,7 @@ public class SplashScreen extends AppCompatActivity {
     static String TAG = "TAGA";
     Animation topAnim, bottomAnim;
     TextView textView;
-    LottieAnimationView lottie;
+    LottieAnimationView lottie_progressbar;
 
     public static String Notification_Intent_Firebase = "inactive";
     public static String Ad_Network_Name = "facebook";
@@ -125,11 +125,11 @@ public class SplashScreen extends AppCompatActivity {
         topAnim = AnimationUtils.loadAnimation(this, R.anim.top_animation);
         bottomAnim = AnimationUtils.loadAnimation(this, R.anim.bottom_animation);
         textView = findViewById(R.id.textView_splashscreen);
-        lottie = findViewById(R.id.lottie);
+        lottie_progressbar = findViewById(R.id.lottie_progressbar);
 
 
 //        textView.setAnimation(topAnim);
-        lottie.addAnimatorListener(new Animator.AnimatorListener() {
+        lottie_progressbar.addAnimatorListener(new Animator.AnimatorListener() {
             @Override
             public void onAnimationStart(Animator animation) {
 
@@ -140,7 +140,6 @@ public class SplashScreen extends AppCompatActivity {
                 animationCompleted = true;
 
                 if (!activityChanged) {
-                    activityChanged = true;
                     handler_forIntent();
                 }
 
@@ -206,8 +205,9 @@ public class SplashScreen extends AppCompatActivity {
                         Ads_State = "active";
                         Ad_Network_Name = "admob";
                     }
-                    activityChanged = true;
-                    handler_forIntent();
+                    if (!activityChanged) {
+                        handler_forIntent();
+                    }
                 }
             }, 2000);
 
@@ -228,7 +228,6 @@ public class SplashScreen extends AppCompatActivity {
 
 
                     if (animationCompleted) {
-                        activityChanged = true;
                         handler_forIntent();
                     }
 
@@ -305,6 +304,7 @@ public class SplashScreen extends AppCompatActivity {
 
 
     private void handler_forIntent() {
+        activityChanged = true;
         if (!isInternetAvailable(SplashScreen.this)) {
             createSnackBar();
             return;

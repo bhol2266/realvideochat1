@@ -35,7 +35,16 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.LinearSmoothScroller;
 import androidx.recyclerview.widget.RecyclerView;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+
+import java.io.BufferedReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -56,13 +65,12 @@ public class Fragment_HomePage extends Fragment {
     int randomNumber, current_value;
     TextView onlineCountTextview;
     AlertDialog permissionDialog;
-    ArrayList<Model_Profile> girlList_movingImages;
     ActivityResultLauncher<String[]> mPermissionResultLauncher;
     private boolean isCameraPermissionGranted = false;
     private boolean isRecordAudioPermissionGranted = false;
 
     private String[] PERMISSIONS;
-
+    List<String> imageList_MomingIMages = new ArrayList<>();
     View view;
     Context context;
 
@@ -76,8 +84,7 @@ public class Fragment_HomePage extends Fragment {
 
         view = inflater.inflate(R.layout.fragment_home_page, container, false);
         context = view.getContext();
-//        Manifest.permission.CAMERA,
-//                Manifest.permission.RECORD_AUDIO,
+
         context = getContext();
         // Inflate the layout for context fragment
         mPermissionResultLauncher = registerForActivityResult(new ActivityResultContracts.RequestMultiplePermissions(), new ActivityResultCallback<Map<String, Boolean>>() {
@@ -97,12 +104,14 @@ public class Fragment_HomePage extends Fragment {
             }
         });
 
+
         if (SplashScreen.App_updating.equals("inactive")) {
             loadDatabase(); //this will load images for moving images and call method    setimagesScrolling()
         }
         setButtonAnimation(view, context);
         blinkWorldMap(view, context);
         update_onlineCount(view, context);
+
 
         PERMISSIONS = new String[]{
 
@@ -369,11 +378,10 @@ public class Fragment_HomePage extends Fragment {
         List<String> imageList2 = new ArrayList<>();
         List<String> imageList3 = new ArrayList<>();
 
-        int listSize = girlList_movingImages.size();
+        int listSize = imageList_MomingIMages.size();
         int partSize = listSize / 3;
-        for (int i = 0; i < girlList_movingImages.size(); i++) {
-            Model_Profile model_profile = girlList_movingImages.get(i);
-            String imageUrl = model_profile.getProfilePhoto();
+        for (int i = 0; i < imageList_MomingIMages.size(); i++) {
+            String imageUrl = imageList_MomingIMages.get(i);
             if (i < partSize) {
                 imageList.add(imageUrl);
             } else if (i < partSize * 2) {
@@ -434,27 +442,75 @@ public class Fragment_HomePage extends Fragment {
     }
 
     private void loadDatabase() {
-        girlList_movingImages = new ArrayList<>();
+        imageList_MomingIMages=new ArrayList<>();
         new Thread(new Runnable() {
             @Override
             public void run() {
-                Cursor cursor = new DatabaseHelper(context, SplashScreen.DB_NAME, SplashScreen.DB_VERSION, "GirlsProfile").readRandomGirlsForMovingImages();
-                if (cursor.moveToFirst()) {
-                    do {
-                        girlList_movingImages.add(SplashScreen.readCursor(cursor));
-                    } while (cursor.moveToNext());
+                try {
+                    // Open the JSON file from the assets folder
+                    InputStream inputStream = context.getAssets().open("users.json");
 
+                    // Create a BufferedReader to read the file
+                    BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+
+                    // Read the file line by line
+                    String line;
+                    StringBuilder jsonString = new StringBuilder();
+                    while ((line = bufferedReader.readLine()) != null) {
+                        jsonString.append(line);
+                    }
+
+                    // Close the input stream
+                    inputStream.close();
+
+                    // Parse the JSON string
+                    JSONArray jsonArray = new JSONArray(jsonString.toString());
+
+                    List<String> shuffledList = new ArrayList<>();
+                    for (int i = 0; i < jsonArray.length(); i++) {
+                        shuffledList.add(jsonArray.getString(i));
+                    }
+                    Collections.shuffle(shuffledList);
+
+                    // Read the first 100 items
+                    int count = Math.min(shuffledList.size(), 100);
+                    for (int i = 0; i < count; i++) {
+                        String item = shuffledList.get(i);
+                        imageList_MomingIMages.add(SplashScreen.databaseURL_images + "VideoChatProfiles/" + SplashScreen.decryption(item) + "/profile.jpg");
+                    }
+
+                } catch (JSONException | IOException e) {
                 }
-                cursor.close();
                 getActivity().runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        Log.d(SplashScreen.TAG, "run: " + girlList_movingImages.size());
+
+//                        createJSON();
                         setimagesScrolling();
                     }
                 });
             }
         }).start();
+
+    }
+
+    private void createJSON() {
+        try {
+            JSONArray jsonArray = new JSONArray();
+
+            for (String item : imageList_MomingIMages) {
+                jsonArray.put(item);
+            }
+
+
+            FileWriter fileWriter = new FileWriter(context.getFilesDir() + "/myjsonfile.json");
+            fileWriter.write(jsonArray.toString());
+            fileWriter.close();
+
+        } catch (Exception e) {
+            Log.d(SplashScreen.TAG, "run: " + e.getMessage());
+        }
+
 
     }
 

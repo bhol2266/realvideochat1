@@ -120,15 +120,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
 
-    //this method is especially created for the moving images in Fragment_Homepage to read images
-    public Cursor readRandomGirlsForMovingImages() {
-        SQLiteDatabase db = this.getWritableDatabase();
-
-        String query = "SELECT * FROM " + Database_tableNo + " WHERE LENGTH(images) > 50 AND censored = 1 ORDER BY RANDOM() LIMIT 100";
-        Cursor cursor = db.rawQuery(query, null);
-        return cursor;
-    }
-
     public Cursor readRandomGirls() {
         SQLiteDatabase db = this.getWritableDatabase();
 
@@ -159,7 +150,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getWritableDatabase();
         if (SplashScreen.App_updating.equals("inactive") && SplashScreen.userLoggedIn && SplashScreen.userLoggedIAs.equals("Google")) {
             if (countryName.equals("All")) {
-                String query = "SELECT * FROM " + Database_tableNo + " WHERE LENGTH(images) > 50 ORDER BY RANDOM() LIMIT 50";
+                String query = "SELECT * FROM " + Database_tableNo + " WHERE LENGTH(images) > 50 ORDER BY RANDOM() LIMIT 30";
                 Cursor cursor = db.rawQuery(query, null);
                 return cursor;
             } else {

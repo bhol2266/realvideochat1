@@ -190,8 +190,6 @@ public class Fragment_Trending extends Fragment {
             }
         });
 
-        updateFlagIconButton();
-        sideLayout_Countries();
 
         swipeRefreshLayout = view.findViewById(R.id.swipeRefreshLayout);
         swipeRefreshLayout.setRefreshing(true);
@@ -208,8 +206,12 @@ public class Fragment_Trending extends Fragment {
                 updateFlagButton();
             }
         });
+
+        updateFlagIconButton();
+        sideLayout_Countries();
         setUpSlider();
         setupRecycerView();
+
 
         return view;
     }
@@ -361,8 +363,6 @@ public class Fragment_Trending extends Fragment {
         RecyclerView recyclerView = view.findViewById(R.id.recyclerView);
         recyclerView.setVisibility(View.VISIBLE);
 
-        loadDatabase();
-
 
         adapter = new GirlsCardAdapter(context, girlsList);
         getLocation();
@@ -414,7 +414,7 @@ public class Fragment_Trending extends Fragment {
                                 swipeRefreshLayout.setRefreshing(false);
 
                             }
-                        },1500);
+                        }, 1500);
                         new Handler().postDelayed(new Runnable() {
                             @Override
                             public void run() {
@@ -481,11 +481,13 @@ public class Fragment_Trending extends Fragment {
     private void getLocation() {
 
         if (SplashScreen.App_updating.equals("active")) {
+            loadDatabase();
             return;
         }
         FusedLocationProviderClient fusedLocationClient = LocationServices.getFusedLocationProviderClient(context);
 
         if (ActivityCompat.checkSelfPermission(context, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            loadDatabase();
             return;
         }
         fusedLocationClient.getLastLocation()
@@ -497,6 +499,8 @@ public class Fragment_Trending extends Fragment {
 
                         // Call reverse geocoding to get the city and country
                         getAddressFromLocation(latitude, longitude);
+                    } else {
+                        loadDatabase();
                     }
                 });
 
@@ -513,14 +517,20 @@ public class Fragment_Trending extends Fragment {
                 // Now you have the city and country information
                 showNearBy();
 
+                boolean countryAvailable = false;
                 for (int i = 0; i < SplashScreen.countryList.size(); i++) {
                     CountryInfo_Model countryInfo_model = SplashScreen.countryList.get(i);
                     if (SplashScreen.currentCountry.equalsIgnoreCase(countryInfo_model.getCountry().trim())) {
+                        countryAvailable = true;
                         loadDatabase_Country(countryInfo_model.getCountry().trim());
                     }
                 }
+                if (!countryAvailable) {
+                    loadDatabase();
+                }
 
 
+                // below code is for moving the current country flag on top in sidelayout countries layout
                 int fromIndex = -1;
                 for (int i = 0; i < countrylist_forRecyclerview.size(); i++) {
                     CountryInfo_Model countryInfoModel1 = countrylist_forRecyclerview.get(i);
@@ -569,6 +579,7 @@ public class Fragment_Trending extends Fragment {
                         new Handler().postDelayed(new Runnable() {
                             @Override
                             public void run() {
+                                Collections.shuffle(girlsList);
                                 if (SplashScreen.App_updating.equals("active")) {
                                     if (girlsList.size() > 6) {
                                         girlsList.subList(6, girlsList.size()).clear();
@@ -738,7 +749,6 @@ public class Fragment_Trending extends Fragment {
         recharge_dialog.getWindow().setBackgroundDrawable(inset);
 
     }
-
 
 
 }
@@ -1049,7 +1059,8 @@ class NearByAdapter extends RecyclerView.Adapter<NearByAdapter.ViewHolder> {
         holder.videocall.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Fragment_Trending.rechargeDialog(view.getContext());            }
+                Fragment_Trending.rechargeDialog(view.getContext());
+            }
         });
     }
 

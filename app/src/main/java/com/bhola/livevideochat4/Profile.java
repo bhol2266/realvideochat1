@@ -669,6 +669,8 @@ class ProfileGirlImageAdapter extends RecyclerView.Adapter<ProfileGirlImageAdapt
                     holder.imageView.setRenderEffect(RenderEffect.createBlurEffect(40, 40, Shader.TileMode.MIRROR));
                 }
             }
+        }else {
+            holder.vipText.setVisibility(View.GONE);
         }
 
         holder.cardView.setOnClickListener(new View.OnClickListener() {
@@ -703,11 +705,13 @@ class ProfileGirlImageAdapter extends RecyclerView.Adapter<ProfileGirlImageAdapt
     public class ImageViewHolder extends RecyclerView.ViewHolder {
         private final CardView cardView;
         private final ImageView imageView;
+        TextView vipText;
 
         public ImageViewHolder(@NonNull View itemView) {
             super(itemView);
             cardView = itemView.findViewById(R.id.cardView);
             imageView = itemView.findViewById(R.id.imageView);
+            vipText = itemView.findViewById(R.id.vipText);
         }
 
     }

@@ -1656,7 +1656,7 @@ class ChatsAdapter extends RecyclerView.Adapter {
     }
 
     private void updateErrorIcon(FrameLayout errorLayout, ImageView errorIcon, String chatType) {
-        if (!chatType.equals("premium")) {
+        if (!chatType.equals("premium") || SplashScreen.coins >0) {
             errorLayout.setVisibility(View.GONE);
         }
         new Handler().postDelayed(new Runnable() {
