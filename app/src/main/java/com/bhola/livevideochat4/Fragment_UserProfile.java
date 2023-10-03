@@ -5,6 +5,7 @@ import static android.content.Context.MODE_PRIVATE;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -63,9 +64,15 @@ public class Fragment_UserProfile extends Fragment {
 
             if (SplashScreen.userLoggedIAs.equals("Google")) {
                 String urll = sh.getString("photoUrl", "not set");
-                Picasso.get()
-                        .load(urll)
-                        .into(profileImage);
+
+                if (urll.startsWith("http")) {
+
+                    Picasso.get()
+                            .load(urll)
+                            .into(profileImage);
+                } else {
+                    profileImage.setImageURI(Uri.parse(urll));
+                }
             }
 
         }
@@ -141,7 +148,7 @@ public class Fragment_UserProfile extends Fragment {
         edit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
+                context.startActivity(new Intent(context, UserProfileEdit.class));
             }
         });
     }

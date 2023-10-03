@@ -310,7 +310,7 @@ public class SplashScreen extends AppCompatActivity {
             return;
         }
         if (SplashScreen.userLoggedIn && firebaseUser != null) {
-            Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+            Intent intent = new Intent(getApplicationContext(), UserProfileEdit.class);
             startActivity(intent);
         } else {
 
