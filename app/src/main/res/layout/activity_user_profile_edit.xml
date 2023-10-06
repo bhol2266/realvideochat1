@@ -200,9 +200,11 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_alignParentEnd="true"
-                    android:fontFamily="@font/inter"
-                    android:text="Male"
                     android:layout_marginRight="10dp"
+                    android:alpha="0.8"
+                    android:fontFamily="@font/inter"
+
+                    android:text="Male"
                     android:textColor="@color/gmts_light_gray"
                     android:textSize="18dp" />
 
@@ -246,6 +248,8 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentEnd="true"
                 android:layout_centerVertical="true"
+                android:alpha="0.8"
+
                 android:fontFamily="@font/inter"
                 android:text="Male"
                 android:textColor="@color/gmts_light_gray"
@@ -282,8 +286,10 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentEnd="true"
                 android:layout_centerVertical="true"
+                android:alpha="0.8"
                 android:fontFamily="@font/inter"
                 android:text="2005-02-27"
+
                 android:textColor="@color/gmts_light_gray"
                 android:textSize="16dp" />
 
@@ -317,6 +323,7 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentEnd="true"
                 android:layout_centerVertical="true"
+                android:alpha="0.8"
                 android:fontFamily="@font/inter"
                 android:text="Hindi, English"
                 android:textColor="@color/gmts_light_gray"
@@ -331,6 +338,7 @@
             android:background="@color/gmts_light_gray" />
 
         <RelativeLayout
+            android:id="@+id/bioLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"

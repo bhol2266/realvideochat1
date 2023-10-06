@@ -17,13 +17,13 @@
 
         <TextView
             android:id="@+id/title"
-            android:layout_marginBottom="10dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
+            android:layout_marginBottom="10dp"
+            android:alpha="0.9"
             android:fontFamily="@font/rubrik_bold"
             android:text="Edit Nickname"
-            android:alpha="0.9"
             android:textColor="@color/semiblack"
             android:textSize="24dp" />
 
@@ -54,7 +54,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginLeft="15dp"
-            android:layout_marginTop="15dp"
+            android:layout_marginTop="5dp"
             android:gravity="start"
             android:orientation="horizontal">
 
@@ -63,9 +63,9 @@
                 android:layout_width="20dp"
                 android:layout_height="20dp"
                 android:layout_gravity="center_vertical"
-                android:src="@drawable/i"
                 android:backgroundTint="@color/themeColor"
                 android:foregroundTint="@color/themeColor"
+                android:src="@drawable/i"
                 app:tint="@color/themeColor" />
 
             <TextView
@@ -92,7 +92,9 @@
                 android:id="@+id/textContainer"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:paddingBottom="5dp"
+                android:hint="Introduce yourself~"
+                android:padding="10dp"
+                android:textColorHint="@color/themeColor"
                 app:boxBackgroundMode="none"
                 app:boxStrokeWidth="0dp"
                 app:boxStrokeWidthFocused="0dp"
@@ -106,15 +108,13 @@
                     android:background="@null"
                     android:fontFamily="@font/inter"
                     android:gravity="top"
-                    android:hint="Introduce yourself~"
                     android:inputType="textMultiLine"
                     android:lines="4"
                     android:maxLength="200"
+                    android:paddingTop="5dp"
                     android:scrollbars="vertical"
                     android:textColor="@color/gmts_light_gray"
-                    android:textSize="16dp" />
-
-
+                    android:textSize="16sp" />
             </com.google.android.material.textfield.TextInputLayout>
 
 
@@ -127,6 +127,7 @@
             android:layout_height="40dp"
             android:layout_gravity="center"
             android:layout_marginTop="25dp"
+            android:layout_marginBottom="15dp"
             android:background="@drawable/btn_bg"
             android:fontFamily="@font/rubrik_semibold"
             android:gravity="center"

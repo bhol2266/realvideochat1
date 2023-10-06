@@ -143,6 +143,13 @@ public class UserProfileEdit extends AppCompatActivity {
         String langugesWithComma = String.join(",", Languagelist);
         languageTextview.setText(langugesWithComma);
 
+        RelativeLayout languageLayout = findViewById(R.id.languageLayout);
+        languageLayout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startActivity(new Intent(UserProfileEdit.this, Acitivity_LanguageSeletor.class));
+            }
+        });
 
         TextView nickNameTextview = findViewById(R.id.nickName);
         nickNameTextview.setText(nickName);
@@ -152,6 +159,14 @@ public class UserProfileEdit extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 openEditDialog("nickName");
+            }
+        });
+
+        RelativeLayout bioLayout = findViewById(R.id.bioLayout);
+        bioLayout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                openEditDialog("Bio");
             }
         });
 
@@ -165,6 +180,7 @@ public class UserProfileEdit extends AppCompatActivity {
         View promptView = inflater.inflate(R.layout.dialog_nickname_bio_edit, null);
         builder.setView(promptView);
         builder.setCancelable(true);
+        AlertDialog dialog = builder.create();
 
         TextView title = promptView.findViewById(R.id.title);
         if (type.equals("Bio")) {
@@ -188,7 +204,7 @@ public class UserProfileEdit extends AppCompatActivity {
             public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
                 if (charSequence.length() >= 3) {
                     infolayout.setVisibility(View.INVISIBLE);
-                }else {
+                } else {
                     infolayout.setVisibility(View.VISIBLE);
 
                 }
@@ -203,6 +219,7 @@ public class UserProfileEdit extends AppCompatActivity {
 
         EditText textArea = promptView.findViewById(R.id.textArea);
         textArea.setText(Bio);
+
 
         if (type.equals("Bio")) {
             CardView nickNameCard = promptView.findViewById(R.id.nickNameCard);
@@ -221,19 +238,25 @@ public class UserProfileEdit extends AppCompatActivity {
                 SharedPreferences sharedPreferences = getSharedPreferences("UserInfo", MODE_PRIVATE);
                 SharedPreferences.Editor editor = sharedPreferences.edit();
                 if (type.equals("Bio")) {
-                    if (textArea.getText().toString().length() == 0)
-                        editor.putString("Bio", textArea.getText().toString());
+                    editor.putString("Bio", textArea.getText().toString());
+                    Bio = textArea.getText().toString();
                 } else {
+                    if (nickNameEdit.getText().toString().length() < 3) {
+                        return;
+                    }
+                    TextView nickNameTextView = findViewById(R.id.nickName);
+                    nickNameTextView.setText(nickNameEdit.getText().toString());
                     editor.putString("nickName", nickNameEdit.getText().toString());
+                    nickName = nickNameEdit.getText().toString();
+
                 }
                 editor.apply();
 
                 Toast.makeText(UserProfileEdit.this, "Saved", Toast.LENGTH_SHORT).show();
-                onBackPressed();
+                dialog.dismiss();
             }
         });
 
-        AlertDialog dialog = builder.create();
         dialog.show();
 
 
