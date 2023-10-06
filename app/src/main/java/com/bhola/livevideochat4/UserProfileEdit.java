@@ -1,6 +1,7 @@
 package com.bhola.livevideochat4;
 
 import android.app.Activity;
+import android.app.DatePickerDialog;
 import android.app.FragmentManager;
 import android.content.Context;
 import android.content.Intent;
@@ -12,15 +13,21 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.ContextThemeWrapper;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
+import android.widget.DatePicker;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -61,6 +68,8 @@ public class UserProfileEdit extends AppCompatActivity {
     CircleImageView profileImage;
     String photoUrl;
     GalleryImageAdapter galleryImageAdapter;
+    String nickName, Gender, Birthday, Bio;
+    public static ArrayList<String> Languagelist;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -81,6 +90,156 @@ public class UserProfileEdit extends AppCompatActivity {
                 Toast.makeText(UserProfileEdit.this, "Long Press image to delete", Toast.LENGTH_SHORT).show();
             }
         });
+
+        profileDetails();
+
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (Languagelist.size() != 0) {
+            TextView languageTextView = findViewById(R.id.language);
+
+            String langugesWithComma = String.join(",", Languagelist);
+
+            languageTextView.setText(langugesWithComma);
+        }
+    }
+
+    private void profileDetails() {
+        TextView birthdayTevtview = findViewById(R.id.birthdayTevtview);
+        TextView genderTextview = findViewById(R.id.genderTextview);
+        genderTextview.setText(Gender);
+        birthdayTevtview.setText(Birthday);
+
+
+        RelativeLayout birthdayLayout = findViewById(R.id.birthdayLayout);
+        birthdayLayout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                ContextThemeWrapper themedContext = new ContextThemeWrapper(UserProfileEdit.this, R.style.DatePickerDialogTheme);
+                DatePickerDialog datePickerDialog = new DatePickerDialog(
+                        themedContext,
+                        new DatePickerDialog.OnDateSetListener() {
+                            @Override
+                            public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
+                                // Handle the selected date
+                                Birthday = year + "-" + (month + 1) + "-" + dayOfMonth;
+                                birthdayTevtview.setText(Birthday);
+                            }
+                        },
+                        // Set the initial date (optional)
+                        2023, 0, 1  // Year, Month (0-indexed), Day
+                );
+
+// Show the date picker dialog
+                datePickerDialog.show();
+            }
+        });
+
+        TextView languageTextview = findViewById(R.id.language);
+
+        String langugesWithComma = String.join(",", Languagelist);
+        languageTextview.setText(langugesWithComma);
+
+
+        TextView nickNameTextview = findViewById(R.id.nickName);
+        nickNameTextview.setText(nickName);
+
+        RelativeLayout nickNameLayout = findViewById(R.id.nickNameLayout);
+        nickNameLayout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                openEditDialog("nickName");
+            }
+        });
+
+
+    }
+
+    private void openEditDialog(String type) {
+
+        final androidx.appcompat.app.AlertDialog.Builder builder = new androidx.appcompat.app.AlertDialog.Builder(UserProfileEdit.this);
+        LayoutInflater inflater = LayoutInflater.from(getApplicationContext());
+        View promptView = inflater.inflate(R.layout.dialog_nickname_bio_edit, null);
+        builder.setView(promptView);
+        builder.setCancelable(true);
+
+        TextView title = promptView.findViewById(R.id.title);
+        if (type.equals("Bio")) {
+            title.setText("Edit Bio");
+        } else {
+            title.setText("Edit Nickname");
+        }
+
+
+        LinearLayout infolayout = promptView.findViewById(R.id.infolayout);
+        infolayout.setVisibility(View.INVISIBLE);
+        EditText nickNameEdit = promptView.findViewById(R.id.nickName);
+        nickNameEdit.setText(nickName);
+        nickNameEdit.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                if (charSequence.length() >= 3) {
+                    infolayout.setVisibility(View.INVISIBLE);
+                }else {
+                    infolayout.setVisibility(View.VISIBLE);
+
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+
+            }
+        });
+
+
+        EditText textArea = promptView.findViewById(R.id.textArea);
+        textArea.setText(Bio);
+
+        if (type.equals("Bio")) {
+            CardView nickNameCard = promptView.findViewById(R.id.nickNameCard);
+            nickNameCard.setVisibility(View.GONE);
+            infolayout.setVisibility(View.GONE);
+
+        } else {
+            CardView textareaCard = promptView.findViewById(R.id.textareaCard);
+            textareaCard.setVisibility(View.GONE);
+        }
+
+        TextView saveBtn = promptView.findViewById(R.id.save);
+        saveBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                SharedPreferences sharedPreferences = getSharedPreferences("UserInfo", MODE_PRIVATE);
+                SharedPreferences.Editor editor = sharedPreferences.edit();
+                if (type.equals("Bio")) {
+                    if (textArea.getText().toString().length() == 0)
+                        editor.putString("Bio", textArea.getText().toString());
+                } else {
+                    editor.putString("nickName", nickNameEdit.getText().toString());
+                }
+                editor.apply();
+
+                Toast.makeText(UserProfileEdit.this, "Saved", Toast.LENGTH_SHORT).show();
+                onBackPressed();
+            }
+        });
+
+        AlertDialog dialog = builder.create();
+        dialog.show();
+
+
+        ColorDrawable back = new ColorDrawable(Color.TRANSPARENT);
+        InsetDrawable inset = new InsetDrawable(back, 20);
+        dialog.getWindow().setBackgroundDrawable(inset);
 
     }
 
@@ -206,14 +365,33 @@ public class UserProfileEdit extends AppCompatActivity {
     public void save_userInfo_alldetails() {
         SharedPreferences sharedPreferences = getSharedPreferences("UserInfo", MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
+
+        editor.putString("nickName", nickName);
+        editor.putString("Gender", Gender);
         editor.putString("photoUrl", photoUrl);
+        editor.putString("Birthday", Birthday);
+        editor.putString("Bio", Bio);
         editor.apply();
     }
 
     public void retreive_Userinfo() {
+        Languagelist = new ArrayList<>();
 
         SharedPreferences sharedPreferences = getSharedPreferences("UserInfo", MODE_PRIVATE);
+        nickName = sharedPreferences.getString("nickName", "not set");
+        Gender = sharedPreferences.getString("Gender", "not set");
+        Birthday = sharedPreferences.getString("Birthday", "not set");
+        Bio = sharedPreferences.getString("Bio", "");
         photoUrl = sharedPreferences.getString("photoUrl", "not set");
+
+        String json_language = sharedPreferences.getString("Language", "");
+        Gson gson_langugage = new Gson();
+        if (json_language.length() > 0) {
+            Languagelist = gson_langugage.fromJson(json_language, ArrayList.class);
+        } else {
+            Languagelist.add("English"); //default
+        }
+
         String json = sharedPreferences.getString("galleryImages", "");
         Gson gson = new Gson();
         Type type = new TypeToken<ArrayList<String>>() {
@@ -294,6 +472,22 @@ public class UserProfileEdit extends AppCompatActivity {
         InsetDrawable inset = new InsetDrawable(back, 20);
         dialog.getWindow().setBackgroundDrawable(inset);
 
+    }
+
+
+    @Override
+    public void onBackPressed() {
+        // Get the fragment manager
+        FragmentManager fragmentManager = ((Activity) UserProfileEdit.this).getFragmentManager();
+
+        // Check if there are any fragments in the back stack
+        if (fragmentManager.getBackStackEntryCount() > 0) {
+            // If there are fragments in the back stack, pop the top one (close it)
+            fragmentManager.popBackStack();
+        } else {
+            // If there are no fragments in the back stack, perform the default back button behavior
+            super.onBackPressed();
+        }
     }
 
 }

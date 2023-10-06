@@ -45,6 +45,35 @@
         <item name="color">@color/white</item>
     </style>
 
-    <!--    bottomsheet dialog rounded corners-->
+
+    <style name="DatePickerDialogTheme" parent="Theme.AppCompat.Light.Dialog">
+
+<!--        <item name="android:datePickerMode">calendar</item>-->
+        <item name="colorAccent">@color/themeColor</item>
+
+        <item name="android:datePickerStyle">@style/CustomDatePickerStyle</item>
+        <!-- Customize the OK button -->
+        <item name="android:buttonBarButtonStyle">@style/CustomButtonBarButtonStyle</item>
+
+        <!-- Customize the Cancel button -->
+        <item name="android:buttonBarNegativeButtonStyle">@style/CustomButtonBarButtonStyle</item>
+
+    </style>
+
+    <style name="CustomDatePickerStyle" parent="@android:style/Widget.Material.Light.DatePicker">
+        <!-- Set the background color for the header -->
+        <item name="android:headerBackground">@color/themeColor</item>
+    </style>
+
+    <style name="CustomButtonBarButtonStyle" parent="@style/Widget.AppCompat.Button.Borderless">
+        <!-- Set text color for the buttons -->
+        <item name="android:textColor">@color/themeColor</item>
+
+        <!-- Set background color for the buttons -->
+
+        <!-- Add other button style attributes as needed -->
+    </style>
+
+
 
 </resources>

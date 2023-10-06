@@ -168,7 +168,7 @@ public class SplashScreen extends AppCompatActivity {
     }
 
     private void clearChats() {
-        SharedPreferences sharedPreferences = SplashScreen.this.getSharedPreferences("messenger_chats", MODE_PRIVATE);
+        SharedPreferences sharedPreferences = SplashScreen.this.getSharedPreferences("UserInfo", MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
 
 // Clear the SharedPreferences
