@@ -13,6 +13,7 @@ import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
@@ -36,13 +37,24 @@ public class Fill_details extends AppCompatActivity {
             public void onClick(View view) {
                 if (nickName.getText().toString().length() > 0 && selectedGender.length() > 0 && Birthday.length() > 0) {
 
+                    Intent receivedIntent = getIntent();
+                    String loggedAs = receivedIntent.getStringExtra("loggedAs");
+                    String email = receivedIntent.getStringExtra("email");
+                    String photoUrl = receivedIntent.getStringExtra("photoUrl");
+
                     SharedPreferences sharedPreferences = getSharedPreferences("UserInfo", MODE_PRIVATE);
                     SharedPreferences.Editor editor = sharedPreferences.edit();
+
+                    editor.putString("email", email);
+                    editor.putString("photoUrl", photoUrl);
+                    editor.putString("loginAs", loggedAs);
+
                     editor.putString("nickName", nickName.getText().toString());
                     editor.putString("Gender", selectedGender);
                     editor.putString("Birthday", Birthday);
                     editor.apply();
 
+                    Toast.makeText(Fill_details.this, "Logged In!", Toast.LENGTH_SHORT).show();
                     startActivity(new Intent(Fill_details.this, MainActivity.class));
                 }
             }
@@ -76,8 +88,12 @@ public class Fill_details extends AppCompatActivity {
                         new DatePickerDialog.OnDateSetListener() {
                             @Override
                             public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
+                                // Format the month and day with zero padding if needed
+                                String formattedMonth = String.format("%02d", month + 1);
+                                String formattedDay = String.format("%02d", dayOfMonth);
+
                                 // Handle the selected date
-                                Birthday = year + "-" + (month + 1) + "-" + dayOfMonth;
+                                Birthday = year + "-" + formattedMonth + "-" + formattedDay;
                                 dateOfBirth.setText(Birthday);
                                 btnStatus();
                             }
@@ -90,6 +106,19 @@ public class Fill_details extends AppCompatActivity {
 
         genderSelector();
 
+        receiveIntent();
+
+
+    }
+
+    private void receiveIntent() {
+        Intent receivedIntent = getIntent();
+        String loggedAs = receivedIntent.getStringExtra("loggedAs");
+        String displayName = receivedIntent.getStringExtra("nickName");
+
+        if (loggedAs.equals("Google")) {
+            nickName.setText(displayName);
+        }
 
     }
 

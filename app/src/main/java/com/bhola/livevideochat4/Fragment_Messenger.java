@@ -60,7 +60,7 @@ public class Fragment_Messenger extends Fragment {
 
     private Dialog alertNotificationDialog;
     private static final long AUTO_DISMISS_DELAY = 4000; // 4 seconds
-
+   public static int count=0;
 
     public Fragment_Messenger() {
         // Required empty public constructor
@@ -434,7 +434,7 @@ public class Fragment_Messenger extends Fragment {
         if (userListTemp == null) {
             return;
         }
-        int count = 0;
+         count = 0;
 
         for (int i = 0; i < Fragment_Messenger.userListTemp.size(); i++) {
 

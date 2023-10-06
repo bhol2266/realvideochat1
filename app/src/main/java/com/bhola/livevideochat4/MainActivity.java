@@ -118,7 +118,7 @@ public class MainActivity extends AppCompatActivity {
 //                                    mediaPlayer.start();
 
                                 }
-                            }, 6000);
+                            }, 20000);
 
                         } else {
                             if (unreadMessage_count != 0) {

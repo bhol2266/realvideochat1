@@ -1,12 +1,5 @@
 package com.bhola.livevideochat4;
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.view.WindowCompat;
-import androidx.core.view.WindowInsetsCompat;
-import androidx.core.view.WindowInsetsControllerCompat;
-
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -23,6 +16,13 @@ import android.widget.LinearLayout;
 import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.view.WindowCompat;
+import androidx.core.view.WindowInsetsCompat;
+import androidx.core.view.WindowInsetsControllerCompat;
 
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
@@ -85,64 +85,11 @@ public class LoginScreen extends AppCompatActivity {
         loginGuest.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                openGuestLoginDialog();
+                LoginInComplete("Guest", "Guest", "", "");
             }
         });
     }
 
-    private void openGuestLoginDialog() {
-
-        TextInputEditText editTextName, editTextAge;
-        RadioGroup radioGroupGender;
-        TextView buttonSubmit;
-
-        final androidx.appcompat.app.AlertDialog.Builder builder = new androidx.appcompat.app.AlertDialog.Builder(LoginScreen.this);
-        LayoutInflater inflater = LayoutInflater.from(getApplicationContext());
-        View promptView = inflater.inflate(R.layout.dialog_guestlogin, null);
-        builder.setView(promptView);
-        builder.setCancelable(true);
-
-        editTextName = promptView.findViewById(R.id.editTextName);
-        editTextAge = promptView.findViewById(R.id.editTextAge);
-        radioGroupGender = promptView.findViewById(R.id.radioGroupGender);
-        buttonSubmit = promptView.findViewById(R.id.buttonSubmit);
-
-        buttonSubmit.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String name = editTextName.getText().toString();
-                String age = editTextAge.getText().toString();
-                String gender = "Male";
-
-//                int selectedId = radioGroupGender.getCheckedRadioButtonId();
-//                if (selectedId != -1) {
-//                    RadioButton radioButton = findViewById(selectedId);
-//                    gender = radioButton.getText().toString();
-//                }
-
-                // Display the submitted information
-                if (name.length() == 0 || age.length() == 0 || gender.length() == 0) {
-                    Toast.makeText(LoginScreen.this, "Enter details", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-                SharedPreferences sh = getSharedPreferences("UserInfo", MODE_PRIVATE);
-                SharedPreferences.Editor editor = sh.edit();
-                editor.putString("name", name);
-                editor.putString("age", age);
-                editor.putString("gender", gender);
-                editor.putString("loginAs", "Guest");
-                editor.apply();
-                LoginInComplete("Guest");
-            }
-        });
-
-
-        dialog = builder.create();
-        dialog.show();
-        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-
-
-    }
 
     private void addUnderlineTerms_privacy() {
         TextView terms = findViewById(R.id.terms);
@@ -153,13 +100,13 @@ public class LoginScreen extends AppCompatActivity {
         terms.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                startActivity(new Intent(LoginScreen.this,Terms_Conditions.class));
+                startActivity(new Intent(LoginScreen.this, Terms_Conditions.class));
             }
         });
         privaciy.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                startActivity(new Intent(LoginScreen.this,PrivacyPolicy.class));
+                startActivity(new Intent(LoginScreen.this, PrivacyPolicy.class));
 
             }
         });
@@ -212,14 +159,7 @@ public class LoginScreen extends AppCompatActivity {
                             ArrayList<String> keyword = new ArrayList<>();
                             saveUserdataFireStore(account.getDisplayName(), account.getEmail(), account.getPhotoUrl().toString(), false);
 
-                            SharedPreferences sh = getSharedPreferences("UserInfo", MODE_PRIVATE);
-                            SharedPreferences.Editor editor = sh.edit();
-                            editor.putString("name", account.getDisplayName());
-                            editor.putString("email", account.getEmail());
-                            editor.putString("photoUrl", account.getPhotoUrl().toString());
-                            editor.putString("loginAs", "Google");
-                            editor.apply();
-                            LoginInComplete("Google");
+                            LoginInComplete("Google", account.getDisplayName(), account.getEmail(), account.getPhotoUrl().toString());
 
                         } else {
                             Toast.makeText(LoginScreen.this, task.getException().getMessage(), Toast.LENGTH_SHORT).show();
@@ -248,12 +188,15 @@ public class LoginScreen extends AppCompatActivity {
     }
 
 
-    private void LoginInComplete(String loggedAs) {
+    private void LoginInComplete(String loggedAs, String displayName, String email, String photoUrl) {
         SplashScreen.userLoggedIn = true;
         SplashScreen.userLoggedIAs = loggedAs;
-        Toast.makeText(this, "Logged In!", Toast.LENGTH_SHORT).show();
         finish();
-        Intent intent = new Intent(LoginScreen.this, MainActivity.class);
+        Intent intent = new Intent(LoginScreen.this, Fill_details.class);
+        intent.putExtra("loggedAs", loggedAs);
+        intent.putExtra("nickName", displayName);
+        intent.putExtra("email", email);
+        intent.putExtra("photoUrl", photoUrl);
         startActivity(intent);
     }
 

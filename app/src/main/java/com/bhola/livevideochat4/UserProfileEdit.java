@@ -23,6 +23,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
+import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -66,7 +67,7 @@ public class UserProfileEdit extends AppCompatActivity {
     private final int PROFILE_IMAGE_CODE = 222;
     private int currentCroppingAction = 0; // Initialize to 0 this is for CropImage resultAcitivty to distinguish between gallery image or profile image
     CircleImageView profileImage;
-    String photoUrl;
+   public static String photoUrl;
     GalleryImageAdapter galleryImageAdapter;
     String nickName, Gender, Birthday, Bio;
     public static ArrayList<String> Languagelist;
@@ -92,6 +93,15 @@ public class UserProfileEdit extends AppCompatActivity {
         });
 
         profileDetails();
+
+        ImageView backArrow = findViewById(R.id.backArrow);
+        backArrow.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                onBackPressed();
+            }
+        });
+
 
     }
 
@@ -124,16 +134,18 @@ public class UserProfileEdit extends AppCompatActivity {
                         new DatePickerDialog.OnDateSetListener() {
                             @Override
                             public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
+                                // Format the month and day with zero padding if needed
+                                String formattedMonth = String.format("%02d", month + 1);
+                                String formattedDay = String.format("%02d", dayOfMonth);
+
                                 // Handle the selected date
-                                Birthday = year + "-" + (month + 1) + "-" + dayOfMonth;
+                                Birthday = year + "-" + formattedMonth + "-" + formattedDay;
                                 birthdayTevtview.setText(Birthday);
+                                save_userInfo_alldetails();
                             }
                         },
-                        // Set the initial date (optional)
                         2023, 0, 1  // Year, Month (0-indexed), Day
                 );
-
-// Show the date picker dialog
                 datePickerDialog.show();
             }
         });
@@ -268,12 +280,17 @@ public class UserProfileEdit extends AppCompatActivity {
 
     private void changeProfileImage() {
         profileImage = findViewById(R.id.profileImage);
-        if (!photoUrl.equals("not set")) {
+        if (photoUrl.length() != 0) {
             if (photoUrl.startsWith("http")) {
                 Picasso.get().load(photoUrl).into(profileImage);
             } else {
                 profileImage.setImageURI(Uri.parse(photoUrl));
             }
+        } else {
+            if (Gender.equals("female")) {
+                profileImage.setImageResource(R.drawable.female_logo);
+            }
+
         }
         LinearLayout profileImageLayout = findViewById(R.id.profileImageLayout);
         profileImageLayout.setOnClickListener(new View.OnClickListener() {
@@ -351,8 +368,7 @@ public class UserProfileEdit extends AppCompatActivity {
                     photoUrl = String.valueOf(copiedImageUri);
 
                 }
-                save_userInfo_gallery((Context) UserProfileEdit.this, (ArrayList<String>) galleryImages);
-
+                save_userInfo_alldetails();
             } else if (resultCode == CropImage.CROP_IMAGE_ACTIVITY_RESULT_ERROR_CODE) {
                 Exception error = result.getError();
                 // Handle cropping error
@@ -405,7 +421,7 @@ public class UserProfileEdit extends AppCompatActivity {
         Gender = sharedPreferences.getString("Gender", "not set");
         Birthday = sharedPreferences.getString("Birthday", "not set");
         Bio = sharedPreferences.getString("Bio", "");
-        photoUrl = sharedPreferences.getString("photoUrl", "not set");
+        photoUrl = sharedPreferences.getString("photoUrl", "");
 
         String json_language = sharedPreferences.getString("Language", "");
         Gson gson_langugage = new Gson();
@@ -513,6 +529,9 @@ public class UserProfileEdit extends AppCompatActivity {
         }
     }
 
+    public void reflectChangesBtn(View view) {
+        startActivity(new Intent(UserProfileEdit.this,SplashScreen.class));
+    }
 }
 
 class GalleryImageAdapter extends RecyclerView.Adapter<GalleryImageAdapter.ImageViewHolder> {

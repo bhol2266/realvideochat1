@@ -310,7 +310,7 @@ public class SplashScreen extends AppCompatActivity {
             return;
         }
         if (SplashScreen.userLoggedIn && firebaseUser != null) {
-            Intent intent = new Intent(getApplicationContext(), UserProfileEdit.class);
+            Intent intent = new Intent(getApplicationContext(), MainActivity.class);
             startActivity(intent);
         } else {
 
@@ -566,17 +566,13 @@ public class SplashScreen extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
         firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
-        if (firebaseUser != null) {
+
+        SharedPreferences sh = getSharedPreferences("UserInfo", MODE_PRIVATE);
+        String loginAs = sh.getString("loginAs", "not set");
+        if (firebaseUser != null && loginAs.equals("Google")) {
             authProviderName = firebaseUser.getProviderData().get(firebaseUser.getProviderData().size() - 1).getProviderId();
             userLoggedIn = true;
         }
-    }
-
-    public static List<String> editImagesLinks(List<String> images) {
-        //this method change the original images and video stripchat url from the DB to own database url
-
-
-        return images;
     }
 
 

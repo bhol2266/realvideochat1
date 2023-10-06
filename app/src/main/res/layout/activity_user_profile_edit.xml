@@ -79,7 +79,7 @@
                     android:layout_width="50dp"
                     android:layout_height="50dp"
                     android:layout_margin="5dp"
-                    android:src="@drawable/user" />
+                    android:src="@drawable/student" />
 
 
                 <ImageView
@@ -365,6 +365,21 @@
         </RelativeLayout>
 
 
+        <Button
+            android:id="@+id/reflectChangesBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:background="@drawable/btn_bg"
+            android:fontFamily="@font/inter"
+            android:paddingLeft="15dp"
+            android:paddingTop="10dp"
+            android:paddingRight="15dp"
+            android:onClick="reflectChangesBtn"
+            android:paddingBottom="10dp"
+            android:layout_gravity="center_horizontal"
+            android:text="Restart to reflect changes"
+            android:textSize="12dp" />
     </LinearLayout>
 
 </FrameLayout>
