@@ -115,5 +115,22 @@ dependencies {
 
     implementation"com.theartofdev.edmodo:android-image-cropper:2.8.0"
 
+//    //video call agaro
+//    implementation 'io.agora.rtc:voice-sdk:4.0.0.4'
+
+
+
+
+
+    implementation 'com.github.ZEGOCLOUD:zego_uikit_prebuilt_call_android:+'    // Add this line to your module-level build.gradle file's dependencies, usually named [app].
+    implementation 'com.github.ZEGOCLOUD:zego_uikit_signaling_plugin_android:+'  // Add this line to your module-level build.gradle file's dependencies, usually named [app].
+
+
+
+
+
+
+
+
 
 }

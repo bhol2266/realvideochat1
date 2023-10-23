@@ -55,6 +55,9 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FirebaseFirestore;
 import com.squareup.picasso.Picasso;
 
 import org.json.JSONArray;
@@ -65,8 +68,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Random;
 
 import de.hdodenhof.circleimageview.CircleImageView;
@@ -367,6 +372,7 @@ public class Fragment_Trending extends Fragment {
         adapter = new GirlsCardAdapter(context, girlsList);
         getLocation();
 
+
         layoutManager = new GridLayoutManager(context, 2);
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setAdapter(adapter);
@@ -515,6 +521,8 @@ public class Fragment_Trending extends Fragment {
                 SplashScreen.currentCity = addresses.get(0).getLocality();
                 SplashScreen.currentCountry = addresses.get(0).getCountryName();
                 // Now you have the city and country information
+
+                updateLocationFireStore();
                 showNearBy();
 
                 boolean countryAvailable = false;
@@ -548,6 +556,25 @@ public class Fragment_Trending extends Fragment {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    private void updateLocationFireStore() {
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        CollectionReference usersRef = db.collection("Users");
+        String userId = String.valueOf(SplashScreen.userModel.getUserId()); // Replace with the actual user ID
+        DocumentReference userDocRef = usersRef.document(userId);
+
+        Map<String, Object> updates = new HashMap<>();
+        updates.put("location", SplashScreen.currentCity);
+
+        userDocRef.update(updates)
+                .addOnSuccessListener(aVoid -> {
+                    // The field(s) were successfully updated
+                })
+                .addOnFailureListener(e -> {
+                    // Handle any errors that might occur during the update
+                });
+
     }
 
 

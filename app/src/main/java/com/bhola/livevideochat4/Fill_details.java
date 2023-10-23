@@ -1,9 +1,13 @@
 package com.bhola.livevideochat4;
 
 import android.app.DatePickerDialog;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
+import android.support.annotation.NonNull;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.ContextThemeWrapper;
@@ -12,12 +16,30 @@ import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
 import androidx.core.content.ContextCompat;
+
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.auth.User;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.squareup.picasso.Picasso;
+import com.theartofdev.edmodo.cropper.CropImage;
+import com.theartofdev.edmodo.cropper.CropImageView;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Random;
+
+import de.hdodenhof.circleimageview.CircleImageView;
 
 public class Fill_details extends AppCompatActivity {
 
@@ -25,11 +47,22 @@ public class Fill_details extends AppCompatActivity {
     EditText nickName;
     String Birthday = "";
     Button nextBtn;
+    String photoUrl;
+    int userId;
+    private final int PROFILE_IMAGE_CODE = 222;
+    private ProgressDialog progressDialog;
+    boolean DP_changed = false;
+    Uri ChangeDP_URI;
+    String loggedAs;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_fill_details);
+
+        loggedAs = getIntent().getStringExtra("loggedAs");
+        userId = generateUserID();
+
 
         nextBtn = findViewById(R.id.nextBtn);
         nextBtn.setOnClickListener(new View.OnClickListener() {
@@ -37,25 +70,15 @@ public class Fill_details extends AppCompatActivity {
             public void onClick(View view) {
                 if (nickName.getText().toString().length() > 0 && selectedGender.length() > 0 && Birthday.length() > 0) {
 
-                    Intent receivedIntent = getIntent();
-                    String loggedAs = receivedIntent.getStringExtra("loggedAs");
-                    String email = receivedIntent.getStringExtra("email");
-                    String photoUrl = receivedIntent.getStringExtra("photoUrl");
 
-                    SharedPreferences sharedPreferences = getSharedPreferences("UserInfo", MODE_PRIVATE);
-                    SharedPreferences.Editor editor = sharedPreferences.edit();
+                    if (DP_changed) {
+                        uploadImagetoFirebaseStorage(ChangeDP_URI);
+                    } else {
 
-                    editor.putString("email", email);
-                    editor.putString("photoUrl", photoUrl);
-                    editor.putString("loginAs", loggedAs);
-
-                    editor.putString("nickName", nickName.getText().toString());
-                    editor.putString("Gender", selectedGender);
-                    editor.putString("Birthday", Birthday);
-                    editor.apply();
-
-                    Toast.makeText(Fill_details.this, "Logged In!", Toast.LENGTH_SHORT).show();
-                    startActivity(new Intent(Fill_details.this, MainActivity.class));
+                        saveProfileDetails();
+                        Toast.makeText(Fill_details.this, "Logged In!", Toast.LENGTH_SHORT).show();
+                        startActivity(new Intent(Fill_details.this, MainActivity.class));
+                    }
                 }
             }
         });
@@ -104,11 +127,64 @@ public class Fill_details extends AppCompatActivity {
             }
         });
 
+        changeProfileImage();
         genderSelector();
 
         receiveIntent();
 
 
+
+    }
+
+
+    private void saveProfileDetails() {
+        Intent receivedIntent = getIntent();
+        String email = receivedIntent.getStringExtra("email");
+
+        SharedPreferences sharedPreferences = getSharedPreferences("UserInfo", MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+
+        editor.putString("email", email);
+        editor.putString("photoUrl", photoUrl);
+        editor.putString("loginAs", loggedAs);
+
+        editor.putString("nickName", nickName.getText().toString());
+        editor.putString("Gender", selectedGender);
+        editor.putString("Birthday", Birthday);
+        editor.putInt("userId", userId);
+        editor.putInt("coins", 0);
+        editor.apply();
+
+
+        UserModel userModel=new UserModel(nickName.getText().toString(),email,photoUrl,loggedAs,selectedGender,Birthday,"","English","",false,0,userId,new java.util.Date(),"");
+
+
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        db.collection("Users")
+                .document(String.valueOf(userId))
+                .set(userModel)
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        // Handle the error if the data upload fails
+                        // You can add error handling code here
+                    }
+                });
+
+    }
+
+    private int generateUserID() {
+        Random random = new Random();
+        int min = 1000000; // The minimum 7-digit number (1,000,000)
+        int max = 9999999; // The maximum 7-digit number (9,999,999)
+
+        int randomInt = random.nextInt((max - min) + 1) + min;
+        return randomInt;
     }
 
     private void receiveIntent() {
@@ -186,4 +262,99 @@ public class Fill_details extends AppCompatActivity {
         }
 
     }
+
+    private void changeProfileImage() {
+        photoUrl = getIntent().getStringExtra("photoUrl");
+
+        CircleImageView profileImage = findViewById(R.id.profileImage);
+        if (photoUrl.length() != 0) {
+            if (photoUrl.startsWith("http")) {
+                Picasso.get().load(photoUrl).into(profileImage);
+            } else {
+                profileImage.setImageURI(Uri.parse(photoUrl));
+            }
+        }
+
+        LinearLayout profileImageLayout = findViewById(R.id.editProfilelayout);
+        profileImageLayout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                startActivityForResult(intent, PROFILE_IMAGE_CODE);
+            }
+        });
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == PROFILE_IMAGE_CODE && resultCode == RESULT_OK && data != null) {
+
+            Uri imageUri = data.getData();
+
+            CropImage.activity(imageUri).setGuidelines(CropImageView.Guidelines.ON).setAspectRatio(1, 1) // Specify the aspect ratio you want
+                    .start(this);
+
+        } else if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE) {
+            CropImage.ActivityResult result = CropImage.getActivityResult(data);
+            if (resultCode == RESULT_OK) {
+                Uri croppedImageUri = result.getUri();
+
+                DP_changed = true;
+                ChangeDP_URI = croppedImageUri;
+
+                CircleImageView profileImage = findViewById(R.id.profileImage);
+                profileImage.setImageURI(croppedImageUri);
+
+            } else if (resultCode == CropImage.CROP_IMAGE_ACTIVITY_RESULT_ERROR_CODE) {
+                Exception error = result.getError();
+                // Handle cropping error
+            }
+        }
+    }
+
+    private void uploadImagetoFirebaseStorage(Uri croppedImageUri) {
+        showLoadingDialog();
+        StorageReference storageReference = FirebaseStorage.getInstance().getReference();
+
+        // Get a reference to the location where you want to store the file in Firebase Storage
+        StorageReference imageRef = storageReference.child("Users/"+String.valueOf(userId)+"/profile.jpg");
+
+// Upload the file to Firebase Storage
+        imageRef.putFile(croppedImageUri)
+                .addOnSuccessListener(taskSnapshot -> {
+                    // File uploaded successfully
+                    imageRef.getDownloadUrl().addOnSuccessListener(uri -> {
+                        String downloadUrl = uri.toString();
+                        photoUrl = downloadUrl;
+
+                        dismissLoadingDialog();
+
+                        saveProfileDetails();
+                        Toast.makeText(Fill_details.this, "Logged In!", Toast.LENGTH_SHORT).show();
+                        startActivity(new Intent(Fill_details.this, MainActivity.class));
+                    });
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
+                });
+
+    }
+
+    private void showLoadingDialog() {
+        progressDialog = new ProgressDialog(this);
+        progressDialog.setMessage("Uploading...");
+        progressDialog.setIndeterminate(true);
+        progressDialog.setCancelable(false);
+        progressDialog.show();
+    }
+
+    private void dismissLoadingDialog() {
+        if (progressDialog != null && progressDialog.isShowing()) {
+            progressDialog.dismiss();
+        }
+    }
+
+
 }

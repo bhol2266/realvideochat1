@@ -3,17 +3,13 @@ package com.bhola.livevideochat4;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.Color;
 import android.graphics.Paint;
-import android.graphics.drawable.ColorDrawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.LinearLayout;
-import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -30,15 +26,15 @@ import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
-import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.GoogleAuthProvider;
+import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -157,9 +153,7 @@ public class LoginScreen extends AppCompatActivity {
                         if (task.isSuccessful()) {
                             progressDialog.cancel();
                             ArrayList<String> keyword = new ArrayList<>();
-                            saveUserdataFireStore(account.getDisplayName(), account.getEmail(), account.getPhotoUrl().toString(), false);
-
-                            LoginInComplete("Google", account.getDisplayName(), account.getEmail(), account.getPhotoUrl().toString());
+                            checkUserExist(account.getEmail(), account.getDisplayName(), account.getPhotoUrl().toString());
 
                         } else {
                             Toast.makeText(LoginScreen.this, task.getException().getMessage(), Toast.LENGTH_SHORT).show();
@@ -173,19 +167,69 @@ public class LoginScreen extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
     }
 
+    private void checkUserExist(String email, String displayName, String picUrl) {
+        showLoadingDialog();
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        CollectionReference usersRef = db.collection("Users");
 
-    private void saveUserdataFireStore(String displayName, String email, String profileUrl, boolean membership) {
-        firebaseFirestore.collection("Users").document(FirebaseAuth.getInstance().getCurrentUser().getEmail()).set(new UserModel(displayName, email, profileUrl, membership, new java.util.Date(), "not set")).addOnSuccessListener(new OnSuccessListener<Void>() {
-            @Override
-            public void onSuccess(Void unused) {
-            }
-        }).addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
-                Toast.makeText(LoginScreen.this, e.getMessage(), Toast.LENGTH_SHORT).show();
-            }
-        });
+// Create a query to find the user with your email
+        Query query = usersRef.whereEqualTo("email", email);
+
+
+        query.get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    if (queryDocumentSnapshots.isEmpty()) {
+                        // No user with the provided email address found and countinue to new login
+                        LoginInComplete("Google", displayName, email, picUrl);
+
+                    } else {
+                        for (QueryDocumentSnapshot documentSnapshot : queryDocumentSnapshots) {
+                            SplashScreen.userModel = documentSnapshot.toObject(UserModel.class); // Replace User with your actual user model class
+                            // Use the user data as needed
+                            Toast.makeText(this,"Welcome Back!", Toast.LENGTH_SHORT).show();
+
+                            SharedPreferences sharedPreferences = getSharedPreferences("UserInfo", MODE_PRIVATE);
+                            SharedPreferences.Editor editor = sharedPreferences.edit();
+
+                            editor.putString("email", email);
+                            editor.putString("photoUrl", SplashScreen.userModel.getProfilepic());
+                            editor.putString("loginAs", SplashScreen.userModel.getLoggedAs());
+
+                            editor.putString("nickName", SplashScreen.userModel.getFullname());
+                            editor.putString("Gender", SplashScreen.userModel.getSelectedGender());
+                            editor.putString("Birthday", SplashScreen.userModel.getBirthday());
+                            editor.putInt("userId", SplashScreen.userModel.getUserId());
+                            editor.putInt("coins", SplashScreen.userModel.getCoins());
+                            editor.apply();
+
+                            dismissLoadingDialog();
+                            startActivity(new Intent(LoginScreen.this, MainActivity.class));
+
+                        }
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    // Handle any errors that might occur during the query
+                });
+
+
     }
+
+
+    private void showLoadingDialog() {
+        progressDialog = new ProgressDialog(this);
+        progressDialog.setMessage("Fetching details...");
+        progressDialog.setIndeterminate(true);
+        progressDialog.setCancelable(false);
+        progressDialog.show();
+    }
+
+    private void dismissLoadingDialog() {
+        if (progressDialog != null && progressDialog.isShowing()) {
+            progressDialog.dismiss();
+        }
+    }
+
 
 
     private void LoginInComplete(String loggedAs, String displayName, String email, String photoUrl) {
@@ -205,21 +249,32 @@ public class LoginScreen extends AppCompatActivity {
 
 class UserModel {
 
-    String fullname, email, profilepic;
+    String fullname, email, profilepic, loggedAs, selectedGender, birthday, location, language, intrestedIn;
     boolean membership;
+    int coins;
+    int userId;
     Date date;
     String memberShipExpiryDate;
 
-    public UserModel(String fullname, String email, String profilepic, boolean membership, Date date, String memberShipExpiryDate) {
+
+    public UserModel() {
+    }
+
+    public UserModel(String fullname, String email, String profilepic, String loggedAs, String selectedGender, String birthday, String location, String language, String intrestedIn, boolean membership, int coins, int userId, Date date, String memberShipExpiryDate) {
         this.fullname = fullname;
         this.email = email;
         this.profilepic = profilepic;
+        this.loggedAs = loggedAs;
+        this.selectedGender = selectedGender;
+        this.birthday = birthday;
+        this.location = location;
+        this.language = language;
+        this.intrestedIn = intrestedIn;
         this.membership = membership;
+        this.coins = coins;
+        this.userId = userId;
         this.date = date;
         this.memberShipExpiryDate = memberShipExpiryDate;
-    }
-
-    public UserModel() {
     }
 
     public String getFullname() {
@@ -246,12 +301,76 @@ class UserModel {
         this.profilepic = profilepic;
     }
 
+    public String getLoggedAs() {
+        return loggedAs;
+    }
+
+    public void setLoggedAs(String loggedAs) {
+        this.loggedAs = loggedAs;
+    }
+
+    public String getSelectedGender() {
+        return selectedGender;
+    }
+
+    public void setSelectedGender(String selectedGender) {
+        this.selectedGender = selectedGender;
+    }
+
+    public String getBirthday() {
+        return birthday;
+    }
+
+    public void setBirthday(String birthday) {
+        this.birthday = birthday;
+    }
+
+    public String getLocation() {
+        return location;
+    }
+
+    public void setLocation(String location) {
+        this.location = location;
+    }
+
+    public String getLanguage() {
+        return language;
+    }
+
+    public void setLanguage(String language) {
+        this.language = language;
+    }
+
+    public String getIntrestedIn() {
+        return intrestedIn;
+    }
+
+    public void setIntrestedIn(String intrestedIn) {
+        this.intrestedIn = intrestedIn;
+    }
+
     public boolean isMembership() {
         return membership;
     }
 
     public void setMembership(boolean membership) {
         this.membership = membership;
+    }
+
+    public int getCoins() {
+        return coins;
+    }
+
+    public void setCoins(int coins) {
+        this.coins = coins;
+    }
+
+    public int getUserId() {
+        return userId;
+    }
+
+    public void setUserId(int userId) {
+        this.userId = userId;
     }
 
     public Date getDate() {

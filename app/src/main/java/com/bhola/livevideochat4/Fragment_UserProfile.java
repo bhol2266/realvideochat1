@@ -38,7 +38,7 @@ public class Fragment_UserProfile extends Fragment {
 
 
     ImageView profileImage;
-    TextView name, coins;
+    TextView name, coins, id;
     LinearLayout logout;
     View view;
     Context context;
@@ -61,33 +61,6 @@ public class Fragment_UserProfile extends Fragment {
 
         setProfileDetails();
 
-
-        logout.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                GoogleSignInOptions gso;
-                GoogleSignInClient gsc;
-                if (SplashScreen.userLoggedIAs.equals("Google")) {
-                    gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN).requestEmail().build();
-                    gsc = GoogleSignIn.getClient(context, gso);
-                    gsc.signOut().addOnCompleteListener(new com.google.android.gms.tasks.OnCompleteListener<Void>() {
-                        @Override
-                        public void onComplete(@NonNull com.google.android.gms.tasks.Task<Void> task) {
-                            FirebaseAuth.getInstance().signOut();
-                            clearUserInfo();
-                        }
-                    });
-
-                } else {
-                    clearUserInfo();
-                }
-
-
-                Toast.makeText(context, "Logged Out!", Toast.LENGTH_SHORT).show();
-                startActivity(new Intent(context, LoginScreen.class));
-
-            }
-        });
 
         LinearLayout memberShip = view.findViewById(R.id.memberShip);
         memberShip.setOnClickListener(new View.OnClickListener() {
@@ -116,12 +89,44 @@ public class Fragment_UserProfile extends Fragment {
     }
 
     private void setProfileDetails() {
+        SharedPreferences sh = context.getSharedPreferences("UserInfo", MODE_PRIVATE);
+
         profileImage = view.findViewById(R.id.profileUrl);
         name = view.findViewById(R.id.profileName);
         coins = view.findViewById(R.id.coins);
+        id = view.findViewById(R.id.id);
+        int userId = sh.getInt("userId", 0);
+
+        id.setText(String.valueOf(userId));
         coins.setText(String.valueOf("Coins: " + SplashScreen.coins));
         logout = view.findViewById(R.id.logout);
-        SharedPreferences sh = context.getSharedPreferences("UserInfo", MODE_PRIVATE);
+        logout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                GoogleSignInOptions gso;
+                GoogleSignInClient gsc;
+                if (SplashScreen.userLoggedIAs.equals("Google")) {
+                    gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN).requestEmail().build();
+                    gsc = GoogleSignIn.getClient(context, gso);
+                    gsc.signOut().addOnCompleteListener(new com.google.android.gms.tasks.OnCompleteListener<Void>() {
+                        @Override
+                        public void onComplete(@NonNull com.google.android.gms.tasks.Task<Void> task) {
+                            FirebaseAuth.getInstance().signOut();
+                            clearUserInfo();
+                        }
+                    });
+
+                } else {
+                    clearUserInfo();
+                }
+
+
+                Toast.makeText(context, "Logged Out!", Toast.LENGTH_SHORT).show();
+                startActivity(new Intent(context, LoginScreen.class));
+
+            }
+        });
+
         String urll = sh.getString("photoUrl", "");
         String Gender = sh.getString("Gender", "");
         String Birthday = sh.getString("Birthday", "");
@@ -152,28 +157,16 @@ public class Fragment_UserProfile extends Fragment {
 
             String fullname = sh.getString("nickName", "not set");
             name.setText(fullname);
-            Log.d(SplashScreen.TAG, "onCreateView: " + fullname);
 
+            if (urll.startsWith("http")) {
 
-            if (SplashScreen.userLoggedIAs.equals("Google")) {
-
-                if (urll.startsWith("http")) {
-
-                    Picasso.get()
-                            .load(urll)
-                            .into(profileImage);
-                } else {
-                    profileImage.setImageURI(Uri.parse(urll));
-                }
+                Picasso.get()
+                        .load(urll)
+                        .into(profileImage);
             } else {
-                if (urll.length() != 0) {
+                if (urll.length() > 0) {
                     profileImage.setImageURI(Uri.parse(urll));
-                } else {
-                    if (Gender.equals("female")) {
-                        profileImage.setImageResource(R.drawable.female_logo);
-                    }
                 }
-
             }
 
         }

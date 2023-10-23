@@ -97,7 +97,7 @@ public class Fragment_HomePage extends Fragment {
                     isRecordAudioPermissionGranted = result.get(Manifest.permission.RECORD_AUDIO);
                 }
                 if (result.get(Manifest.permission.CAMERA) != null && result.get(Manifest.permission.RECORD_AUDIO) != null && isCameraPermissionGranted && isRecordAudioPermissionGranted) {
-                    Intent intent = new Intent(context, BeforeVideoCall.class);
+                    Intent intent = new Intent(context, VideoCallScreen.class);
                     intent.putExtra("count", onlineCountTextview.getText().toString());
                     startActivity(intent);
                 }
@@ -139,7 +139,7 @@ public class Fragment_HomePage extends Fragment {
         if (!permmisionRequestList.isEmpty()) {
             mPermissionResultLauncher.launch(permmisionRequestList.toArray(new String[0]));
         } else {
-            Intent intent = new Intent(context, BeforeVideoCall.class);
+            Intent intent = new Intent(context, VideoCallScreen.class);
             intent.putExtra("count", onlineCountTextview.getText().toString());
             startActivity(intent);
         }

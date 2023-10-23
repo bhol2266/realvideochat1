@@ -38,6 +38,9 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.gson.Gson;
 
@@ -59,6 +62,7 @@ public class SplashScreen extends AppCompatActivity {
     TextView textView;
     LottieAnimationView lottie_progressbar;
 
+    public static UserModel userModel;
     public static String Notification_Intent_Firebase = "inactive";
     public static String Ad_Network_Name = "facebook";
     public static String Refer_App_url2 = "https://play.google.com/store/apps/developer?id=UK+DEVELOPERS";
@@ -249,10 +253,12 @@ public class SplashScreen extends AppCompatActivity {
         //Reading Login Times and login details
         SharedPreferences sh = getSharedPreferences("UserInfo", MODE_PRIVATE);
         int a = sh.getInt("loginTimes", 0);
+        int userId = sh.getInt("userId", 0);
         coins = sh.getInt("coins", 0);
         String loginAs = sh.getString("loginAs", "not set");
         if (!loginAs.equals("not set")) {
             userLoggedIn = true;
+            getUserFromFireStore(userId);
             if (loginAs.equals("Google")) {
                 userLoggedIAs = "Google";
             } else {
@@ -267,6 +273,29 @@ public class SplashScreen extends AppCompatActivity {
         SharedPreferences.Editor myEdit = sharedPreferences.edit();
         myEdit.putInt("loginTimes", a + 1);
         myEdit.commit();
+
+
+    }
+
+    private void getUserFromFireStore(int userId) {
+
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        CollectionReference usersRef = db.collection("Users");
+
+        DocumentReference userRef = usersRef.document(String.valueOf(userId));
+
+        userRef.get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    if (documentSnapshot.exists()) {
+                        userModel = documentSnapshot.toObject(UserModel.class);
+                        // Use the user data
+                    } else {
+                        // User document doesn't exist
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    // Handle the error
+                });
 
 
     }
