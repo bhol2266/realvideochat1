@@ -23,7 +23,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
-import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -41,6 +40,11 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.imageview.ShapeableImageView;
 import com.google.common.reflect.TypeToken;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 import com.google.gson.Gson;
 import com.squareup.picasso.Picasso;
 import com.theartofdev.edmodo.cropper.CropImage;
@@ -63,14 +67,14 @@ public class UserProfileEdit extends AppCompatActivity {
 
     private final int GALLERY_REQUEST_CODE = 111;
 
-    List<String> galleryImages;
+    List<GalleryModel> galleryImages;
     private final int PROFILE_IMAGE_CODE = 222;
     private int currentCroppingAction = 0; // Initialize to 0 this is for CropImage resultAcitivty to distinguish between gallery image or profile image
     CircleImageView profileImage;
-   public static String photoUrl;
+    public static String photoUrl;
     GalleryImageAdapter galleryImageAdapter;
     String nickName, Gender, Birthday, Bio;
-    public static ArrayList<String> Languagelist;
+    public static String Language;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -108,13 +112,8 @@ public class UserProfileEdit extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        if (Languagelist.size() != 0) {
-            TextView languageTextView = findViewById(R.id.language);
-
-            String langugesWithComma = String.join(",", Languagelist);
-
-            languageTextView.setText(langugesWithComma);
-        }
+        TextView languageTextView = findViewById(R.id.language);
+        languageTextView.setText(Language);
     }
 
     private void profileDetails() {
@@ -141,6 +140,8 @@ public class UserProfileEdit extends AppCompatActivity {
                                 // Handle the selected date
                                 Birthday = year + "-" + formattedMonth + "-" + formattedDay;
                                 birthdayTevtview.setText(Birthday);
+                                new Utils().updateProfileonFireStore("birthday",Birthday);
+
                                 save_userInfo_alldetails();
                             }
                         },
@@ -152,8 +153,7 @@ public class UserProfileEdit extends AppCompatActivity {
 
         TextView languageTextview = findViewById(R.id.language);
 
-        String langugesWithComma = String.join(",", Languagelist);
-        languageTextview.setText(langugesWithComma);
+        languageTextview.setText(Language);
 
         RelativeLayout languageLayout = findViewById(R.id.languageLayout);
         languageLayout.setOnClickListener(new View.OnClickListener() {
@@ -252,6 +252,8 @@ public class UserProfileEdit extends AppCompatActivity {
                 if (type.equals("Bio")) {
                     editor.putString("Bio", textArea.getText().toString());
                     Bio = textArea.getText().toString();
+                    new Utils().updateProfileonFireStore("bio",Bio);
+
                 } else {
                     if (nickNameEdit.getText().toString().length() < 3) {
                         return;
@@ -260,6 +262,7 @@ public class UserProfileEdit extends AppCompatActivity {
                     nickNameTextView.setText(nickNameEdit.getText().toString());
                     editor.putString("nickName", nickNameEdit.getText().toString());
                     nickName = nickNameEdit.getText().toString();
+                    new Utils().updateProfileonFireStore("fullname",nickName);
 
                 }
                 editor.apply();
@@ -307,7 +310,6 @@ public class UserProfileEdit extends AppCompatActivity {
         RecyclerView recyclerView = findViewById(R.id.recyclerView);
         GridLayoutManager layoutManager = new GridLayoutManager(UserProfileEdit.this, 4);
         recyclerView.setLayoutManager(layoutManager);
-        Log.d("Dsaf", "loadImagesFromGalley: " + galleryImages.size());
         galleryImageAdapter = new GalleryImageAdapter(UserProfileEdit.this, galleryImages);
         recyclerView.setAdapter(galleryImageAdapter);
     }
@@ -336,7 +338,7 @@ public class UserProfileEdit extends AppCompatActivity {
             if (resultCode == RESULT_OK) {
                 Uri croppedImageUri = result.getUri();
 
-                // Save the cropped image URI to internal storage
+                // Create Image directory to internal storage if doesn't exist
                 File internalStorage = new File(getFilesDir(), "images");
                 if (!internalStorage.exists()) {
                     internalStorage.mkdir();
@@ -346,13 +348,14 @@ public class UserProfileEdit extends AppCompatActivity {
                     File destinationFile = new File(internalStorage, System.currentTimeMillis() + ".jpg");
                     Uri copiedImageUri = Uri.fromFile(destinationFile);
 
-                    galleryImages.add(1, copiedImageUri.toString());
-                    galleryImageAdapter.notifyItemInserted(1);
+
                     try {
                         saveCroppedImage(croppedImageUri.getPath(), destinationFile.getPath());
                     } catch (IOException e) {
                     }
-//                    dialog_upload_successfull();
+
+                    uploadImagetoFirebaseStorageGallery(copiedImageUri);
+
 
                 } else {
 
@@ -364,17 +367,103 @@ public class UserProfileEdit extends AppCompatActivity {
                     } catch (IOException e) {
                     }
 
-                    profileImage.setImageURI(croppedImageUri);
-                    photoUrl = String.valueOf(copiedImageUri);
+                    uploadImagetoFirebaseStorageProfile(copiedImageUri, "Users/" + String.valueOf(SplashScreen.userModel.getUserId()) + "/profile.jpg");
+
 
                 }
-                save_userInfo_alldetails();
             } else if (resultCode == CropImage.CROP_IMAGE_ACTIVITY_RESULT_ERROR_CODE) {
                 Exception error = result.getError();
                 // Handle cropping error
             }
         }
     }
+
+    private void uploadImagetoFirebaseStorageGallery(Uri croppedImageUri) {
+        Utils utils = new Utils();
+        utils.showLoadingDialog(UserProfileEdit.this, "Uploading...");
+        StorageReference storageReference = FirebaseStorage.getInstance().getReference();
+
+        long currentTimeMillis = System.currentTimeMillis();
+        String currentTimeString = Long.toString(currentTimeMillis);
+        String path = "Users/" + String.valueOf(SplashScreen.userModel.getUserId()) + "/gallery/" + currentTimeString + ".jpg";
+        StorageReference imageRef = storageReference.child(path);
+
+// Upload the file to Firebase Storage
+        imageRef.putFile(croppedImageUri)
+                .addOnSuccessListener(taskSnapshot -> {
+                    // File uploaded successfully
+                    imageRef.getDownloadUrl().addOnSuccessListener(uri -> {
+                        String downloadUrl = uri.toString();
+
+
+                        GalleryModel galleryModel = new GalleryModel(downloadUrl, croppedImageUri.toString(), path,currentTimeString + ".jpg");
+
+                        galleryImages.add(1, galleryModel);
+                        galleryImageAdapter.notifyItemInserted(1);
+
+                        updateGalleryonFireStore();
+
+                        save_userInfo_gallery(UserProfileEdit.this, galleryImages);
+                        utils.dismissLoadingDialog();
+
+                    });
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
+                });
+    }
+
+    private void updateGalleryonFireStore() {
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        CollectionReference usersRef = db.collection("Users");
+        String userId = String.valueOf(SplashScreen.userModel.getUserId()); // Replace with the actual user ID
+        DocumentReference userDocRef = usersRef.document(userId);
+
+        Map<String, Object> updates = new HashMap<>();
+        updates.put("galleryImages", galleryImages);
+
+        userDocRef.update(updates)
+                .addOnSuccessListener(aVoid -> {
+                    // The field(s) were successfully updated
+                })
+                .addOnFailureListener(e -> {
+                    // Handle any errors that might occur during the update
+                });
+
+    }
+
+    private void uploadImagetoFirebaseStorageProfile(Uri croppedImageUri, String path) {
+        Utils utils = new Utils();
+        utils.showLoadingDialog(UserProfileEdit.this, "Uploading...");
+        StorageReference storageReference = FirebaseStorage.getInstance().getReference();
+
+
+        StorageReference imageRef = storageReference.child(path);
+
+// Upload the file to Firebase Storage
+        imageRef.putFile(croppedImageUri)
+                .addOnSuccessListener(taskSnapshot -> {
+                    // File uploaded successfully
+                    imageRef.getDownloadUrl().addOnSuccessListener(uri -> {
+                        String downloadUrl = uri.toString();
+
+                        profileImage.setImageURI(croppedImageUri);
+                        photoUrl = downloadUrl;
+                        new Utils().updateProfileonFireStore("profilepic",photoUrl);
+
+                        save_userInfo_alldetails();
+                        utils.dismissLoadingDialog();
+
+                    });
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
+                });
+
+    }
+
+
+
 
     private void saveCroppedImage(String sourcePath, String destinationPath) throws IOException {
         File sourceFile = new File(sourcePath);
@@ -392,7 +481,7 @@ public class UserProfileEdit extends AppCompatActivity {
     }
 
 
-    public static void save_userInfo_gallery(Context context, ArrayList<String> itemList) {
+    public static void save_userInfo_gallery(Context context, List<GalleryModel> itemList) {
         SharedPreferences sharedPreferences = context.getSharedPreferences("UserInfo", MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         Gson gson = new Gson();
@@ -414,7 +503,6 @@ public class UserProfileEdit extends AppCompatActivity {
     }
 
     public void retreive_Userinfo() {
-        Languagelist = new ArrayList<>();
 
         SharedPreferences sharedPreferences = getSharedPreferences("UserInfo", MODE_PRIVATE);
         nickName = sharedPreferences.getString("nickName", "not set");
@@ -422,24 +510,19 @@ public class UserProfileEdit extends AppCompatActivity {
         Birthday = sharedPreferences.getString("Birthday", "not set");
         Bio = sharedPreferences.getString("Bio", "");
         photoUrl = sharedPreferences.getString("photoUrl", "");
+        Language = sharedPreferences.getString("Language", "");
 
-        String json_language = sharedPreferences.getString("Language", "");
-        Gson gson_langugage = new Gson();
-        if (json_language.length() > 0) {
-            Languagelist = gson_langugage.fromJson(json_language, ArrayList.class);
-        } else {
-            Languagelist.add("English"); //default
-        }
 
         String json = sharedPreferences.getString("galleryImages", "");
         Gson gson = new Gson();
-        Type type = new TypeToken<ArrayList<String>>() {
+        Type type = new TypeToken<ArrayList<GalleryModel>>() {
         }.getType();
         if (json.length() > 0) {
             galleryImages = gson.fromJson(json, type);
 
         } else {
-            galleryImages.add(0, "notset");
+
+            galleryImages.add(0, new GalleryModel("","","",""));
         }
 
     }
@@ -530,15 +613,15 @@ public class UserProfileEdit extends AppCompatActivity {
     }
 
     public void reflectChangesBtn(View view) {
-        startActivity(new Intent(UserProfileEdit.this,SplashScreen.class));
+        startActivity(new Intent(UserProfileEdit.this, SplashScreen.class));
     }
 }
 
 class GalleryImageAdapter extends RecyclerView.Adapter<GalleryImageAdapter.ImageViewHolder> {
     private final Context context;
-    private final List<String> imageList;
+    private final List<GalleryModel> imageList;
 
-    public GalleryImageAdapter(Context context, List<String> imageList) {
+    public GalleryImageAdapter(Context context, List<GalleryModel> imageList) {
         this.context = context;
         this.imageList = imageList;
     }
@@ -552,10 +635,11 @@ class GalleryImageAdapter extends RecyclerView.Adapter<GalleryImageAdapter.Image
 
     @Override
     public void onBindViewHolder(@NonNull ImageViewHolder holder, int position) {
-        String imageUri = imageList.get(position);
+        GalleryModel galleryModel = imageList.get(position);
+
 
         if (position != 0) {
-            holder.imageview.setImageURI(Uri.parse(imageUri));
+            holder.imageview.setImageURI(Uri.parse(galleryModel.getImage_uri()));
             holder.loadImage.setVisibility(View.GONE);
             holder.imageview.setOnLongClickListener(new View.OnLongClickListener() {
                 @Override
@@ -586,12 +670,10 @@ class GalleryImageAdapter extends RecyclerView.Adapter<GalleryImageAdapter.Image
                         @Override
                         public void onClick(View view) {
                             for (int i = 0; i < imageList.size(); i++) {
-                                if (imageUri.equals(imageList.get(i))) {
+                                GalleryModel galleryModel1 = imageList.get(i);
+                                if (galleryModel.getImage_uri().equals(galleryModel1.getImage_uri())) {
 
-                                    imageList.remove(i);
-                                    notifyItemRemoved(i);
-                                    UserProfileEdit.save_userInfo_gallery(view.getContext(), (ArrayList<String>) imageList);
-                                    Toast.makeText(context, "Deleted Successfully", Toast.LENGTH_SHORT).show();
+                                    removeFromFirebaseStorage(galleryModel.getImagePathFirebaseStorage(), i);
 
                                 }
                             }
@@ -614,15 +696,19 @@ class GalleryImageAdapter extends RecyclerView.Adapter<GalleryImageAdapter.Image
                     ArrayList<Map<String, String>> imageListt = new ArrayList<>();
 
                     for (int i = 1; i < imageList.size(); i++) {
+                        GalleryModel galleryModel1 = imageList.get(i);
+
                         Map<String, String> stringMap2 = new HashMap<>();
-                        stringMap2.put("url", imageList.get(i));
+                        stringMap2.put("url", galleryModel1.getImage_uri());
                         stringMap2.put("type", "free");
                         imageListt.add(stringMap2);
                     }
 
                     int index = 0;
                     for (int i = 0; i < imageList.size(); i++) {
-                        if (imageUri.equals(imageList.get(i))) {
+                        GalleryModel galleryModel1 = imageList.get(i);
+
+                        if (galleryModel.getImage_uri().equals(galleryModel1.getImage_uri())) {
                             index = i;
                         }
                     }
@@ -658,6 +744,33 @@ class GalleryImageAdapter extends RecyclerView.Adapter<GalleryImageAdapter.Image
                 }
             });
         }
+
+    }
+
+    private void removeFromFirebaseStorage(String imagePath, int i) {
+        Utils utils = new Utils();
+        utils.showLoadingDialog(context, "deleting...");
+        FirebaseStorage storage = FirebaseStorage.getInstance();
+        StorageReference storageRef = storage.getReference();
+
+        StorageReference imageRef = storageRef.child(imagePath);
+        Log.d("imagePath", "imagePath: " + imageRef);
+        // Delete the image
+        imageRef.delete()
+                .addOnSuccessListener(aVoid -> {
+                    imageList.remove(i);
+                    notifyItemRemoved(i);
+                    UserProfileEdit.save_userInfo_gallery(context, imageList);
+                    Toast.makeText(context, "Deleted Successfully", Toast.LENGTH_SHORT).show();
+                    utils.dismissLoadingDialog();
+
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(context, e.getMessage(), Toast.LENGTH_SHORT).show();
+                    // Failed to delete the image
+                    // You can add code here to handle the failure case
+                });
+
 
     }
 

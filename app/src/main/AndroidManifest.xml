@@ -50,9 +50,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.LiveVideoChat"
         tools:targetApi="31">
-        <activity
-            android:name=".VideoCallScreen"
-            android:exported="false" />
+
         <activity
             android:name=".Fill_details"
             android:exported="false" />

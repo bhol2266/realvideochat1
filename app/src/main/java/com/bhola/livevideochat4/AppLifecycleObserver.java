@@ -45,6 +45,7 @@ public class AppLifecycleObserver implements Application.ActivityLifecycleCallba
 
     @Override
     public void onActivityDestroyed(Activity activity) {
+
     }
 
     public boolean isAppInForeground() {

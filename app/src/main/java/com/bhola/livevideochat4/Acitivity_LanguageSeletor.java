@@ -44,13 +44,14 @@ public class Acitivity_LanguageSeletor extends AppCompatActivity {
     public static boolean saveBtnDisable = false;
     public static TextView saveBtn;
     public static ChosenLangugeAdapter chosenLangugeAdapter;
+    ArrayList<String> Languagelist;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_acitivity_language_seletor);
 
-
+        Languagelist = new ArrayList<>();
         searchBar();
         chosen_langs();
         setUpRecyclerview();
@@ -92,21 +93,21 @@ public class Acitivity_LanguageSeletor extends AppCompatActivity {
 
                 if (saveBtnDisable) {
 
-                    UserProfileEdit.Languagelist.clear();
+                    Languagelist.clear();
                     for (LanguageModel languageModel : LanguagePickerAdapter.mlist) {
                         if (languageModel.isSelected()) {
-                            UserProfileEdit.Languagelist.add(languageModel.getLanguageName());
+                            Languagelist.add(languageModel.getLanguageName());
                         }
                     }
                     SharedPreferences sharedPreferences = getSharedPreferences("UserInfo", MODE_PRIVATE);
                     SharedPreferences.Editor editor = sharedPreferences.edit();
 
-                    // Convert the ArrayList to JSON using Gson
-                    Gson gson = new Gson();
-                    String json = gson.toJson(UserProfileEdit.Languagelist);
-                    editor.putString("Language", json);
+                    String langugesWithComma = String.join(",", Languagelist);
+                    UserProfileEdit.Language = langugesWithComma;
+                    editor.putString("Language", langugesWithComma);
                     editor.apply();
 
+                    new Utils().updateProfileonFireStore("language", langugesWithComma);
                     Toast.makeText(Acitivity_LanguageSeletor.this, "Saved", Toast.LENGTH_SHORT).show();
                     onBackPressed();
                 }
@@ -207,7 +208,10 @@ public class Acitivity_LanguageSeletor extends AppCompatActivity {
 
                 boolean selected = false;
 
-                for (String language : UserProfileEdit.Languagelist) {
+
+                String[] selectedlanguage = UserProfileEdit.Language.split(",\\s*");
+
+                for (String language : selectedlanguage) {
                     if (language.equals(langName)) {
                         selected = true;
                     }

@@ -1,15 +1,23 @@
 package com.bhola.livevideochat4;
 
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Paint;
+import android.graphics.drawable.Drawable;
+import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -35,9 +43,22 @@ import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.gson.Gson;
+import com.squareup.picasso.Picasso;
+import com.squareup.picasso.Target;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
+import javax.net.ssl.HttpsURLConnection;
 
 public class LoginScreen extends AppCompatActivity {
 
@@ -183,17 +204,26 @@ public class LoginScreen extends AppCompatActivity {
                         LoginInComplete("Google", displayName, email, picUrl);
 
                     } else {
+
+
+
                         for (QueryDocumentSnapshot documentSnapshot : queryDocumentSnapshots) {
                             SplashScreen.userModel = documentSnapshot.toObject(UserModel.class); // Replace User with your actual user model class
+                            Utils utils=new Utils();
+                            utils.updateDateonFireStore("date", new java.util.Date());
+
                             // Use the user data as needed
-                            Toast.makeText(this,"Welcome Back!", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(this, "Welcome Back!", Toast.LENGTH_SHORT).show();
 
                             SharedPreferences sharedPreferences = getSharedPreferences("UserInfo", MODE_PRIVATE);
                             SharedPreferences.Editor editor = sharedPreferences.edit();
 
+
                             editor.putString("email", email);
                             editor.putString("photoUrl", SplashScreen.userModel.getProfilepic());
                             editor.putString("loginAs", SplashScreen.userModel.getLoggedAs());
+                            editor.putString("Bio", SplashScreen.userModel.getLoggedAs());
+                            editor.putString("Language", SplashScreen.userModel.getLanguage());
 
                             editor.putString("nickName", SplashScreen.userModel.getFullname());
                             editor.putString("Gender", SplashScreen.userModel.getSelectedGender());
@@ -203,7 +233,11 @@ public class LoginScreen extends AppCompatActivity {
                             editor.apply();
 
                             dismissLoadingDialog();
-                            startActivity(new Intent(LoginScreen.this, MainActivity.class));
+                            if (SplashScreen.userModel.getGalleryImages().size() > 1) {
+                                saveGalleryImages(SplashScreen.userModel.getGalleryImages()); // save fallery images to local storeage from firebase storage
+                            } else {
+                                startActivity(new Intent(LoginScreen.this, MainActivity.class));
+                            }
 
                         }
                     }
@@ -213,6 +247,28 @@ public class LoginScreen extends AppCompatActivity {
                 });
 
 
+    }
+
+    private void saveGalleryImages(final ArrayList<GalleryModel> galleryImages) {
+
+        DownloadImageTask downloadImageTask = new DownloadImageTask(LoginScreen.this);
+        downloadImageTask.execute(galleryImages);
+
+    }
+
+    public static void saveGalleryImagesToSharedPreferences(Context context) {
+        // This method is called when all images are downloaded.
+        SharedPreferences sharedPreferences = context.getSharedPreferences("UserInfo", MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+
+        List<GalleryModel> itemList = new ArrayList<>();
+        itemList.addAll(SplashScreen.userModel.getGalleryImages());
+
+        Gson gson = new Gson();
+        String json = gson.toJson(itemList);
+        editor.putString("galleryImages", json);
+
+        editor.apply(); // Make sure to apply the changes.
     }
 
 
@@ -231,7 +287,6 @@ public class LoginScreen extends AppCompatActivity {
     }
 
 
-
     private void LoginInComplete(String loggedAs, String displayName, String email, String photoUrl) {
         SplashScreen.userLoggedIn = true;
         SplashScreen.userLoggedIAs = loggedAs;
@@ -247,20 +302,97 @@ public class LoginScreen extends AppCompatActivity {
 
 }
 
+
+class DownloadImageTask extends AsyncTask<ArrayList<GalleryModel>, Void, Void> {
+
+    private ProgressDialog progressBarDialog;
+    private Context context;
+
+    public DownloadImageTask(Context context) {
+        this.context = context;
+    }
+
+    @Override
+    protected Void doInBackground(ArrayList<GalleryModel>... arrayLists) {
+
+        ArrayList<GalleryModel> imageList = arrayLists[0];
+
+        for (int i = 1; i < imageList.size(); i++) {
+            GalleryModel galleryModel = imageList.get(i);
+            try {
+                URL url = new URL(galleryModel.getDownloadUrl());
+                HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
+                connection.setDoInput(true);
+                connection.connect();
+
+                InputStream inputStream = connection.getInputStream();
+                Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
+
+                File internalStorage = new File(context.getFilesDir(), "images");
+
+                if (!internalStorage.exists()) {
+                    internalStorage.mkdir();
+                }
+                File file = new File(internalStorage, galleryModel.getImageFileNAme());
+                Uri imageURI = Uri.fromFile(file);
+                SplashScreen.userModel.getGalleryImages().get(i).setImage_uri(String.valueOf(imageURI));
+
+                if (file.exists()) file.delete();
+
+                FileOutputStream outputStream = new FileOutputStream(file);
+                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream);
+                outputStream.flush();
+                outputStream.close();
+
+            } catch (Exception e) {
+                Log.d("TAGA", "doInBackground: " + e.getMessage());
+            }
+        }
+
+
+        return null;
+    }
+
+    @Override
+    protected void onPreExecute() {
+        super.onPreExecute();
+        progressBarDialog = new ProgressDialog(context);
+        progressBarDialog.setMessage("Downloading user images...");
+        progressBarDialog.setCancelable(false);
+        progressBarDialog.show();
+
+    }
+
+    @Override
+    protected void onPostExecute(Void unused) {
+        super.onPostExecute(unused);
+        progressBarDialog.dismiss();
+        LoginScreen.saveGalleryImagesToSharedPreferences(context);
+        context.startActivity(new Intent(context, MainActivity.class));
+
+    }
+
+    @Override
+    protected void onProgressUpdate(Void... values) {
+        super.onProgressUpdate(values);
+    }
+}
+
 class UserModel {
 
-    String fullname, email, profilepic, loggedAs, selectedGender, birthday, location, language, intrestedIn;
-    boolean membership;
+    String fullname, email, profilepic, loggedAs, selectedGender, birthday, location, language, bio, intrestedIn;
+    boolean streamer;
     int coins;
     int userId;
     Date date;
     String memberShipExpiryDate;
+    ArrayList<GalleryModel> galleryImages;
 
 
     public UserModel() {
     }
 
-    public UserModel(String fullname, String email, String profilepic, String loggedAs, String selectedGender, String birthday, String location, String language, String intrestedIn, boolean membership, int coins, int userId, Date date, String memberShipExpiryDate) {
+    public UserModel(String fullname, String email, String profilepic, String loggedAs, String selectedGender, String birthday, String location, String language, String bio, String intrestedIn, boolean streamer, int coins, int userId, Date date, String memberShipExpiryDate, ArrayList<GalleryModel> galleryImages) {
         this.fullname = fullname;
         this.email = email;
         this.profilepic = profilepic;
@@ -269,12 +401,14 @@ class UserModel {
         this.birthday = birthday;
         this.location = location;
         this.language = language;
+        this.bio = bio;
         this.intrestedIn = intrestedIn;
-        this.membership = membership;
+        this.streamer = streamer;
         this.coins = coins;
         this.userId = userId;
         this.date = date;
         this.memberShipExpiryDate = memberShipExpiryDate;
+        this.galleryImages = galleryImages;
     }
 
     public String getFullname() {
@@ -341,6 +475,14 @@ class UserModel {
         this.language = language;
     }
 
+    public String getBio() {
+        return bio;
+    }
+
+    public void setBio(String bio) {
+        this.bio = bio;
+    }
+
     public String getIntrestedIn() {
         return intrestedIn;
     }
@@ -349,12 +491,12 @@ class UserModel {
         this.intrestedIn = intrestedIn;
     }
 
-    public boolean isMembership() {
-        return membership;
+    public boolean isStreamer() {
+        return streamer;
     }
 
-    public void setMembership(boolean membership) {
-        this.membership = membership;
+    public void setStreamer(boolean streamer) {
+        this.streamer = streamer;
     }
 
     public int getCoins() {
@@ -387,5 +529,13 @@ class UserModel {
 
     public void setMemberShipExpiryDate(String memberShipExpiryDate) {
         this.memberShipExpiryDate = memberShipExpiryDate;
+    }
+
+    public ArrayList<GalleryModel> getGalleryImages() {
+        return galleryImages;
+    }
+
+    public void setGalleryImages(ArrayList<GalleryModel> galleryImages) {
+        this.galleryImages = galleryImages;
     }
 }

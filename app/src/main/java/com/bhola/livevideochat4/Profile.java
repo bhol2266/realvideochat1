@@ -36,6 +36,8 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.airbnb.lottie.LottieAnimationView;
+import com.bhola.Models.GiftItemModel;
+import com.bhola.livevideochat4.Models.Model_Profile;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.squareup.picasso.Picasso;
 
@@ -519,7 +521,10 @@ public class Profile extends AppCompatActivity {
                             @Override
                             public void run() {
                                 bindDetails();
-                                setImageinGridLayout();
+                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                                    // this is because when sdk is lower the blur effect on ImageView not working
+                                    setImageinGridLayout();
+                                }
                                 selectBot();
 
                             }
@@ -667,9 +672,11 @@ class ProfileGirlImageAdapter extends RecyclerView.Adapter<ProfileGirlImageAdapt
             if (imageItem.get("type").equals("premium")) {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                     holder.imageView.setRenderEffect(RenderEffect.createBlurEffect(40, 40, Shader.TileMode.MIRROR));
+                } else {
+
                 }
             }
-        }else {
+        } else {
             holder.vipText.setVisibility(View.GONE);
         }
 
@@ -717,41 +724,4 @@ class ProfileGirlImageAdapter extends RecyclerView.Adapter<ProfileGirlImageAdapt
     }
 }
 
-class GiftItemModel {
-    private String giftName;
-    private int coin;
-    private boolean selected;
 
-    public GiftItemModel() {
-    }
-
-    public GiftItemModel(String giftName, int coin, boolean selected) {
-        this.giftName = giftName;
-        this.coin = coin;
-        this.selected = selected; // Default value is false
-    }
-
-    public String getGiftName() {
-        return giftName;
-    }
-
-    public void setGiftName(String giftName) {
-        this.giftName = giftName;
-    }
-
-    public int getCoin() {
-        return coin;
-    }
-
-    public void setCoin(int coin) {
-        this.coin = coin;
-    }
-
-    public boolean isSelected() {
-        return selected;
-    }
-
-    public void setSelected(boolean selected) {
-        this.selected = selected;
-    }
-}

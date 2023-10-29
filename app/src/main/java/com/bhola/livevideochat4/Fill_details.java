@@ -35,6 +35,7 @@ import com.squareup.picasso.Picasso;
 import com.theartofdev.edmodo.cropper.CropImage;
 import com.theartofdev.edmodo.cropper.CropImageView;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
@@ -50,7 +51,6 @@ public class Fill_details extends AppCompatActivity {
     String photoUrl;
     int userId;
     private final int PROFILE_IMAGE_CODE = 222;
-    private ProgressDialog progressDialog;
     boolean DP_changed = false;
     Uri ChangeDP_URI;
     String loggedAs;
@@ -133,7 +133,6 @@ public class Fill_details extends AppCompatActivity {
         receiveIntent();
 
 
-
     }
 
 
@@ -156,8 +155,8 @@ public class Fill_details extends AppCompatActivity {
         editor.apply();
 
 
-        UserModel userModel=new UserModel(nickName.getText().toString(),email,photoUrl,loggedAs,selectedGender,Birthday,"","English","",false,0,userId,new java.util.Date(),"");
-
+        UserModel userModel = new UserModel(nickName.getText().toString(), email, photoUrl, loggedAs, selectedGender, Birthday, "", "English", "", "", false, 0, userId, new java.util.Date(), "", new ArrayList<GalleryModel>());
+        SplashScreen.userModel = userModel;
 
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         db.collection("Users")
@@ -315,11 +314,12 @@ public class Fill_details extends AppCompatActivity {
     }
 
     private void uploadImagetoFirebaseStorage(Uri croppedImageUri) {
-        showLoadingDialog();
+        Utils utils = new Utils();
+        utils.showLoadingDialog(Fill_details.this, "Uploading...");
         StorageReference storageReference = FirebaseStorage.getInstance().getReference();
 
         // Get a reference to the location where you want to store the file in Firebase Storage
-        StorageReference imageRef = storageReference.child("Users/"+String.valueOf(userId)+"/profile.jpg");
+        StorageReference imageRef = storageReference.child("Users/" + String.valueOf(userId) + "/profile.jpg");
 
 // Upload the file to Firebase Storage
         imageRef.putFile(croppedImageUri)
@@ -329,7 +329,7 @@ public class Fill_details extends AppCompatActivity {
                         String downloadUrl = uri.toString();
                         photoUrl = downloadUrl;
 
-                        dismissLoadingDialog();
+                        utils.dismissLoadingDialog();
 
                         saveProfileDetails();
                         Toast.makeText(Fill_details.this, "Logged In!", Toast.LENGTH_SHORT).show();
@@ -340,20 +340,6 @@ public class Fill_details extends AppCompatActivity {
                     Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
                 });
 
-    }
-
-    private void showLoadingDialog() {
-        progressDialog = new ProgressDialog(this);
-        progressDialog.setMessage("Uploading...");
-        progressDialog.setIndeterminate(true);
-        progressDialog.setCancelable(false);
-        progressDialog.show();
-    }
-
-    private void dismissLoadingDialog() {
-        if (progressDialog != null && progressDialog.isShowing()) {
-            progressDialog.dismiss();
-        }
     }
 
 

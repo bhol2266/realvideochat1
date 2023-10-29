@@ -28,6 +28,7 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.core.view.WindowInsetsControllerCompat;
 
 import com.airbnb.lottie.LottieAnimationView;
+import com.bhola.livevideochat4.Models.Model_Profile;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.common.reflect.TypeToken;
 import com.google.firebase.analytics.FirebaseAnalytics;
@@ -171,6 +172,8 @@ public class SplashScreen extends AppCompatActivity {
 //        clearChats();
     }
 
+
+
     private void clearChats() {
         SharedPreferences sharedPreferences = SplashScreen.this.getSharedPreferences("UserInfo", MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
@@ -289,6 +292,10 @@ public class SplashScreen extends AppCompatActivity {
                     if (documentSnapshot.exists()) {
                         userModel = documentSnapshot.toObject(UserModel.class);
                         // Use the user data
+                        //update user latest login date
+                        Utils utils=new Utils();
+                        utils.updateDateonFireStore("date", new java.util.Date());
+
                     } else {
                         // User document doesn't exist
                     }
@@ -296,6 +303,7 @@ public class SplashScreen extends AppCompatActivity {
                 .addOnFailureListener(e -> {
                     // Handle the error
                 });
+
 
 
     }

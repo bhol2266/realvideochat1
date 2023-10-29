@@ -92,6 +92,10 @@
             android:text="Please wait while we find perfect partner for you"
             android:textColor="@color/themeColor"
             android:textSize="12dp" />
+
+
+
+
     </LinearLayout>
 
 
