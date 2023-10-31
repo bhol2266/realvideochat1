@@ -4,15 +4,12 @@
     <color name="purple_700">#FF3700B3</color>
     <color name="teal_200">#FF03DAC5</color>
     <color name="teal_700">#FF018786</color>
-    <color name="green">#4CAF50</color>
     <color name="black">#FF000000</color>
     <color name="semiblack">#2E2E2E</color>
     <color name="white">#FFFFFFFF</color>
     <color name="themeColor">#CC3C32</color>
     <color name="themeColorlight">#F44336</color>
-    <color name="themeColorExtralight">#FF877F</color>
     <color name="grey">#BF707070</color>
-    <color name="color_333333">#333333</color>
     <color name="cardView_bg">#F1F1F1</color>
     <color name="female_icon">#E91E63</color>
     <color name="male_icon">#3F51B5</color>
