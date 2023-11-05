@@ -3,18 +3,46 @@ package com.bhola.realvideochat1;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.renderscript.Allocation;
-import android.renderscript.Element;
-import android.renderscript.RenderScript;
-import android.renderscript.ScriptIntrinsicBlur;
+import android.graphics.BitmapFactory;
+import android.net.ParseException;
+import android.net.Uri;
+import android.os.StrictMode;
+import android.support.annotation.NonNull;
+import android.util.Log;
+import android.widget.Toast;
 
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+
+import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.mobileconnectors.s3.transferutility.TransferListener;
+import com.amazonaws.mobileconnectors.s3.transferutility.TransferObserver;
+import com.amazonaws.mobileconnectors.s3.transferutility.TransferState;
+import com.amazonaws.mobileconnectors.s3.transferutility.TransferUtility;
+import com.amazonaws.services.s3.AmazonS3Client;
+import com.amazonaws.services.s3.model.CannedAccessControlList;
+import com.bhola.realvideochat1.Models.UserModel;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+
+import javax.net.ssl.HttpsURLConnection;
 
 public class Utils {
 
@@ -73,21 +101,209 @@ public class Utils {
     }
 
 
-    public Bitmap applyBlur(Bitmap inputBitmap, int radius,Context context) {
-        Bitmap outputBitmap = Bitmap.createBitmap(inputBitmap);
+    public void getUserDetails(UserCardAdapter adapter, SwipeRefreshLayout swipeRefreshLayout, ArrayList<UserModel> userslist, int page) {
 
-        RenderScript renderScript = RenderScript.create(context);
 
-        Allocation tmpIn = Allocation.createFromBitmap(renderScript, inputBitmap);
-        Allocation tmpOut = Allocation.createFromBitmap(renderScript, outputBitmap);
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
 
-        ScriptIntrinsicBlur blurScript = ScriptIntrinsicBlur.create(renderScript, Element.U8_4(renderScript));
-        blurScript.setInput(tmpIn);
-        blurScript.setRadius(radius);
-        blurScript.forEach(tmpOut);
+        CollectionReference usersRef = db.collection("Users");
+        Query query = usersRef.orderBy("date", Query.Direction.DESCENDING).limit(20);
 
-        tmpOut.copyTo(outputBitmap);
+        query.get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                if (task.isSuccessful()) {
 
-        return outputBitmap;
+                    for (QueryDocumentSnapshot document : task.getResult()) {
+
+                        // Map the document to your UserModel object.
+                        UserModel userModel = document.toObject(UserModel.class);
+                        Log.d("SpaceError", "size: "+userModel.getUserId());
+
+                        if(userModel.getUserId() != SplashScreen.userModel.getUserId()){
+                        userslist.add(userModel);
+                        }
+
+                    }
+                    adapter.notifyDataSetChanged();
+                    swipeRefreshLayout.setRefreshing(false);
+                } else {
+                    Log.d("SpaceError", "Error getting documents: ", task.getException());
+                }
+            }
+        });
     }
+
+
+    public void getUserDetails(int userId) {
+
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        DocumentReference userRef = db.collection("Users").document(String.valueOf(userId));
+
+        userRef.get().addOnSuccessListener(documentSnapshot -> {
+            if (documentSnapshot.exists()) {
+                // Document exists, you can access its data and convert it to UserModel
+                UserModel userModel = documentSnapshot.toObject(UserModel.class);
+                if (userModel != null) {
+                    Log.d("onUserIDUpdated", "getUserDetails: " + userModel.getProfilepic());
+                }
+            } else {
+                // Document doesn't exist
+            }
+        }).addOnFailureListener(e -> {
+            // Task failed with an exception
+            Log.d("onUserIDUpdated", "exception: " + e.getMessage());
+
+            // Handle the error
+        });
+
+    }
+
+    public static File uriToFile(Context context, Uri uri) {
+        try {
+            InputStream inputStream = context.getContentResolver().openInputStream(uri);
+            File file = File.createTempFile("temp_image", null, context.getCacheDir());
+
+            // Copy the data from the input stream to the file
+            FileOutputStream fos = new FileOutputStream(file);
+            byte[] buffer = new byte[1024];
+            int length;
+            while ((length = inputStream.read(buffer)) > 0) {
+                fos.write(buffer, 0, length);
+            }
+
+            fos.close();
+            inputStream.close();
+
+            return file;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public void uploadImageToSpace(Context context, String uri) {
+
+        File imageFile = uriToFile(context, Uri.parse(uri));
+
+
+        String key = "DO006P38F8BCL7V3ALVL";
+        String secret = "t9DaxKNDoE37wbtQ3tuZk8kDoQB/5jI1czBokGeNyHY";
+
+        BasicAWSCredentials credentials = new BasicAWSCredentials(key, secret);
+        AmazonS3Client s3 = new AmazonS3Client(credentials);
+        s3.setEndpoint(SplashScreen.databaseURL_images + "RealVideoChat1/profilePic");
+
+
+        TransferUtility transferUtility = new TransferUtility(s3, context);
+        CannedAccessControlList filePermission = CannedAccessControlList.PublicRead;
+
+        TransferObserver observer = transferUtility.upload(
+                "", //empty bucket name, included in endpoint
+                String.valueOf(SplashScreen.userModel.getUserId()) + ".jpg",
+                imageFile, //a File object that you want to upload
+                filePermission
+        );
+
+        observer.setTransferListener(new TransferListener() {
+            @Override
+            public void onStateChanged(int id, TransferState state) {
+                if (state.COMPLETED.equals(observer.getState())) {
+                    Toast.makeText(context, "Space upload completed !!", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onProgressChanged(int id, long bytesCurrent, long bytesTotal) {
+            }
+
+            @Override
+            public void onError(int id, Exception ex) {
+                Toast.makeText(context, "Space upload error: " + ex.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+
+    }
+
+    public void downloadProfile_andGetURI(String image_url, Context context) throws IOException {
+        //this method is used to download profle pic from google signIN option and get Uri to upload to digital ocean space
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder()
+                            .permitAll().build();
+                    StrictMode.setThreadPolicy(policy);
+
+
+                    URL url = new URL(image_url);
+                    HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
+                    connection.setDoInput(true);
+                    connection.connect();
+
+                    InputStream inputStream = connection.getInputStream();
+                    Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
+
+                    File internalStorage = new File(context.getFilesDir(), "images");
+
+                    if (!internalStorage.exists()) {
+                        internalStorage.mkdir();
+                    }
+                    File file = new File(internalStorage, "profile.jpg");
+                    Uri imageURI = Uri.fromFile(file);
+                    SplashScreen.userModel.setProfilepic(SplashScreen.databaseURL_images + "RealVideoChat1/profilePic/" + String.valueOf(SplashScreen.userModel.getUserId()) + ".jpg");
+                    if (file.exists()) file.delete();
+
+                    FileOutputStream outputStream = new FileOutputStream(file);
+                    bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream);
+                    outputStream.flush();
+                    outputStream.close();
+
+                    uploadImageToSpace(context, String.valueOf(imageURI));
+                } catch (Exception e) {
+                    Log.d("SpaceError", "saveProfileDetails: " + e.getMessage());
+                }
+            }
+        }).start();
+
+
+    }
+
+    public int calculateAge(String birthDateString) {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        try {
+            // Parse the birthdate string into a Date object
+            Date birthDate = sdf.parse(birthDateString);
+
+            // Get the current date
+            Calendar currentDate = Calendar.getInstance();
+            Date now = currentDate.getTime();
+
+            // Calculate the age
+
+            Calendar cal1 = Calendar.getInstance();
+            cal1.setTime(birthDate);
+            Calendar cal2 = Calendar.getInstance();
+            cal2.setTime(currentDate.getTime());
+
+            int age = cal2.get(Calendar.YEAR) - cal1.get(Calendar.YEAR);
+
+            // Check if the birthdate has occurred this year or not
+            if (cal2.get(Calendar.DAY_OF_YEAR) < cal1.get(Calendar.DAY_OF_YEAR)) {
+                age--;
+            }
+            return age;
+
+        } catch (ParseException e) {
+            e.printStackTrace();
+        } catch (java.text.ParseException e) {
+            throw new RuntimeException(e);
+        }
+        return 0;
+    }
+
+
+
+
 }

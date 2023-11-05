@@ -47,9 +47,9 @@
 
             <com.google.android.material.textfield.TextInputEditText
                 android:layout_width="match_parent"
+                android:layout_height="wrap_content"
                 android:inputType="number"
-                android:text="8512902"
-                android:layout_height="wrap_content" />
+                android:text="2828091" />
 
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -71,6 +71,14 @@
                 android:layout_height="48dp"
                 android:layout_marginStart="8dp" />
         </LinearLayout>
+
+
+        <Button
+            android:id="@+id/uploadImage"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="upload image"/>
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

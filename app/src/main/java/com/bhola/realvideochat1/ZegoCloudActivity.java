@@ -12,11 +12,15 @@ import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.bhola.realvideochat1.ZegoCloud.CustomView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 import com.google.android.material.textfield.TextInputLayout;
 import com.zegocloud.uikit.components.audiovideo.ZegoAvatarViewProvider;
+import com.zegocloud.uikit.components.audiovideo.ZegoForegroundViewProvider;
 import com.zegocloud.uikit.prebuilt.call.ZegoUIKitPrebuiltCallConfig;
+import com.zegocloud.uikit.prebuilt.call.config.DurationUpdateListener;
+import com.zegocloud.uikit.prebuilt.call.config.ZegoCallDurationConfig;
 import com.zegocloud.uikit.prebuilt.call.config.ZegoNotificationConfig;
 import com.zegocloud.uikit.prebuilt.call.invite.ZegoCallInvitationData;
 import com.zegocloud.uikit.prebuilt.call.invite.ZegoUIKitPrebuiltCallConfigProvider;
@@ -29,6 +33,7 @@ import com.zegocloud.uikit.service.defines.ZegoUIKitUser;
 
 import java.util.ArrayList;
 import java.util.List;
+
 
 public class ZegoCloudActivity extends AppCompatActivity {
 
@@ -55,7 +60,10 @@ public class ZegoCloudActivity extends AppCompatActivity {
 
         initVideoButton();
 
+
+
     }
+
 
 
     private void initVideoButton() {
@@ -115,6 +123,7 @@ public class ZegoCloudActivity extends AppCompatActivity {
         callInvitationConfig = new ZegoUIKitPrebuiltCallInvitationConfig();
         callInvitationConfig.notifyWhenAppRunningInBackgroundOrQuit = true;
 
+
         callInvitationConfig.provider = new ZegoUIKitPrebuiltCallConfigProvider() {
             @Override
             public ZegoUIKitPrebuiltCallConfig requireConfig(ZegoCallInvitationData invitationData) {
@@ -123,8 +132,10 @@ public class ZegoCloudActivity extends AppCompatActivity {
                     @Override
                     public View onUserIDUpdated(ViewGroup parent, ZegoUIKitUser uiKitUser) {
                         ImageView imageView = new ImageView(parent.getContext());
-                        String avatarUrl="https://images.pexels.com/photos/15114678/pexels-photo-15114678/free-photo-of-photo-of-a-person-running-around-columns.jpeg?auto=compress&cs=tinysrgb&w=400&lazy=load";
-                        Log.d("onUserIDUpdated", "onUserIDUpdated: "+uiKitUser.userID);
+
+                        String avatarUrl = SplashScreen.databaseURL_images+ "RealVideoChat1/profilePic/"+String.valueOf(uiKitUser.userID)+".jpg";
+                        Log.d("SpaceError", "onUserIDUpdated: "+avatarUrl);
+
                         if (!TextUtils.isEmpty(avatarUrl)) {
                             RequestOptions requestOptions = new RequestOptions().circleCrop();
                             Glide.with(parent.getContext()).load(avatarUrl).apply(requestOptions).into(imageView);
@@ -132,6 +143,27 @@ public class ZegoCloudActivity extends AppCompatActivity {
                         return imageView;
                     }
                 };
+
+
+                config.durationConfig = new ZegoCallDurationConfig();
+                config.durationConfig.isVisible = true;
+                config.durationConfig.durationUpdateListener = new DurationUpdateListener() {
+                    @Override
+                    public void onDurationUpdate(long seconds) {
+                        Log.d("onDurationUpdate", "onDurationUpdate() called with: seconds = [" + seconds + "]");
+                        if (seconds == 60 * 5) {
+                            ZegoUIKitPrebuiltCallInvitationService.endCall();
+                        }
+                    }
+                };
+
+                // Modify your custom calling configurations here.
+                config.audioVideoViewConfig.videoViewForegroundViewProvider = (ZegoForegroundViewProvider) (parent, uiKitUser) -> {
+                    CustomView customView = new CustomView(parent.getContext(), uiKitUser.userID);
+                    return customView;
+                };
+
+
                 return config;
             }
         };
@@ -147,9 +179,7 @@ public class ZegoCloudActivity extends AppCompatActivity {
                 callInvitationConfig);
 
 
-
     }
-
 
 
     @Override

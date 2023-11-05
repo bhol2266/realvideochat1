@@ -6,7 +6,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.ParseException;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.LayoutInflater;
@@ -160,12 +159,12 @@ public class Fragment_UserProfile extends Fragment {
             if (urll.startsWith("http")) {
 
                 Picasso.get()
-                        .load(urll)
+                        .load( SplashScreen.databaseURL_images + "RealVideoChat1/profilePic/" + String.valueOf(SplashScreen.userModel.getUserId()) + ".jpg")
                         .into(profileImage);
             } else {
-                if (urll.length() > 0) {
-                    profileImage.setImageURI(Uri.parse(urll));
-                }
+//                if (urll.length() > 0) {
+//                    profileImage.setImageURI(Uri.parse(urll));
+//                }
             }
 
         }

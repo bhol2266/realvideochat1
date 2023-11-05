@@ -1,8 +1,6 @@
 package com.bhola.realvideochat1;
 
-import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.InsetDrawable;
@@ -26,11 +24,7 @@ import androidx.viewpager2.widget.ViewPager2;
 
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
-import com.google.common.reflect.TypeToken;
-import com.google.gson.Gson;
-
-import java.lang.reflect.Type;
-import java.util.ArrayList;
+import com.zegocloud.uikit.prebuilt.call.invite.ZegoUIKitPrebuiltCallInvitationService;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -55,6 +49,13 @@ public class MainActivity extends AppCompatActivity {
 
         initializeBottonFragments();
 
+//        new Handler().postDelayed(new Runnable() {
+//            @Override
+//            public void run() {
+//                startActivity(new Intent(MainActivity.this,ZegoCloudActivity.class));
+//            }
+//        },3000);
+
 
     }
 
@@ -63,7 +64,7 @@ public class MainActivity extends AppCompatActivity {
         viewPager2 = findViewById(R.id.viewpager);
         viewPager2.setAdapter(new PagerAdapter(MainActivity.this));
 
-        viewPager2.setOffscreenPageLimit(5);
+        viewPager2.setOffscreenPageLimit(4);
         TabLayout tabLayout = findViewById(R.id.tabLayout);
 
 
@@ -84,22 +85,14 @@ public class MainActivity extends AppCompatActivity {
                         tabIcon.setBackgroundTintList(ContextCompat.getColorStateList(MainActivity.this, R.color.themeColor));
 
                         break;
+
                     case 1:
-                        tab.setIcon(R.drawable.videocall2);
-
-                        View view1 = getLayoutInflater().inflate(R.layout.customtab, null);
-                        view1.findViewById(R.id.icon).setBackgroundResource(R.drawable.videocall2);
-                        tab.setCustomView(view1);
-
-                        break;
-                    case 2:
                         tab.setIcon(R.drawable.chat);
 
 
                         View view2 = getLayoutInflater().inflate(R.layout.customtab, null);
                         view2.findViewById(R.id.icon).setBackgroundResource(R.drawable.chat);
                         tab.setCustomView(view2);
-                        unreadMessage_count = getUndreadMessage_Count();
 
                         badge_text = view2.findViewById(R.id.badge_text);
                         badge_text.setVisibility(View.GONE);
@@ -108,7 +101,7 @@ public class MainActivity extends AppCompatActivity {
                         break;
 
 
-                    case 3:
+                    case 2:
                         tab.setIcon(R.drawable.info_2);
 
 
@@ -163,52 +156,6 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    private int getUndreadMessage_Count() {
-
-        ArrayList<ChatItem_ModelClass> userListTemp = new ArrayList<>();
-        SharedPreferences sharedPreferences = MainActivity.this.getSharedPreferences("messenger_chats", Context.MODE_PRIVATE);
-
-// Retrieve the JSON string from SharedPreferences
-        String json = "";
-        if (SplashScreen.userLoggedIn && SplashScreen.userLoggedIAs.equals("Google")) {
-            json = sharedPreferences.getString("userListTemp_Google", null);
-        } else {
-            json = sharedPreferences.getString("userListTemp_Guest", null);
-        }
-
-// Convert the JSON string back to ArrayList
-        Gson gson = new Gson();
-        Type type = new TypeToken<ArrayList<ChatItem_ModelClass>>() {
-        }.getType();
-
-
-        if (json == null) {
-            // Handle case when no ArrayList is saved in SharedPreferences
-            return 0;
-        } else {
-            userListTemp = gson.fromJson(json, type);
-
-            int count = 0;
-            for (int i = 0; i < userListTemp.size(); i++) {
-
-                ChatItem_ModelClass modelclass = userListTemp.get(i);
-
-                for (int j = 0; j < modelclass.getUserBotMsg().size(); j++) {
-                    UserBotMsg userBotMsg = modelclass.getUserBotMsg().get(j);
-                    if (userBotMsg.getSent() == 1 && userBotMsg.getRead() == 0) {
-                        count = count + 1;
-                    }
-                }
-                if (modelclass.isContainsQuestion()) {
-                    if (modelclass.getQuestionWithAns().getSent() == 1 && modelclass.getQuestionWithAns().getRead() == 0) {
-                        count = count + 1;
-                    }
-                }
-            }
-            return count;
-        }
-
-    }
 
 
     @Override
@@ -307,7 +254,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        ZegoUIKitPrebuiltCallInvitationService.unInit();
+    }
 
 
 }

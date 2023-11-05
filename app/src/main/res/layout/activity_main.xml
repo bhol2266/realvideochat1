@@ -30,7 +30,6 @@
         app:tabMode="fixed"
         app:tabRippleColor="#FF9C95"
         app:tabSelectedTextAppearance="@color/themeColor"
-
         app:tabSelectedTextColor="@color/themeColor"
         app:tabTextColor="@color/themeColor" />
 

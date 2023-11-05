@@ -449,6 +449,13 @@ public class UserProfileEdit extends AppCompatActivity {
 
                         profileImage.setImageURI(croppedImageUri);
                         photoUrl = downloadUrl;
+
+                        try {
+                            new Utils().downloadProfile_andGetURI(photoUrl,UserProfileEdit.this);
+                        } catch (IOException e) {
+                            Log.d("SpaceError", "saveProfileDetails: "+e.getMessage());
+                        }
+
                         new Utils().updateProfileonFireStore("profilepic",photoUrl);
 
                         save_userInfo_alldetails();
@@ -761,6 +768,8 @@ class GalleryImageAdapter extends RecyclerView.Adapter<GalleryImageAdapter.Image
                     imageList.remove(i);
                     notifyItemRemoved(i);
                     UserProfileEdit.save_userInfo_gallery(context, imageList);
+
+                    updateOnFirestore(imageList);
                     Toast.makeText(context, "Deleted Successfully", Toast.LENGTH_SHORT).show();
                     utils.dismissLoadingDialog();
 
@@ -772,6 +781,26 @@ class GalleryImageAdapter extends RecyclerView.Adapter<GalleryImageAdapter.Image
                 });
 
 
+    }
+
+    private void updateOnFirestore(List<GalleryModel> imageList) {
+
+
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        CollectionReference usersRef = db.collection("Users");
+        String userId = String.valueOf(SplashScreen.userModel.getUserId()); // Replace with the actual user ID
+        DocumentReference userDocRef = usersRef.document(userId);
+
+        Map<String, Object> updates = new HashMap<>();
+        updates.put("galleryImages", imageList);
+
+        userDocRef.update(updates)
+                .addOnSuccessListener(aVoid -> {
+                    // The field(s) were successfully updated
+                })
+                .addOnFailureListener(e -> {
+                    // Handle any errors that might occur during the update
+                });
     }
 
 

@@ -9,6 +9,7 @@ import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.ContextThemeWrapper;
 import android.view.View;
 import android.widget.Button;
@@ -24,15 +25,18 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
 import androidx.core.content.ContextCompat;
 
+import com.bhola.realvideochat1.Models.UserModel;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.squareup.picasso.Picasso;
 import com.theartofdev.edmodo.cropper.CropImage;
 import com.theartofdev.edmodo.cropper.CropImageView;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -151,8 +155,9 @@ public class Fill_details extends AppCompatActivity {
         editor.apply();
 
 
-        UserModel userModel = new UserModel(nickName.getText().toString(), email, photoUrl, loggedAs, selectedGender, Birthday, "", "English", "", "", false, 0, userId, new java.util.Date(), "", new ArrayList<GalleryModel>());
+        UserModel userModel = new UserModel(nickName.getText().toString(), email, photoUrl, loggedAs, selectedGender, Birthday, "", "English", "", "", false, 0, userId, new java.util.Date(), "", new ArrayList<GalleryModel>(),"");
         SplashScreen.userModel = userModel;
+
 
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         db.collection("Users")
@@ -161,6 +166,7 @@ public class Fill_details extends AppCompatActivity {
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
+
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {
@@ -170,6 +176,21 @@ public class Fill_details extends AppCompatActivity {
                         // You can add error handling code here
                     }
                 });
+
+        //add fcm token
+        FirebaseMessaging.getInstance().getToken().addOnCompleteListener(task -> {
+            if(task.isSuccessful()){
+                String token = task.getResult();
+                new Utils().updateProfileonFireStore("fcmToken",token);
+            }
+        });
+
+
+        try {
+            new Utils().downloadProfile_andGetURI(photoUrl, Fill_details.this);
+        } catch (IOException e) {
+            Log.d("SpaceError", "saveProfileDetails: "+e.getMessage());
+        }
 
     }
 

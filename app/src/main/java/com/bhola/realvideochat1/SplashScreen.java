@@ -27,6 +27,8 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.core.view.WindowInsetsControllerCompat;
 
 import com.airbnb.lottie.LottieAnimationView;
+import com.bhola.realvideochat1.Models.UserModel;
+import com.bhola.realvideochat1.ZegoCloud.ZegoCloud_Utils;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.auth.FirebaseAuth;
@@ -40,6 +42,7 @@ import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.messaging.FirebaseMessaging;
+import com.google.gson.Gson;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -62,6 +65,7 @@ public class SplashScreen extends AppCompatActivity {
     public static String Ad_Network_Name = "facebook";
     public static String Refer_App_url2 = "https://play.google.com/store/apps/developer?id=UK+DEVELOPERS";
     public static String Ads_State = "inactive";
+    public static String fcmAPI_KEY = "";
     public static String App_updating = "active";
     public static String databaseURL_video = "https://bhola2266.ap-south-1.linodeobjects.com//"; //default
     public static String databaseURL_images = "https://bucket2266.blr1.digitaloceanspaces.com/"; //default
@@ -82,10 +86,11 @@ public class SplashScreen extends AppCompatActivity {
     public static String privacy_policy_link = "https://sites.google.com/view/desi-girls-live-video-chat/privacypolicy";
 
 
-    //sqlDB
-    public static String DB_NAME = "profiles";
-    public static int DB_VERSION = 1;//manual set
-    public static int DB_VERSION_INSIDE_TABLE = 1; //manual set
+    //ZegoCloud
+    public static Long Zegocloud_appID;
+    public static String Zegocloud_appSign = "";
+    public static String Zegocloud_serverSecret = "";
+
 
     //Google login
     public static boolean userLoggedIn = false;
@@ -164,7 +169,6 @@ public class SplashScreen extends AppCompatActivity {
     }
 
 
-
     private void clearChats() {
         SharedPreferences sharedPreferences = SplashScreen.this.getSharedPreferences("UserInfo", MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
@@ -174,8 +178,6 @@ public class SplashScreen extends AppCompatActivity {
         editor.apply();
 
     }
-
-
 
 
     private void allUrl() {
@@ -209,7 +211,12 @@ public class SplashScreen extends AppCompatActivity {
                     App_updating = (String) snapshot.child("App_updating").getValue();
                     Notification_ImageURL = (String) snapshot.child("Notification_ImageURL").getValue();
                     databaseURL_video = (String) snapshot.child("databaseURL_video").getValue();
-                    databaseURL_images = (String) snapshot.child("databaseURL_images").getValue();
+
+
+                    Zegocloud_appID = Long.valueOf((Integer) snapshot.child("Zegocloud_appID").getValue(Integer.class));
+                    Zegocloud_appSign = (String) snapshot.child("Zegocloud_appSign").getValue();
+                    Zegocloud_serverSecret = (String) snapshot.child("Zegocloud_serverSecret").getValue();
+                    fcmAPI_KEY = (String) snapshot.child("fcmAPI_KEY").getValue();
 
 
                     if (animationCompleted) {
@@ -271,8 +278,10 @@ public class SplashScreen extends AppCompatActivity {
                         userModel = documentSnapshot.toObject(UserModel.class);
                         // Use the user data
                         //update user latest login date
-                        Utils utils=new Utils();
+                        Utils utils = new Utils();
                         utils.updateDateonFireStore("date", new java.util.Date());
+                        new ZegoCloud_Utils().initCallInviteService(getApplication(), userModel.getUserId(), userModel.getFullname());
+//                        new ZegoCloud_Utils().initChat(SplashScreen.this);
 
                     } else {
                         // User document doesn't exist
@@ -281,7 +290,6 @@ public class SplashScreen extends AppCompatActivity {
                 .addOnFailureListener(e -> {
                     // Handle the error
                 });
-
 
 
     }
@@ -325,13 +333,17 @@ public class SplashScreen extends AppCompatActivity {
             return;
         }
         if (SplashScreen.userLoggedIn && firebaseUser != null) {
-            Intent intent = new Intent(getApplicationContext(), ZegoCloudActivity.class);
-            startActivity(intent);
+
+            //user logged in with google now check notification extras
+            checkNotificationExtras();
+
         } else {
 
             if (SplashScreen.userLoggedIn && SplashScreen.userLoggedIAs.equals("Guest")) {
-                Intent intent = new Intent(getApplicationContext(), MainActivity.class);
-                startActivity(intent);
+
+                //user logged in with guest now check notification extras
+                checkNotificationExtras();
+
             } else {
                 Intent intent = new Intent(getApplicationContext(), LoginScreen.class);
                 startActivity(intent);
@@ -340,6 +352,33 @@ public class SplashScreen extends AppCompatActivity {
         overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
 
         finish();
+    }
+
+    private void checkNotificationExtras() {
+        if (getIntent().getExtras() != null) {
+            //from notification
+            String userId = getIntent().getExtras().getString("userId");
+            FirebaseUtil.allUserCollectionReference().document(userId).get()
+                    .addOnCompleteListener(task -> {
+                        if (task.isSuccessful()) {
+                            UserModel model = task.getResult().toObject(UserModel.class);
+
+                            Intent mainIntent = new Intent(this, MainActivity.class);
+                            mainIntent.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+                            startActivity(mainIntent);
+
+                            String userModelJson = new Gson().toJson(model); // Using Google's Gson library for JSON serialization
+                            Intent intent = new Intent(this, ChatScreen_User.class);
+                            intent.putExtra("userModelJson", userModelJson);
+                            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                            startActivity(intent);
+                            finish();
+
+                        }
+                    });
+        } else {
+            startActivity(new Intent(SplashScreen.this, MainActivity.class));
+        }
     }
 
     private void createSnackBar() {
@@ -354,7 +393,6 @@ public class SplashScreen extends AppCompatActivity {
         });
         snackbar.show();
     }
-
 
 
     private List<String> getusers_fromSingleCountry(String path) {
@@ -373,7 +411,6 @@ public class SplashScreen extends AppCompatActivity {
         }
         return filenames;
     }
-
 
 
     public String loadJSONFromAsset(String path) {

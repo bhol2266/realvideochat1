@@ -3,6 +3,8 @@ package com.bhola.realvideochat1.ZegoCloud;
 import android.os.Build;
 
 
+import com.bhola.realvideochat1.SplashScreen;
+
 import java.security.MessageDigest;
 import java.security.SecureRandom;
 import java.util.HashMap;
@@ -61,8 +63,8 @@ public class ZegoCloud_Signature {
         }
         sr.nextBytes(bytes);
         String signatureNonce = bytesToHex(bytes);
-        long appId = 1889863973L;       //Use your appId and serverSecret, add uppercase L or lowercase l after the number to indicate long type
-        String serverSecret = "6bb439062e57ac5441158d90f36756eb";
+        long appId = SplashScreen.Zegocloud_appID;       //Use your appId and serverSecret, add uppercase L or lowercase l after the number to indicate long type
+        String serverSecret = SplashScreen.Zegocloud_serverSecret;
         long timestamp = System.currentTimeMillis() / 1000L;
 
 

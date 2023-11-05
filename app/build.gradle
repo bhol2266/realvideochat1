@@ -93,6 +93,8 @@ dependencies {
 
     //Google sign in
     implementation platform('com.google.firebase:firebase-bom:32.1.0')
+    implementation 'com.firebaseui:firebase-ui-firestore:8.0.2'
+
     implementation 'com.google.android.gms:play-services-auth:20.7.0'
 
 
@@ -119,6 +121,9 @@ dependencies {
     implementation 'com.github.ZEGOCLOUD:zego_uikit_prebuilt_call_android:+'    // Add this line to your module-level build.gradle file's dependencies, usually named [app].
     implementation 'com.github.ZEGOCLOUD:zego_uikit_signaling_plugin_android:+'  // Add this line to your module-level build.gradle file's dependencies, usually named [app].
 
+
+    implementation 'com.amazonaws:aws-android-sdk-s3:2.30.0'
+    implementation 'com.squareup.okhttp3:okhttp:4.9.1'
 
 
 
