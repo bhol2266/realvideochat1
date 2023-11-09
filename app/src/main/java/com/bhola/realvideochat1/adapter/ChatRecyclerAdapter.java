@@ -26,8 +26,8 @@ import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.airbnb.lottie.LottieAnimationView;
-import com.bhola.realvideochat1.ChatScreen_User;
 import com.bhola.realvideochat1.Fragment_LargePhotoViewer;
+import com.bhola.realvideochat1.ImageResizer;
 import com.bhola.realvideochat1.Models.ChatMessageModel;
 import com.bhola.realvideochat1.R;
 import com.firebase.ui.firestore.FirestoreRecyclerAdapter;
@@ -344,7 +344,7 @@ public class ChatRecyclerAdapter extends FirestoreRecyclerAdapter<ChatMessageMod
             ExifInterface exif = new ExifInterface(inputStream);
             int orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_UNDEFINED);
             Bitmap originalBitmap = MediaStore.Images.Media.getBitmap(context.getContentResolver(), imageUri);
-            Bitmap rotatedBitmap = ChatScreen_User.rotateBitmap(originalBitmap, orientation);
+            Bitmap rotatedBitmap = ImageResizer.rotateBitmap(originalBitmap, orientation);
 
             return rotatedBitmap;
         } catch (IOException e) {

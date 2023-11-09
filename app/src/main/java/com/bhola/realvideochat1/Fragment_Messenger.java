@@ -10,6 +10,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.LifecycleOwner;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -35,7 +36,7 @@ public class Fragment_Messenger extends Fragment {
 
     View view;
     Context context;
-    RecentChatRecyclerAdapter adapter;
+    RecentChatRecyclerAdapter adapterMessenger;
     RecyclerView recyclerView;
 
     @Override
@@ -89,43 +90,25 @@ public class Fragment_Messenger extends Fragment {
                 .orderBy("lastMessageTimestamp",Query.Direction.DESCENDING);
 
         FirestoreRecyclerOptions<ChatroomModel> options = new FirestoreRecyclerOptions.Builder<ChatroomModel>()
-                .setQuery(query,ChatroomModel.class).build();
+                .setQuery(query,ChatroomModel.class).setLifecycleOwner((LifecycleOwner) context).build();
 
-        adapter = new RecentChatRecyclerAdapter(options,context,String.valueOf(SplashScreen.userModel.getUserId()));
-        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        recyclerView.setAdapter(adapter);
-        adapter.startListening();
+        adapterMessenger = new RecentChatRecyclerAdapter(options,context,String.valueOf(SplashScreen.userModel.getUserId()));
+        recyclerView.setLayoutManager(new WrapContentLinearLayoutManager(context, LinearLayoutManager.VERTICAL, false));
 
-        adapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
-            @Override
-            public void onItemRangeInserted(int positionStart, int itemCount) {
-                super.onItemRangeInserted(positionStart, itemCount);
-                Log.d("added", "onItemRangeInserted: ");
-                recyclerView.smoothScrollToPosition(0);
-            }
-        });
+//        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        recyclerView.setAdapter(adapterMessenger);
+        adapterMessenger.startListening();
+
+
 
     }
 
-    @Override
-    public void onStart() {
-        super.onStart();
-        if(adapter!=null)
-            adapter.startListening();
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-        if(adapter!=null)
-            adapter.stopListening();
-    }
 
     @Override
     public void onResume() {
         super.onResume();
-        if(adapter!=null)
-            adapter.notifyDataSetChanged();
+        if(adapterMessenger!=null)
+            adapterMessenger.notifyDataSetChanged();
     }
 
 }
@@ -134,3 +117,18 @@ public class Fragment_Messenger extends Fragment {
 
 
 
+ class WrapContentLinearLayoutManager extends LinearLayoutManager {
+     public WrapContentLinearLayoutManager(Context context, int orientation, boolean reverseLayout) {
+         super(context, orientation, reverseLayout);
+     }
+
+     //... constructor
+    @Override
+    public void onLayoutChildren(RecyclerView.Recycler recycler, RecyclerView.State state) {
+        try {
+            super.onLayoutChildren(recycler, state);
+        } catch (IndexOutOfBoundsException e) {
+            Log.e("TAG", "meet a IOOBE in RecyclerView");
+        }
+    }
+}

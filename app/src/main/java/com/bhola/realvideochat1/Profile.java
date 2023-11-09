@@ -56,6 +56,7 @@ public class Profile extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
         if (SplashScreen.Ads_State.equals("active")) {
 //            showAds();
@@ -108,7 +109,7 @@ public class Profile extends AppCompatActivity {
             }
         });
         TextView coinCount = view.findViewById(R.id.coin);
-        coinCount.setText(String.valueOf(SplashScreen.coins));
+        coinCount.setText(String.valueOf(SplashScreen.userModel.getCoins()));
         TextView topup = view.findViewById(R.id.topup);
         topup.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -144,7 +145,17 @@ public class Profile extends AppCompatActivity {
 
     private void bindDetails() {
         ImageView profileImage = findViewById(R.id.profileImage);
-        Picasso.get().load(model_profile.getProfilepic()).into(profileImage);
+
+        if (model_profile.getProfilepic().isEmpty()) {
+            if (model_profile.getSelectedGender().equals("male")) {
+                profileImage.setImageResource(R.drawable.male_logo);
+            } else {
+                profileImage.setImageResource(R.drawable.female_logo);
+            }
+        } else {
+            Picasso.get().load(model_profile.getProfilepic()).into(profileImage);
+        }
+
 
         TextView id = findViewById(R.id.id);
         id.setText(convertUsernameto_number(model_profile.getFullname()));
@@ -163,8 +174,6 @@ public class Profile extends AppCompatActivity {
         TextView bio = findViewById(R.id.bioTextview);
         bio.setText(model_profile.getBio().toString());
 
-        ZegoSendCallInvitationButton newVoiceCall = findViewById(R.id.new_voice_call);
-        new ZegoCloud_Utils().initVoiceButton(model_profile.getFullname(), String.valueOf(model_profile.getUserId()),newVoiceCall);
 
         ZegoSendCallInvitationButton newVideoCall = findViewById(R.id.new_video_call);
         new ZegoCloud_Utils().initVideoButton(model_profile.getFullname(), String.valueOf(model_profile.getUserId()),newVideoCall);
@@ -176,8 +185,23 @@ public class Profile extends AppCompatActivity {
         voiceCall.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                if(SplashScreen.userModel.getCoins()<100){
+                   rechargeDialog(view.getContext());
+                    return;
+
+                }
+                ZegoSendCallInvitationButton newVoiceCall = findViewById(R.id.new_voice_call);
+                new ZegoCloud_Utils().initVoiceButton(model_profile.getFullname(), String.valueOf(model_profile.getUserId()),newVoiceCall);
+
                 newVoiceCall.performClick();
-//                rechargeDialog(view.getContext());
+                SplashScreen.calleeId=String.valueOf(model_profile.getUserId());
+                if (model_profile.isStreamer()) {
+                    SplashScreen.isCalleeIdStreamer = true;
+                } else {
+                    SplashScreen.isCalleeIdStreamer = false;
+                }
+                FirebaseUtil.getOrCreateChatroomModel(String.valueOf(model_profile.getUserId()));
+
             }
         });
 
@@ -185,9 +209,21 @@ public class Profile extends AppCompatActivity {
         videoCall.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                if(SplashScreen.userModel.getCoins()<100){
+                    rechargeDialog(view.getContext());
+                    return;
+                }
+                ZegoSendCallInvitationButton newVideoCall = findViewById(R.id.new_video_call);
+                new ZegoCloud_Utils().initVideoButton(model_profile.getFullname(), String.valueOf(model_profile.getUserId()),newVideoCall);
                 newVideoCall.performClick();
+                SplashScreen.calleeId=String.valueOf(model_profile.getUserId());
+                if (model_profile.isStreamer()) {
+                    SplashScreen.isCalleeIdStreamer = true;
+                } else {
+                    SplashScreen.isCalleeIdStreamer = false;
+                }
+                FirebaseUtil.getOrCreateChatroomModel(String.valueOf(model_profile.getUserId()));
 
-                //                rechargeDialog(view.getContext());
 
             }
         });
@@ -511,7 +547,7 @@ class ProfileGirlImageAdapter extends RecyclerView.Adapter<ProfileGirlImageAdapt
         int heightInPixels = (int) (widthInPixels * 3.5 / 4); // Calculate the height
 
 
-        if (SplashScreen.coins == 0) {
+        if (SplashScreen.userModel.getCoins() == 0) {
 
             if (imageItem.get("type").equals("premium")) {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {

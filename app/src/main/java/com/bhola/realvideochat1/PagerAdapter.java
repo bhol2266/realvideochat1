@@ -19,6 +19,8 @@ public class PagerAdapter extends FragmentStateAdapter {
             case 1:
                 return new Fragment_Messenger();
             case 2:
+                return new Fragment_CallLog();
+            case 3:
                 return new Fragment_CustomerCare();
             default:
                 return new Fragment_UserProfile();
@@ -27,6 +29,6 @@ public class PagerAdapter extends FragmentStateAdapter {
 
     @Override
     public int getItemCount() {
-        return 4;
+        return 5;
     }
 }

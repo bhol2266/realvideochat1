@@ -15,11 +15,12 @@ public class UserModel {
     String memberShipExpiryDate;
     ArrayList<GalleryModel> galleryImages;
     private String fcmToken;
+    boolean banned;
 
     public UserModel() {
     }
 
-    public UserModel(String fullname, String email, String profilepic, String loggedAs, String selectedGender, String birthday, String location, String language, String bio, String intrestedIn, boolean streamer, int coins, int userId, Date date, String memberShipExpiryDate, ArrayList<GalleryModel> galleryImages, String fcmToken) {
+    public UserModel(String fullname, String email, String profilepic, String loggedAs, String selectedGender, String birthday, String location, String language, String bio, String intrestedIn, boolean streamer, int coins, int userId, Date date, String memberShipExpiryDate, ArrayList<GalleryModel> galleryImages, String fcmToken, boolean banned) {
         this.fullname = fullname;
         this.email = email;
         this.profilepic = profilepic;
@@ -37,6 +38,7 @@ public class UserModel {
         this.memberShipExpiryDate = memberShipExpiryDate;
         this.galleryImages = galleryImages;
         this.fcmToken = fcmToken;
+        this.banned = banned;
     }
 
     public String getFullname() {
@@ -173,5 +175,13 @@ public class UserModel {
 
     public void setFcmToken(String fcmToken) {
         this.fcmToken = fcmToken;
+    }
+
+    public boolean isBanned() {
+        return banned;
+    }
+
+    public void setBanned(boolean banned) {
+        this.banned = banned;
     }
 }

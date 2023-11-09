@@ -3,6 +3,7 @@ package com.bhola.realvideochat1;
 import android.app.DatePickerDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -36,6 +37,7 @@ import com.squareup.picasso.Picasso;
 import com.theartofdev.edmodo.cropper.CropImage;
 import com.theartofdev.edmodo.cropper.CropImageView;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Random;
@@ -151,11 +153,11 @@ public class Fill_details extends AppCompatActivity {
         editor.putString("Gender", selectedGender);
         editor.putString("Birthday", Birthday);
         editor.putInt("userId", userId);
-        editor.putInt("coins", 0);
+        editor.putInt("coins", 100);
         editor.apply();
 
 
-        UserModel userModel = new UserModel(nickName.getText().toString(), email, photoUrl, loggedAs, selectedGender, Birthday, "", "English", "", "", false, 0, userId, new java.util.Date(), "", new ArrayList<GalleryModel>(),"");
+        UserModel userModel = new UserModel(nickName.getText().toString(), email, photoUrl, loggedAs, selectedGender, Birthday, "", "English", "", "", false, 100, userId, new java.util.Date(), "", new ArrayList<GalleryModel>(),"",false);
         SplashScreen.userModel = userModel;
 
 
@@ -338,8 +340,21 @@ public class Fill_details extends AppCompatActivity {
         // Get a reference to the location where you want to store the file in Firebase Storage
         StorageReference imageRef = storageReference.child("Users/" + String.valueOf(userId) + "/profile.jpg");
 
+
+        int orientation = ImageResizer.getImageOrientation(croppedImageUri,Fill_details.this);
+        Bitmap bitmap=ImageResizer.imageURItoBitmap(croppedImageUri,Fill_details.this);
+        Bitmap rotatedBitmap = ImageResizer.rotateBitmap(bitmap, orientation);
+
+        Bitmap redusedBitmap = ImageResizer.reduceBitmapSize(rotatedBitmap, 400000);
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        redusedBitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+        byte[] data = baos.toByteArray();
+
+
+
 // Upload the file to Firebase Storage
-        imageRef.putFile(croppedImageUri)
+        imageRef.putBytes(data)
                 .addOnSuccessListener(taskSnapshot -> {
                     // File uploaded successfully
                     imageRef.getDownloadUrl().addOnSuccessListener(uri -> {

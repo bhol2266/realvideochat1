@@ -34,7 +34,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="1dp"
                 android:fontFamily="@font/inter"
-                android:text="Welcome to SAX team! if you have any problem on SAX Chat app, please report to us through feedback. Have fun on SAX Chat - Video Call."
+                android:text="Welcome to Real team! if you have any problem on Real Chat app, please report to us through feedback. Have fun on Real Chat - Video Call."
                 android:textColor="@color/black"
                 android:textSize="15dp" />
 

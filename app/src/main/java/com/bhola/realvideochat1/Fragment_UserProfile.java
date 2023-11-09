@@ -36,7 +36,8 @@ public class Fragment_UserProfile extends Fragment {
 
 
     ImageView profileImage;
-    TextView name, coins, id;
+    TextView name, id;
+    public  static  TextView coins;
     LinearLayout logout;
     View view;
     Context context;
@@ -96,7 +97,7 @@ public class Fragment_UserProfile extends Fragment {
         int userId = sh.getInt("userId", 0);
 
         id.setText(String.valueOf(userId));
-        coins.setText(String.valueOf("Coins: " + SplashScreen.coins));
+        coins.setText(String.valueOf("Coins: " + SplashScreen.userModel.getCoins()));
         logout = view.findViewById(R.id.logout);
         logout.setOnClickListener(new View.OnClickListener() {
             @Override

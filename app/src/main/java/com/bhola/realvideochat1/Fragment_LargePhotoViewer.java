@@ -179,7 +179,7 @@ class ImagePagerAdapter extends RecyclerView.Adapter<ImagePagerAdapter.ImageView
                     .resize(screenWidth, 0)
                     .into(imageView);
 
-            if (SplashScreen.coins == 0) {
+            if (SplashScreen.userModel.getCoins() == 0) {
                 if (imageUrls.get(position).get("type").equals("premium")) {
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                         if(SplashScreen.userLoggedIn && SplashScreen.userLoggedIAs.equals("Google")){

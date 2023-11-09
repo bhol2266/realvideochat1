@@ -46,7 +46,16 @@ public class RecentChatRecyclerAdapter extends FirestoreRecyclerAdapter<Chatroom
 
                         UserModel otherUserModel = task.getResult().toObject(UserModel.class);
                         holder.userName.setText(otherUserModel.getFullname());
-                        Picasso.get().load(otherUserModel.getProfilepic()).into(holder.profileUrl);
+
+                        if (otherUserModel.getProfilepic().isEmpty()) {
+                            if (otherUserModel.getSelectedGender().equals("male")) {
+                                holder.profileUrl.setImageResource(R.drawable.male_logo);
+                            } else {
+                                holder.profileUrl.setImageResource(R.drawable.female_logo);
+                            }
+                        } else {
+                            Picasso.get().load(otherUserModel.getProfilepic()).into(holder.profileUrl);
+                        }
 
                         if (lastMessageSentByMe) {
                             holder.lastMessage.setText("You : " + model.getLastMessage());

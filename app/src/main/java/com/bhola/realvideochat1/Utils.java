@@ -25,6 +25,7 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
@@ -40,6 +41,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.net.ssl.HttpsURLConnection;
@@ -47,6 +49,7 @@ import javax.net.ssl.HttpsURLConnection;
 public class Utils {
 
     private ProgressDialog progressDialog;
+
 
 
     public void showLoadingDialog(Context context, String message) {
@@ -103,12 +106,15 @@ public class Utils {
 
     public void getUserDetails(UserCardAdapter adapter, SwipeRefreshLayout swipeRefreshLayout, ArrayList<UserModel> userslist, int page) {
 
+        String gender_query = "male";
+        if (SplashScreen.userModel.getSelectedGender().equals("male")) {
+            gender_query = "female";
+        }
 
         FirebaseFirestore db = FirebaseFirestore.getInstance();
 
         CollectionReference usersRef = db.collection("Users");
-        Query query = usersRef.orderBy("date", Query.Direction.DESCENDING).limit(20);
-
+        Query query = usersRef.orderBy("date", Query.Direction.DESCENDING).whereEqualTo("selectedGender", gender_query).limit(800);
         query.get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
             @Override
             public void onComplete(@NonNull Task<QuerySnapshot> task) {
@@ -118,24 +124,25 @@ public class Utils {
 
                         // Map the document to your UserModel object.
                         UserModel userModel = document.toObject(UserModel.class);
-                        Log.d("SpaceError", "size: "+userModel.getUserId());
+                        Log.d("SpaceError", "size: " + userModel.getUserId());
 
-                        if(userModel.getUserId() != SplashScreen.userModel.getUserId()){
-                        userslist.add(userModel);
+                        if (userModel.getUserId() != SplashScreen.userModel.getUserId()) {
+                            userslist.add(userModel);
                         }
 
                     }
+//                    new ZegoCloud_Utils().checkUserOnlineStatus(userslist, context);
                     adapter.notifyDataSetChanged();
                     swipeRefreshLayout.setRefreshing(false);
                 } else {
-                    Log.d("SpaceError", "Error getting documents: ", task.getException());
+                    Log.d("Exception", "Error getting documents: ", task.getException());
                 }
             }
         });
     }
 
 
-    public void getUserDetails(int userId) {
+    public void getUserDetail(int userId) {
 
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         DocumentReference userRef = db.collection("Users").document(String.valueOf(userId));
@@ -158,6 +165,47 @@ public class Utils {
         });
 
     }
+
+
+    public void readAll_FemaleUserList(Context context) {
+
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+// Reference to the "users" collection in Firestore
+        CollectionReference usersCollection = db.collection("Users");
+
+// Create a query to filter users by gender
+        Query query = usersCollection.whereEqualTo("selectedGender", "female");
+
+// Execute the query and handle the results
+        query.get().addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                QuerySnapshot querySnapshot = task.getResult();
+                List<UserModel> femaleUsers = new ArrayList<>();
+
+                for (DocumentSnapshot document : querySnapshot.getDocuments()) {
+                    // Convert the Firestore document to a UserModel object
+                    UserModel user = document.toObject(UserModel.class);
+                    if (!SplashScreen.userModel.getEmail().equals(user.getEmail())) {
+                        //excluding self email
+                        femaleUsers.add(user);
+                    }
+
+                }
+
+//                checkUserOnlineStatus(femaleUsers, context);
+            } else {
+                // Handle the error
+                Exception e = task.getException();
+                e.printStackTrace();
+                Log.d("Exception", "Exception: " + e.getMessage());
+
+            }
+        });
+
+
+    }
+
 
     public static File uriToFile(Context context, Uri uri) {
         try {
@@ -209,7 +257,7 @@ public class Utils {
             @Override
             public void onStateChanged(int id, TransferState state) {
                 if (state.COMPLETED.equals(observer.getState())) {
-                    Toast.makeText(context, "Space upload completed !!", Toast.LENGTH_SHORT).show();
+//                    Toast.makeText(context, "Space upload completed !!", Toast.LENGTH_SHORT).show();
                 }
             }
 
@@ -302,8 +350,6 @@ public class Utils {
         }
         return 0;
     }
-
-
 
 
 }

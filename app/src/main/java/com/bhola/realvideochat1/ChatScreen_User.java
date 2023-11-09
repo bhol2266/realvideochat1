@@ -9,10 +9,8 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
-import android.graphics.Matrix;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.InsetDrawable;
-import android.media.ExifInterface;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
@@ -23,6 +21,7 @@ import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -66,6 +65,7 @@ import com.zegocloud.uikit.prebuilt.call.invite.widget.ZegoSendCallInvitationBut
 
 import org.json.JSONObject;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -118,6 +118,7 @@ public class ChatScreen_User extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
+        getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
 
         init();
@@ -132,11 +133,6 @@ public class ChatScreen_User extends Activity {
     }
 
     private void ZegocloudBtns() {
-        ZegoSendCallInvitationButton newVoiceCall = findViewById(R.id.new_voice_call);
-        new ZegoCloud_Utils().initVoiceButton(otherUser.getFullname(), String.valueOf(otherUser.getUserId()), newVoiceCall);
-
-        ZegoSendCallInvitationButton newVideoCall = findViewById(R.id.new_video_call);
-        new ZegoCloud_Utils().initVideoButton(otherUser.getFullname(), String.valueOf(otherUser.getUserId()), newVideoCall);
 
 
         ImageView videoCall = findViewById(R.id.videoCall);
@@ -145,13 +141,42 @@ public class ChatScreen_User extends Activity {
         videoCall.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                if (SplashScreen.userModel.getCoins() < 100) {
+                    rechargeDialog(view.getContext());
+                    return;
+                }
+                ZegoSendCallInvitationButton newVideoCall = findViewById(R.id.new_video_call);
+                new ZegoCloud_Utils().initVideoButton(otherUser.getFullname(), String.valueOf(otherUser.getUserId()), newVideoCall);
                 newVideoCall.performClick();
+                SplashScreen.calleeId = String.valueOf(otherUser.getUserId());
+                if (otherUser.isStreamer()) {
+                    SplashScreen.isCalleeIdStreamer = true;
+                } else {
+                    SplashScreen.isCalleeIdStreamer = false;
+                }
+                FirebaseUtil.getOrCreateChatroomModel(String.valueOf(otherUser.getUserId()));
+
             }
         });
         voiceCall.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                if (SplashScreen.userModel.getCoins() < 100) {
+                    rechargeDialog(view.getContext());
+                    return;
+
+                }
+                ZegoSendCallInvitationButton newVoiceCall = findViewById(R.id.new_voice_call);
+                new ZegoCloud_Utils().initVoiceButton(otherUser.getFullname(), String.valueOf(otherUser.getUserId()), newVoiceCall);
                 newVoiceCall.performClick();
+                SplashScreen.calleeId = String.valueOf(otherUser.getUserId());
+                if (otherUser.isStreamer()) {
+                    SplashScreen.isCalleeIdStreamer = true;
+                } else {
+                    SplashScreen.isCalleeIdStreamer = false;
+                }
+                FirebaseUtil.getOrCreateChatroomModel(String.valueOf(otherUser.getUserId()));
+
             }
         });
 
@@ -226,8 +251,12 @@ public class ChatScreen_User extends Activity {
                 if (msg.length() == 0) {
                     return;
                 }
-
-                sendMessageToUser(msg, "text", "");
+                if (SplashScreen.userModel.getCoins() >= 20) {
+                    sendMessageToUser(msg, "text", "");
+                } else {
+                    rechargeDialog(ChatScreen_User.this);
+                    return;
+                }
 //                insertCustomMsginChats(msg, "mimeType/text", "premium"); //this function handles the custom msg from user and updates the userlistTemp and all
                 newMessage.setText("");
             }
@@ -245,7 +274,11 @@ public class ChatScreen_User extends Activity {
         sendImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                loadImageFromGallery();
+                if (SplashScreen.userModel.getCoins() >= 20) {
+                    loadImageFromGallery();
+                } else {
+                    rechargeDialog(ChatScreen_User.this);
+                }
             }
         });
 
@@ -300,6 +333,9 @@ public class ChatScreen_User extends Activity {
                             EditText newMessage = findViewById(R.id.newMessage);
                             newMessage.setText("");
                             sendNotification(message);
+                            if (!SplashScreen.userModel.isStreamer()) {
+                                FirebaseUtil.decreaseUserCoins(20);
+                            }
                         }
                     }
                 });
@@ -533,10 +569,11 @@ public class ChatScreen_User extends Activity {
             public void onClick(View view) {
                 rechargeDialog(view.getContext());
 
+
             }
         });
         TextView coinCount = view.findViewById(R.id.coin);
-        coinCount.setText(String.valueOf(SplashScreen.coins));
+        coinCount.setText(String.valueOf(SplashScreen.userModel.getCoins()));
         TextView topup = view.findViewById(R.id.topup);
         topup.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -609,7 +646,12 @@ public class ChatScreen_User extends Activity {
                 //Stop Recording..
                 ChangeVisiblityMic(false);
                 stopRecording(false);
-                uploadVoiceMessageFirebase(recordFile);
+
+                if (SplashScreen.userModel.getCoins() >= 20) {
+                    uploadVoiceMessageFirebase(recordFile);
+                } else {
+                    rechargeDialog(ChatScreen_User.this);
+                }
 
             }
 
@@ -651,69 +693,40 @@ public class ChatScreen_User extends Activity {
     }
 
 
-    private Bitmap resizeImage(Uri imageUri) throws IOException {
-        InputStream imageStream = getContentResolver().openInputStream(imageUri);
-        Bitmap selectedBitmap = BitmapFactory.decodeStream(imageStream);
-
-        int width = selectedBitmap.getWidth();
-        int height = selectedBitmap.getHeight();
-
-        float bitmapRatio = (float) width / (float) height;
-        if (bitmapRatio > 1) {
-            width = 720;
-            height = (int) (width / bitmapRatio);
-        } else {
-            height = 1280;
-            width = (int) (height * bitmapRatio);
-        }
-        return Bitmap.createScaledBitmap(selectedBitmap, width, height, true);
-    }
-
     private void uploadImageToFirebaseStorage(Bitmap bitmap, Uri imageUri) {
         Utils utils = new Utils();
         utils.showLoadingDialog(ChatScreen_User.this, "sending image..");
-        try {
-            InputStream inputStream = getContentResolver().openInputStream(imageUri);
 
-            if (inputStream != null) {
-                ExifInterface exif = new ExifInterface(inputStream);
+        int orientation = ImageResizer.getImageOrientation(imageUri, ChatScreen_User.this);
 
-                // Get the image's orientation
-                int orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_UNDEFINED);
-                // Close the input stream
-                inputStream.close();
+        // Rotate the image to its default orientation
+        Bitmap rotatedBitmap = ImageResizer.rotateBitmap(bitmap, orientation);
+        //Resize image
+        Bitmap redusedBitmap = ImageResizer.reduceBitmapSize(rotatedBitmap, 400000);
 
-                // Rotate the image to its default orientation
-                Bitmap rotatedBitmap = rotateBitmap(bitmap, orientation);
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        redusedBitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+        byte[] data = baos.toByteArray();
 
-                // Create a temporary file to save the rotated image
-                File rotatedImageFile = createTempImageFile();
-                FileOutputStream outputStream = new FileOutputStream(rotatedImageFile);
-                rotatedBitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream);
-                outputStream.close();
 
-                // Upload the rotated image to Firebase Storage
-                Uri rotatedImageUri = Uri.fromFile(rotatedImageFile);
-                StorageReference storageRef = FirebaseStorage.getInstance().getReference();
-                StorageReference imageRef = storageRef.child("Users/" + SplashScreen.userModel.getUserId() + "/chatImages/" + Timestamp.now().toString());
+        // Upload the rotated image to Firebase Storage
+        StorageReference storageRef = FirebaseStorage.getInstance().getReference();
+        StorageReference imageRef = storageRef.child("Users/" + SplashScreen.userModel.getUserId() + "/chatImages/" + Timestamp.now().toString());
 
-                imageRef.putFile(rotatedImageUri).addOnSuccessListener(taskSnapshot -> {
-                    // Image uploaded successfully
-                    // You can get the download URL of the image
-                    imageRef.getDownloadUrl().addOnSuccessListener(uri -> {
-                        String downloadUrl = uri.toString();
-                        sendMessageToUser("[Image]", "image", downloadUrl);
-                        utils.dismissLoadingDialog();
-                    });
-                }).addOnFailureListener(exception -> {
-                    // Handle any errors that may occur during the upload
-                    Toast.makeText(this, "Upload failed: " + exception.getMessage(), Toast.LENGTH_SHORT).show();
-                });
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        imageRef.putBytes(data).addOnSuccessListener(taskSnapshot -> {
+            // Image uploaded successfully
+            // You can get the download URL of the image
+            imageRef.getDownloadUrl().addOnSuccessListener(uri -> {
+                String downloadUrl = uri.toString();
+                sendMessageToUser("[Image]", "image", downloadUrl);
+                utils.dismissLoadingDialog();
+            });
+        }).addOnFailureListener(exception -> {
+            // Handle any errors that may occur during the upload
+            Toast.makeText(this, "Upload failed: " + exception.getMessage(), Toast.LENGTH_SHORT).show();
+        });
     }
+
 
     private Uri saveImageTOAppDirectory(Uri selectedImageUri) {
         Uri savedImageUri = null;
@@ -750,47 +763,6 @@ public class ChatScreen_User extends Activity {
         return savedImageUri;
     }
 
-    public static Bitmap rotateBitmap(Bitmap sourceBitmap, int orientation) {
-        Matrix matrix = new Matrix();
-        switch (orientation) {
-            case ExifInterface.ORIENTATION_NORMAL:
-                return sourceBitmap;
-            case ExifInterface.ORIENTATION_FLIP_HORIZONTAL:
-                matrix.setScale(-1, 1);
-                break;
-            case ExifInterface.ORIENTATION_ROTATE_180:
-                matrix.setRotate(180);
-                break;
-            case ExifInterface.ORIENTATION_FLIP_VERTICAL:
-                matrix.setRotate(180);
-                matrix.postScale(-1, 1);
-                break;
-            case ExifInterface.ORIENTATION_TRANSPOSE:
-                matrix.setRotate(90);
-                matrix.postScale(-1, 1);
-                break;
-            case ExifInterface.ORIENTATION_ROTATE_90:
-                matrix.setRotate(90);
-                break;
-            case ExifInterface.ORIENTATION_TRANSVERSE:
-                matrix.setRotate(-90);
-                matrix.postScale(-1, 1);
-                break;
-            case ExifInterface.ORIENTATION_ROTATE_270:
-                matrix.setRotate(-90);
-                break;
-            default:
-                return sourceBitmap;
-        }
-        try {
-            Bitmap rotatedBitmap = Bitmap.createBitmap(sourceBitmap, 0, 0, sourceBitmap.getWidth(), sourceBitmap.getHeight(), matrix, true);
-            sourceBitmap.recycle();
-            return rotatedBitmap;
-        } catch (OutOfMemoryError e) {
-            e.printStackTrace();
-            return sourceBitmap;
-        }
-    }
 
     private void ChangeVisiblityMic(boolean micOn) {
         CardView edittextCardView = findViewById(R.id.edittextCardView);
@@ -878,45 +850,46 @@ public class ChatScreen_User extends Activity {
 
             Bitmap bitmap = null;
             try {
-                bitmap = resizeImage(imageUri);
-                int byteCount = bitmap.getByteCount();
-                double kbSize = byteCount / 1024.0; // 1 KB = 1024 bytes
-                Log.d("ADSfdsa", "kbSize: " + kbSize);
-
+                // Open an input stream from the URI and decode it into a Bitmap
+                InputStream inputStream = getContentResolver().openInputStream(imageUri);
+                bitmap = BitmapFactory.decodeStream(inputStream);
+                inputStream.close();
             } catch (IOException e) {
-                throw new RuntimeException(e);
+                e.printStackTrace();
+                // Handle exceptions
             }
+
+
             uploadImageToFirebaseStorage(bitmap, imageUri);
         }
     }
 
 
+    void sendNotification(String message) {
 
-    void sendNotification(String message){
-
-        try{
-            JSONObject jsonObject  = new JSONObject();
+        try {
+            JSONObject jsonObject = new JSONObject();
 
             JSONObject notificationObj = new JSONObject();
-            notificationObj.put("title",SplashScreen.userModel.getFullname());
-            notificationObj.put("body",message);
+            notificationObj.put("title", SplashScreen.userModel.getFullname());
+            notificationObj.put("body", message);
 
             JSONObject dataObj = new JSONObject();
-            dataObj.put("userId",String.valueOf(SplashScreen.userModel.getUserId()));
+            dataObj.put("userId", String.valueOf(SplashScreen.userModel.getUserId()));
 
-            jsonObject.put("notification",notificationObj);
-            jsonObject.put("data",dataObj);
-            jsonObject.put("to",otherUser.getFcmToken());
+            jsonObject.put("notification", notificationObj);
+            jsonObject.put("data", dataObj);
+            jsonObject.put("to", otherUser.getFcmToken());
 
             callApi(jsonObject);
 
 
-        }catch (Exception e){
+        } catch (Exception e) {
 
         }
     }
 
-    void callApi(JSONObject jsonObject){
+    void callApi(JSONObject jsonObject) {
         MediaType JSON = MediaType.get("application/json; charset=utf-8");
         OkHttpClient client = new OkHttpClient();
         String url = "https://fcm.googleapis.com/fcm/send";
@@ -924,16 +897,18 @@ public class ChatScreen_User extends Activity {
         Request request = new Request.Builder()
                 .url(url)
                 .post(body)
-                .header("Authorization","Bearer "+SplashScreen.fcmAPI_KEY)
+                .header("Authorization", "Bearer " + SplashScreen.fcmAPI_KEY)
                 .build();
         client.newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
-
+                Log.d("dsfsdfdfgdfsg", "onFailure: " + e.getMessage());
+                Toast.makeText(ChatScreen_User.this, e.getMessage(), Toast.LENGTH_SHORT).show();
             }
 
             @Override
             public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                Log.d("dsfsdfdfgdfsg", "Sucess: Sucess" + SplashScreen.fcmAPI_KEY);
 
             }
         });

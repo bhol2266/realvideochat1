@@ -28,7 +28,6 @@ import androidx.core.view.WindowInsetsControllerCompat;
 
 import com.airbnb.lottie.LottieAnimationView;
 import com.bhola.realvideochat1.Models.UserModel;
-import com.bhola.realvideochat1.ZegoCloud.ZegoCloud_Utils;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.auth.FirebaseAuth;
@@ -51,6 +50,7 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class SplashScreen extends AppCompatActivity {
@@ -61,6 +61,11 @@ public class SplashScreen extends AppCompatActivity {
     LottieAnimationView lottie_progressbar;
 
     public static UserModel userModel;
+    public static String calleeId;//this is for setting callee which will be used in zego call listener
+
+    public static boolean isCalleeIdStreamer=false;
+
+    public static boolean isOutgoing=false;
     public static String Notification_Intent_Firebase = "inactive";
     public static String Ad_Network_Name = "facebook";
     public static String Refer_App_url2 = "https://play.google.com/store/apps/developer?id=UK+DEVELOPERS";
@@ -94,7 +99,6 @@ public class SplashScreen extends AppCompatActivity {
 
     //Google login
     public static boolean userLoggedIn = false;
-    public static int coins = 0;
     public static String userLoggedIAs = "not set";
     public static String authProviderName = "";
     public static String userEmail = "";
@@ -119,7 +123,7 @@ public class SplashScreen extends AppCompatActivity {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        sharedPrefrences();
+
 
         countryList = loadCountryListFromAsset(this, "countrylist.json");
 
@@ -218,6 +222,7 @@ public class SplashScreen extends AppCompatActivity {
                     Zegocloud_serverSecret = (String) snapshot.child("Zegocloud_serverSecret").getValue();
                     fcmAPI_KEY = (String) snapshot.child("fcmAPI_KEY").getValue();
 
+                    sharedPrefrences();
 
                     if (animationCompleted) {
                         handler_forIntent();
@@ -242,7 +247,6 @@ public class SplashScreen extends AppCompatActivity {
         SharedPreferences sh = getSharedPreferences("UserInfo", MODE_PRIVATE);
         int a = sh.getInt("loginTimes", 0);
         int userId = sh.getInt("userId", 0);
-        coins = sh.getInt("coins", 0);
         String loginAs = sh.getString("loginAs", "not set");
         if (!loginAs.equals("not set")) {
             userLoggedIn = true;
@@ -279,10 +283,7 @@ public class SplashScreen extends AppCompatActivity {
                         // Use the user data
                         //update user latest login date
                         Utils utils = new Utils();
-                        utils.updateDateonFireStore("date", new java.util.Date());
-                        new ZegoCloud_Utils().initCallInviteService(getApplication(), userModel.getUserId(), userModel.getFullname());
-//                        new ZegoCloud_Utils().initChat(SplashScreen.this);
-
+                        utils.updateDateonFireStore("date", new Date());
                     } else {
                         // User document doesn't exist
                     }
@@ -355,7 +356,7 @@ public class SplashScreen extends AppCompatActivity {
     }
 
     private void checkNotificationExtras() {
-        if (getIntent().getExtras() != null) {
+        if (getIntent().getExtras() != null && getIntent().getExtras().getString("userId") != null) {
             //from notification
             String userId = getIntent().getExtras().getString("userId");
             FirebaseUtil.allUserCollectionReference().document(userId).get()

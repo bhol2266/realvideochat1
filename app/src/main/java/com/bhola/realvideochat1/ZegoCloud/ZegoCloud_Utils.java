@@ -3,14 +3,18 @@ package com.bhola.realvideochat1.ZegoCloud;
 import android.app.Application;
 import android.content.Context;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.Toast;
 
+import com.bhola.realvideochat1.FirebaseUtil;
+import com.bhola.realvideochat1.Models.CallogModel;
+import com.bhola.realvideochat1.Models.UserModel;
 import com.bhola.realvideochat1.SplashScreen;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
+import com.google.firebase.Timestamp;
 import com.zegocloud.uikit.components.audiovideo.ZegoAvatarViewProvider;
 import com.zegocloud.uikit.components.audiovideo.ZegoForegroundViewProvider;
 import com.zegocloud.uikit.prebuilt.call.ZegoUIKitPrebuiltCallConfig;
@@ -22,7 +26,11 @@ import com.zegocloud.uikit.prebuilt.call.invite.ZegoUIKitPrebuiltCallConfigProvi
 import com.zegocloud.uikit.prebuilt.call.invite.ZegoUIKitPrebuiltCallInvitationConfig;
 import com.zegocloud.uikit.prebuilt.call.invite.ZegoUIKitPrebuiltCallInvitationService;
 import com.zegocloud.uikit.prebuilt.call.invite.internal.ClickListener;
+import com.zegocloud.uikit.prebuilt.call.invite.internal.IncomingCallButtonListener;
+import com.zegocloud.uikit.prebuilt.call.invite.internal.OutgoingCallButtonListener;
+import com.zegocloud.uikit.prebuilt.call.invite.internal.ZegoCallType;
 import com.zegocloud.uikit.prebuilt.call.invite.internal.ZegoCallUser;
+import com.zegocloud.uikit.prebuilt.call.invite.internal.ZegoInvitationCallListener;
 import com.zegocloud.uikit.prebuilt.call.invite.widget.ZegoSendCallInvitationButton;
 import com.zegocloud.uikit.service.defines.ZegoUIKitUser;
 
@@ -68,8 +76,6 @@ public class ZegoCloud_Utils {
     }
 
 
-
-
     public void initCallInviteService(Context context, int userId, String fullname) {
         long appID = SplashScreen.Zegocloud_appID;
         String appSign = SplashScreen.Zegocloud_appSign;
@@ -78,7 +84,6 @@ public class ZegoCloud_Utils {
         String userName = fullname;
         ZegoUIKitPrebuiltCallInvitationConfig callInvitationConfig = new ZegoUIKitPrebuiltCallInvitationConfig();
         callInvitationConfig.notifyWhenAppRunningInBackgroundOrQuit = true;
-
 
         callInvitationConfig.provider = new ZegoUIKitPrebuiltCallConfigProvider() {
             @Override
@@ -90,28 +95,21 @@ public class ZegoCloud_Utils {
                         ImageView imageView = new ImageView(parent.getContext());
 
                         String avatarUrl = SplashScreen.databaseURL_images + "RealVideoChat1/profilePic/" + String.valueOf(uiKitUser.userID) + ".jpg";
-                        Log.d("SpaceError", "onUserIDUpdated: " + avatarUrl);
-
                         if (!TextUtils.isEmpty(avatarUrl)) {
                             RequestOptions requestOptions = new RequestOptions().circleCrop();
                             Glide.with(parent.getContext()).load(avatarUrl).apply(requestOptions).into(imageView);
                         }
-
-                        Log.d("onUserIDUpdated", "onUserIDUpdated: "+avatarUrl);
                         return imageView;
                     }
                 };
-
 
                 config.durationConfig = new ZegoCallDurationConfig();
                 config.durationConfig.isVisible = true;
                 config.durationConfig.durationUpdateListener = new DurationUpdateListener() {
                     @Override
                     public void onDurationUpdate(long seconds) {
-                        Log.d("onDurationUpdate", "onDurationUpdate() called with: seconds = [" + seconds + "]");
-                        if (seconds == 60 * 5) {
-                            ZegoUIKitPrebuiltCallInvitationService.endCall();
-                        }
+                        handleCoinEvents(seconds, context);
+
                     }
                 };
 
@@ -129,28 +127,210 @@ public class ZegoCloud_Utils {
         //androidNotificationConfig.channelID must be the same as the FCM Channel ID in [ZEGOCLOUD Admin Console|_blank]https://console.zegocloud.com),
         // and the androidNotificationConfig.channelName can be an arbitrary value.
         ZegoNotificationConfig notificationConfig = new ZegoNotificationConfig();
-        notificationConfig.sound = "zego_uikit_sound_call";
+        notificationConfig.sound = "zego_uikit_call";
         notificationConfig.channelID = "CallInvitation";
         notificationConfig.channelName = "CallInvitation";
         callInvitationConfig.notificationConfig = notificationConfig;
         ZegoUIKitPrebuiltCallInvitationService.init((Application) context, appID, appSign, userID, userName,
                 callInvitationConfig);
 
+        invitationListners(context);
+
 
     }
 
+    private void handleCoinEvents(long seconds, Context context) {
 
-//    public void initChat(Context context) {
-//        long appID = 1889863973;
-//        String appSign = "71d102ab65161df9f2d2ef11fa98dad3b87513f0df1673892e644cef90b96e75";
+        if (SplashScreen.isOutgoing) {
+            if (!SplashScreen.userModel.isStreamer()) {
+                if (seconds !=0 && seconds % 60 == 0) {
+                    FirebaseUtil.addStreamerCoins();
+                    if (SplashScreen.userModel.getCoins() < 100) {
+                        ZegoUIKitPrebuiltCallInvitationService.endCall();
+                        Toast.makeText(context, "Coins Finished! Please Recharge", Toast.LENGTH_LONG).show();
+                    } else {
+                        FirebaseUtil.decreaseUserCoins(100);
+                    }
+                }
+
+            } else {
+                //isStreamer is calling
+                if (seconds == 30) {
+                    ZegoUIKitPrebuiltCallInvitationService.endCall();
+                    Toast.makeText(context, "Free limit 30 sec", Toast.LENGTH_LONG).show();
+                }
+            }
+
+        } else {
+            //inComing call : we dont have to ahandle any incomingcall cases , because everthing is handler from outGoing Call or outgoing devices
+        }
+    }
+
+
+    private void checkUserOnlineStatus(List<UserModel> femaleUsers, Context context) {
+
+
+//        ArrayList<UserOnlineModel> userlist_Online = new ArrayList<>();
+//        ZegoCloud_Signature zegoCloudSignature = new ZegoCloud_Signature();
+//        Map<String, Object> data = zegoCloudSignature.getSignature();
 //
-//        ZIMKit.initWith((Application) context, appID, appSign);
-//        // Online notification for the initialization (use the following code if this is needed).
-//        ZIMKit.initNotifications();
+//        String signature = (String) data.get("signature");
+//        long unixTimestampSeconds = (long) data.get("timestamp");
+//        String SignatureNonce = (String) data.get("signatureNonce");
 //
-//    }
+//        String API_URL = "https://zim-api.zego.im/?Action=QueryUserOnlineState&AppId=1889863973" + "&Timestamp=" + unixTimestampSeconds + "&Signature=" + signature + "&SignatureVersion=2.0" + "&SignatureNonce=" + SignatureNonce;
+//
+//        for (UserModel userModel : femaleUsers) {
+//
+//            String id = String.valueOf(userModel.getUserId());
+//            API_URL = API_URL + "&UserId[]=" + id;
+//        }
+//
+//
+//        StringRequest stringRequest = new StringRequest(Request.Method.GET, API_URL,
+//                new Response.Listener<String>() {
+//                    @Override
+//                    public void onResponse(String response) {
+//                        try {
+//                            JSONObject jsonObject = new JSONObject(response);
+//
+//                            JSONArray results = jsonObject.getJSONArray("Result");
+//                            Log.d("onResponse", "checkUserOnlineStatus: " + jsonObject.toString());
+//
+//                            for (int i = 0; i < results.length(); i++) {
+//                                JSONObject jsonObject1 = (JSONObject) results.get(i);
+//                                String userID = jsonObject1.getString("UserId");
+//                                String status = jsonObject1.getString("Status");
+//                                boolean isOnline = false;
+//                                if (status.equals("online")) {
+//                                    isOnline = true;
+//                                }
+//                                if (isOnline) {
+//                                    UserOnlineModel userOnlineModel = new UserOnlineModel(userID, isOnline);
+//                                    userlist_Online.add(userOnlineModel);
+//
+//                                }
+//                                if (userlist_Online.size() == 0) {
+//                                    //nobody is online so going to cameraActvity of recorded video calls
+//                                    context.startActivity(new Intent(context, CameraActivity.class));
+//                                    BeforeVideoCall.finishActivity((Activity) context);
+//                                    return;
+//                                }
+//
+//                                Random random = new Random();
+//                                int randomIndex = random.nextInt(userlist_Online.size());
+//                                int userId_forCalling = Integer.parseInt(userlist_Online.get(randomIndex).getUserID());
+//
+//
+//                                for (UserModel userModel : femaleUsers) {
+//                                    if (userModel.getUserId() == Integer.parseInt(userlist_Online.get(randomIndex).getUserID())) {
+//                                        BeforeVideoCall.targetUserID = String.valueOf(userModel.getUserId());
+//                                        BeforeVideoCall.targetuserName = userModel.getFullname();
+//                                    }
+//
+//                                }
+//                                BeforeVideoCall.clickVideoCAllBtn();
+//                                BeforeVideoCall.finishActivity((Activity) context);
+//                                invitationListners(context);
+//
+//                            }
+//
+//                        } catch (JSONException e) {
+//                            e.printStackTrace();
+//                            Log.d("onResponse", "JSONException: " + e.getMessage());
+//                        }
+//                    }
+//                }, new Response.ErrorListener() {
+//            @Override
+//            public void onErrorResponse(VolleyError error) {
+//                Log.d(TAG, "onResponse: " + error.getMessage());
+//                Toast.makeText(context, error.getMessage(), Toast.LENGTH_SHORT).show();
+//            }
+//        });
+//
+//        RequestQueue requestQueue = Volley.newRequestQueue(context);
+//        requestQueue.add(stringRequest);
 
 
+    }
+
+    private void invitationListners(Context context) {
+        //this
+        ZegoUIKitPrebuiltCallInvitationService.addIncomingCallButtonListener(new IncomingCallButtonListener() {
+            @Override
+            public void onIncomingCallDeclineButtonPressed() {
+
+            }
+
+            @Override
+            public void onIncomingCallAcceptButtonPressed() {
+
+            }
+        });
+
+
+        ZegoUIKitPrebuiltCallInvitationService.addOutgoingCallButtonListener(new OutgoingCallButtonListener() {
+            @Override
+            public void onOutgoingCallCancelButtonPressed() {
+                CallogModel callogModel = new CallogModel(SplashScreen.calleeId, "outgoing", Timestamp.now(), false, 0);
+                FirebaseUtil.addDocumentToCallLog(callogModel);
+            }
+        });
+
+        ZegoUIKitPrebuiltCallInvitationService.addInvitationCallListener(new ZegoInvitationCallListener() {
+            @Override
+            public void onIncomingCallReceived(String callID, ZegoCallUser caller, ZegoCallType callType, List<ZegoCallUser> callees) {
+                SplashScreen.isOutgoing = false;
+            }
+
+            @Override
+            public void onIncomingCallCanceled(String callID, ZegoCallUser caller) {
+
+            }
+
+            @Override
+            public void onIncomingCallTimeout(String callID, ZegoCallUser caller) {
+
+            }
+
+            @Override
+            public void onOutgoingCallAccepted(String callID, ZegoCallUser callee) {
+                CallogModel callogModel = new CallogModel(String.valueOf(callee.getId()), "outgoing", Timestamp.now(), true, 0);
+                FirebaseUtil.addDocumentToCallLog(callogModel);
+                SplashScreen.isOutgoing = true;
+                if(!SplashScreen.userModel.isStreamer()){
+                    FirebaseUtil.decreaseUserCoins(100);
+                }
+
+
+            }
+
+            @Override
+            public void onOutgoingCallRejectedCauseBusy(String callID, ZegoCallUser callee) {
+                CallogModel callogModel = new CallogModel(String.valueOf(callee.getId()), "outgoing", Timestamp.now(), false, 0);
+                FirebaseUtil.addDocumentToCallLog(callogModel);
+            }
+
+
+            @Override
+            public void onOutgoingCallDeclined(String callID, ZegoCallUser callee) {
+                CallogModel callogModel = new CallogModel(String.valueOf(callee.getId()), "outgoing", Timestamp.now(), false, 0);
+                FirebaseUtil.addDocumentToCallLog(callogModel);
+            }
+
+            @Override
+            public void onOutgoingCallTimeout(String callID, List<ZegoCallUser> callee) {
+                CallogModel callogModel = new CallogModel(String.valueOf(callee.get(0).getId()), "outgoing", Timestamp.now(), false, 0);
+                FirebaseUtil.addDocumentToCallLog(callogModel);
+            }
+        });
+
+
+    }
+
+    private void requestAnotherVideocall(Context context) {
+
+    }
 
 
 }

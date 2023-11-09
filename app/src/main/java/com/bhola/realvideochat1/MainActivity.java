@@ -22,6 +22,7 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.core.view.WindowInsetsControllerCompat;
 import androidx.viewpager2.widget.ViewPager2;
 
+import com.bhola.realvideochat1.ZegoCloud.ZegoCloud_Utils;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
 import com.zegocloud.uikit.prebuilt.call.invite.ZegoUIKitPrebuiltCallInvitationService;
@@ -39,7 +40,14 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 //        fullscreenMode();
+        try {
+            new ZegoCloud_Utils().initCallInviteService(getApplication(), SplashScreen.userModel.getUserId(), SplashScreen.userModel.getFullname());
+        } catch (Exception e) {
+            startActivity(new Intent(MainActivity.this, SplashScreen.class));
+            return;
+        }
 
 
         if (SplashScreen.Ads_State.equals("active")) {
@@ -64,7 +72,7 @@ public class MainActivity extends AppCompatActivity {
         viewPager2 = findViewById(R.id.viewpager);
         viewPager2.setAdapter(new PagerAdapter(MainActivity.this));
 
-        viewPager2.setOffscreenPageLimit(4);
+        viewPager2.setOffscreenPageLimit(5);
         TabLayout tabLayout = findViewById(R.id.tabLayout);
 
 
@@ -88,20 +96,25 @@ public class MainActivity extends AppCompatActivity {
 
                     case 1:
                         tab.setIcon(R.drawable.chat);
-
-
                         View view2 = getLayoutInflater().inflate(R.layout.customtab, null);
                         view2.findViewById(R.id.icon).setBackgroundResource(R.drawable.chat);
                         tab.setCustomView(view2);
 
                         badge_text = view2.findViewById(R.id.badge_text);
                         badge_text.setVisibility(View.GONE);
+                        break;
+
+                    case 2:
+                        tab.setIcon(R.drawable.info_2);
 
 
+                        View viewCall = getLayoutInflater().inflate(R.layout.customtab, null);
+                        viewCall.findViewById(R.id.icon).setBackgroundResource(R.drawable.call);
+                        tab.setCustomView(viewCall);
                         break;
 
 
-                    case 2:
+                    case 3:
                         tab.setIcon(R.drawable.info_2);
 
 
@@ -155,7 +168,6 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     }
-
 
 
     @Override
@@ -253,6 +265,11 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+    }
 
     @Override
     protected void onDestroy() {

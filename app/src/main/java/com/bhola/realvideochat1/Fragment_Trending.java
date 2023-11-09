@@ -117,7 +117,7 @@ public class Fragment_Trending extends Fragment {
         recyclerView.setNestedScrollingEnabled(false);
 
 
-        getLatestUsers(page);
+            getLatestUsers(page);
 
 
     }
@@ -226,8 +226,17 @@ class UserCardAdapter extends RecyclerView.Adapter<UserCardAdapter.GridViewHolde
     public void onBindViewHolder(@androidx.annotation.NonNull GridViewHolder holder, int position) {
         UserModel item = userlist.get(position);
 
+        Log.d("getUserFromFireStore", "getUserFromFireStore: " + item.getProfilepic());
+        if (item.getProfilepic().length() < 10) {
+            if (item.getSelectedGender().equals("male")) {
+                holder.profile.setImageResource(R.drawable.male_logo);
+            } else {
+                holder.profile.setImageResource(R.drawable.female_logo);
+            }
+        } else {
+            Picasso.get().load(item.getProfilepic()).into(holder.profile);
+        }
         holder.name.setText(item.getFullname());
-        Picasso.get().load(item.getProfilepic()).into(holder.profile);
 
 
         holder.cardView1.setOnClickListener(new View.OnClickListener() {
