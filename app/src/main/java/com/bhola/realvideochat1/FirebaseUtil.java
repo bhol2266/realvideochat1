@@ -207,6 +207,18 @@ public class FirebaseUtil {
         }
     }
 
+    public static void addUserCoins(int newCoins) {
+
+        int currentCoin = SplashScreen.userModel.getCoins();
+        int coinsAfterAdding = currentCoin + newCoins;
+        SplashScreen.userModel.setCoins(coinsAfterAdding);
+        Fragment_UserProfile.coins.setText(String.valueOf("Coins: " + SplashScreen.userModel.getCoins()));
+        updateUserCoinsonFireStore(coinsAfterAdding);
+
+
+
+    }
+
     public static void updateUserCoinsonFireStore(int value) {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         CollectionReference usersRef = db.collection("Users");

@@ -160,7 +160,7 @@ public class Fragment_UserProfile extends Fragment {
             if (urll.startsWith("http")) {
 
                 Picasso.get()
-                        .load( SplashScreen.databaseURL_images + "RealVideoChat1/profilePic/" + String.valueOf(SplashScreen.userModel.getUserId()) + ".jpg")
+                        .load( SplashScreen.userModel.getProfilepic())
                         .into(profileImage);
             } else {
 //                if (urll.length() > 0) {

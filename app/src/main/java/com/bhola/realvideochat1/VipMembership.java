@@ -46,7 +46,6 @@ import com.android.billingclient.api.ConsumeResponseListener;
 import com.android.billingclient.api.ProductDetails;
 import com.android.billingclient.api.ProductDetailsResponseListener;
 import com.android.billingclient.api.Purchase;
-import com.android.billingclient.api.PurchasesResponseListener;
 import com.android.billingclient.api.QueryProductDetailsParams;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -105,7 +104,7 @@ public class VipMembership extends AppCompatActivity {
 
                     //first this is triggerd than onResume is called
 
-                    verifyPurchase(purchase);
+                    verifyPurchase(list.get(0));
 
                     new Handler().postDelayed(new Runnable() {
                         @Override
@@ -126,10 +125,11 @@ public class VipMembership extends AppCompatActivity {
                             progressBar.setVisibility(View.GONE);
 
                             cancelScheduledAlarm();
-                            startActivity(new Intent(VipMembership.this, SplashScreen.class));
-
+                            Toast.makeText(VipMembership.this, "Recharge Successfull!", Toast.LENGTH_SHORT).show();
+                            startActivity(new Intent(VipMembership.this,MainActivity.class));
+                            MainActivity.viewPager2.setCurrentItem(3);
                         }
-                    }, 5000);
+                    }, 2000);
 
 
                 }
@@ -214,15 +214,15 @@ public class VipMembership extends AppCompatActivity {
         List<QueryProductDetailsParams.Product> list = new ArrayList<>();
 
         productIds.add("coins200");
-        productIds.add("coins450");
-        productIds.add("coins1000");
-        productIds.add("coins2500");
+        productIds.add("coins500");
+        productIds.add("coins1200");
+        productIds.add("coins3000");
         productIds.add("coins5000");
         productIds.add("coins10000");
         productIds.add("coins200_offer");
-        productIds.add("coins450_offer");
-        productIds.add("coins1000_offer");
-        productIds.add("coins2500_offer");
+        productIds.add("coins500_offer");
+        productIds.add("coins1200_offer");
+        productIds.add("coins3000_offer");
         productIds.add("coins5000_offer");
         productIds.add("coins10000_offer");
 
@@ -290,13 +290,13 @@ public class VipMembership extends AppCompatActivity {
 
         GridItem_ModelClass item_modelClass2 = new GridItem_ModelClass();
         for (ProductDetails productDetails : productDetailsList) {
-            item_modelClass2.setCoins("450");
-            if (productDetails.getProductId().equals("coins450")) {
+            item_modelClass2.setCoins("500");
+            if (productDetails.getProductId().equals("coins500")) {
                 item_modelClass2.setMRP(productDetails.getOneTimePurchaseOfferDetails().getFormattedPrice().replace(".00", ""));
                 productlist.add(productDetails);
 
             }
-            if (productDetails.getProductId().equals("coins450_offer")) {
+            if (productDetails.getProductId().equals("coins500_offer")) {
                 item_modelClass2.setDISCOUNTED_PRICE(productDetails.getOneTimePurchaseOfferDetails().getFormattedPrice().replace(".00", ""));
                 productlist_offer.add(productDetails);
 
@@ -307,13 +307,13 @@ public class VipMembership extends AppCompatActivity {
 
         GridItem_ModelClass item_modelClass3 = new GridItem_ModelClass();
         for (ProductDetails productDetails : productDetailsList) {
-            item_modelClass3.setCoins("1000");
-            if (productDetails.getProductId().equals("coins1000")) {
+            item_modelClass3.setCoins("1200");
+            if (productDetails.getProductId().equals("coins1200")) {
                 item_modelClass3.setMRP(productDetails.getOneTimePurchaseOfferDetails().getFormattedPrice().replace(".00", ""));
                 productlist.add(productDetails);
 
             }
-            if (productDetails.getProductId().equals("coins1000_offer")) {
+            if (productDetails.getProductId().equals("coins1200_offer")) {
                 item_modelClass3.setDISCOUNTED_PRICE(productDetails.getOneTimePurchaseOfferDetails().getFormattedPrice().replace(".00", ""));
                 productlist_offer.add(productDetails);
 
@@ -324,13 +324,13 @@ public class VipMembership extends AppCompatActivity {
 
         GridItem_ModelClass item_modelClass4 = new GridItem_ModelClass();
         for (ProductDetails productDetails : productDetailsList) {
-            item_modelClass4.setCoins("2500");
-            if (productDetails.getProductId().equals("coins2500")) {
+            item_modelClass4.setCoins("3000");
+            if (productDetails.getProductId().equals("coins3000")) {
                 item_modelClass4.setMRP(productDetails.getOneTimePurchaseOfferDetails().getFormattedPrice().replace(".00", ""));
                 productlist.add(productDetails);
 
             }
-            if (productDetails.getProductId().equals("coins2500_offer")) {
+            if (productDetails.getProductId().equals("coins3000_offer")) {
                 item_modelClass4.setDISCOUNTED_PRICE(productDetails.getOneTimePurchaseOfferDetails().getFormattedPrice().replace(".00", ""));
                 productlist_offer.add(productDetails);
 
@@ -508,40 +508,40 @@ public class VipMembership extends AppCompatActivity {
         SharedPreferences sharedPreferences = getSharedPreferences("UserInfo", MODE_PRIVATE);
         SharedPreferences.Editor myEdit = sharedPreferences.edit();
         myEdit.putString("purchaseToken", purchaseToken);
-        myEdit.putInt("coins", coins);
 
         Date currentDate = new Date();
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
         String dateString = dateFormat.format(currentDate);
         myEdit.putString("purchase_date", dateString);
         myEdit.commit();
+        FirebaseUtil.addUserCoins(coins);
 
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        billingClient.queryPurchasesAsync(BillingClient.ProductType.INAPP, new PurchasesResponseListener() {
-            @Override
-            public void onQueryPurchasesResponse(@NonNull BillingResult billingResult, @NonNull List<Purchase> list) {
-                if (billingResult.getResponseCode() == BillingClient.BillingResponseCode.OK) {
-                    for (Purchase purchase : list) {
-                        if (purchase.getPurchaseState() == Purchase.PurchaseState.PURCHASED && !purchase.isAcknowledged()) {
-                            verifyPurchase(purchase);
-
-                            new Handler().postDelayed(new Runnable() {
-                                @Override
-                                public void run() {
-                                    progressBar.setVisibility(View.GONE);
-
-                                }
-                            }, 5000);
-
-                        }
-                    }
-                }
-            }
-        });
+//        billingClient.queryPurchasesAsync(BillingClient.ProductType.INAPP, new PurchasesResponseListener() {
+//            @Override
+//            public void onQueryPurchasesResponse(@NonNull BillingResult billingResult, @NonNull List<Purchase> list) {
+//                if (billingResult.getResponseCode() == BillingClient.BillingResponseCode.OK) {
+//                    for (Purchase purchase : list) {
+//                        if (purchase.getPurchaseState() == Purchase.PurchaseState.PURCHASED && !purchase.isAcknowledged()) {
+//                            verifyPurchase(purchase);
+//
+//                            new Handler().postDelayed(new Runnable() {
+//                                @Override
+//                                public void run() {
+//                                    progressBar.setVisibility(View.GONE);
+//
+//                                }
+//                            }, 5000);
+//
+//                        }
+//                    }
+//                }
+//            }
+//        });
     }
 
 
@@ -606,7 +606,7 @@ public class VipMembership extends AppCompatActivity {
         TextView price = promptView.findViewById(R.id.price);
         TextView productName = promptView.findViewById(R.id.productName);
 
-        productName.setText(productDetails.getTitle());
+//        productName.setText(productDetails.getTitle());
         price.setText(productDetails.getOneTimePurchaseOfferDetails().getFormattedPrice().replace(".00", ""));
         buyNowTimer.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -756,7 +756,6 @@ public class VipMembership extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        Log.d(SplashScreen.TAG, "backpressCount: " + backpressCount);
         if (backpressCount == 0) {
             exit_dialog();
             backpressCount++;
