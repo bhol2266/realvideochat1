@@ -7,6 +7,7 @@ import android.graphics.drawable.InsetDrawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.PowerManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
@@ -34,13 +35,14 @@ public class MainActivity extends AppCompatActivity {
     public static int unreadMessage_count;
     public static ViewPager2 viewPager2;
     com.facebook.ads.InterstitialAd facebook_IntertitialAds;
-
+    PowerManager.WakeLock wakeLock;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+
+        keepScreenOn();
 //        fullscreenMode();
         try {
             new ZegoCloud_Utils().initCallInviteService(getApplication(), SplashScreen.userModel.getUserId(), SplashScreen.userModel.getFullname());
@@ -65,6 +67,12 @@ public class MainActivity extends AppCompatActivity {
 //        },3000);
 
 
+    }
+
+    private void keepScreenOn() {
+        PowerManager powerManager = (PowerManager) MainActivity.this.getSystemService(MainActivity.this.POWER_SERVICE);
+        wakeLock = powerManager.newWakeLock(PowerManager.FULL_WAKE_LOCK, "My Lock");
+        wakeLock.acquire();
     }
 
 
@@ -268,12 +276,13 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-
+        keepScreenOn();
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        wakeLock.release();
         ZegoUIKitPrebuiltCallInvitationService.unInit();
     }
 
