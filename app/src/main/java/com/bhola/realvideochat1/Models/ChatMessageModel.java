@@ -8,17 +8,20 @@ public class ChatMessageModel {
     private Timestamp timestamp;
     private String messagetype;
     private String extraMessage;
+    int sent,read;
 
 
     public ChatMessageModel() {
     }
 
-    public ChatMessageModel(String message, String senderId, Timestamp timestamp, String messagetype, String extraMessage) {
+    public ChatMessageModel(String message, String senderId, Timestamp timestamp, String messagetype, String extraMessage, int sent, int read) {
         this.message = message;
         this.senderId = senderId;
         this.timestamp = timestamp;
         this.messagetype = messagetype;
         this.extraMessage = extraMessage;
+        this.sent = sent;
+        this.read = read;
     }
 
     public String getMessage() {
@@ -59,5 +62,21 @@ public class ChatMessageModel {
 
     public void setExtraMessage(String extraMessage) {
         this.extraMessage = extraMessage;
+    }
+
+    public int getSent() {
+        return sent;
+    }
+
+    public void setSent(int sent) {
+        this.sent = sent;
+    }
+
+    public int getRead() {
+        return read;
+    }
+
+    public void setRead(int read) {
+        this.read = read;
     }
 }

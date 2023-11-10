@@ -205,7 +205,7 @@ public class ChatScreen_User extends Activity {
                             chatroomId,
                             Arrays.asList(String.valueOf(SplashScreen.userModel.getUserId()), String.valueOf(otherUser.getUserId())),
                             Timestamp.now(),
-                            ""
+                            "","",true
                     );
                     FirebaseUtil.getChatroomReference(chatroomId).set(chatroomModel);
                 }
@@ -321,10 +321,11 @@ public class ChatScreen_User extends Activity {
         chatroomModel.setLastMessageTimestamp(Timestamp.now());
         chatroomModel.setLastMessageSenderId(String.valueOf(SplashScreen.userModel.getUserId()));
         chatroomModel.setLastMessage(message);
+        chatroomModel.setNewMessage(true);
         FirebaseUtil.getChatroomReference(chatroomId).set(chatroomModel);
 
 
-        ChatMessageModel chatMessageModel = new ChatMessageModel(message, String.valueOf(SplashScreen.userModel.getUserId()), Timestamp.now(), type, extraMessage);
+        ChatMessageModel chatMessageModel = new ChatMessageModel(message, String.valueOf(SplashScreen.userModel.getUserId()), Timestamp.now(), type, extraMessage,0,0);
         FirebaseUtil.getChatroomMessageReference(chatroomId).add(chatMessageModel)
                 .addOnCompleteListener(new OnCompleteListener<DocumentReference>() {
                     @Override

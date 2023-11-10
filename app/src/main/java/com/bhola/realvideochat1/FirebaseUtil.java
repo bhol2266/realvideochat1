@@ -1,11 +1,14 @@
 package com.bhola.realvideochat1;
 
 import android.util.Log;
+import android.view.View;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 
 import com.bhola.realvideochat1.Models.CallogModel;
 import com.bhola.realvideochat1.Models.CallroomModel;
+import com.bhola.realvideochat1.Models.ChatMessageModel;
 import com.bhola.realvideochat1.Models.StreamerModel;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -14,6 +17,8 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
@@ -55,7 +60,6 @@ public class FirebaseUtil {
     public static DocumentReference getStreamersReference(String streamerId) {
         return FirebaseFirestore.getInstance().collection("Streamers").document(streamerId);
     }
-
 
 
     public static CollectionReference getChatroomMessageReference(String chatroomId) {
@@ -182,7 +186,7 @@ public class FirebaseUtil {
         int currentCoin = SplashScreen.userModel.getCoins();
         int coinsAfterDecreased = currentCoin - decreaseNumber;
         SplashScreen.userModel.setCoins(coinsAfterDecreased);
-        Log.d("coinsAfterDecreased", "coinsAfterDecreased: "+coinsAfterDecreased);
+        Log.d("coinsAfterDecreased", "coinsAfterDecreased: " + coinsAfterDecreased);
         Fragment_UserProfile.coins.setText(String.valueOf("Coins: " + SplashScreen.userModel.getCoins()));
         updateUserCoinsonFireStore(coinsAfterDecreased);
 
@@ -216,7 +220,6 @@ public class FirebaseUtil {
         updateUserCoinsonFireStore(coinsAfterAdding);
 
 
-
     }
 
     public static void updateUserCoinsonFireStore(int value) {
@@ -235,6 +238,46 @@ public class FirebaseUtil {
                 .addOnFailureListener(e -> {
                     // Handle any errors that might occur during the update
                 });
+
+    }
+
+
+    public static void getUnreadMessageCount(List<String> userIds, TextView messageCount) {
+
+        String otherUserId = userIds.get(0);
+        if (userIds.get(0).equals(String.valueOf(SplashScreen.userModel.getUserId()))) {
+            otherUserId = userIds.get(1);
+        }
+        final int[] unreadCount = {0};
+
+        String roomId = FirebaseUtil.getChatroomId(String.valueOf(SplashScreen.userModel.getUserId()), otherUserId);
+        String finalOtherUserId = otherUserId;
+        getChatroomMessageReference(roomId).get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<QuerySnapshot> task) {
+
+                if (task.isSuccessful()) {
+                    for (QueryDocumentSnapshot document : task.getResult()) {
+                        // Convert the document data to a ChatModel instance
+                        ChatMessageModel chatModel = document.toObject(ChatMessageModel.class);
+
+                        // Add your logic to handle the data as needed
+                        if (chatModel.getRead() == 0 && chatModel.getSenderId().equals(finalOtherUserId)) {
+                            unreadCount[0]++;
+                        }
+                    }
+                    if (unreadCount[0] != 0) {
+                        messageCount.setText(String.valueOf(unreadCount[0]));
+                    } else {
+                        messageCount.setVisibility(View.GONE);
+                    }
+                } else {
+                    // Handle errors
+                    Log.d("dasfsadf", "Error getting documents: ", task.getException());
+                }
+            }
+        });
+
 
     }
 

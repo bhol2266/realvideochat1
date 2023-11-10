@@ -2,6 +2,7 @@ package com.bhola.realvideochat1.adapter;
 
 import android.content.Context;
 import android.content.Intent;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -38,6 +39,7 @@ public class RecentChatRecyclerAdapter extends FirestoreRecyclerAdapter<Chatroom
 
     @Override
     protected void onBindViewHolder(@NonNull ChatroomModelViewHolder holder, int position, @NonNull ChatroomModel model) {
+
 
         FirebaseUtil.getOtherUserFromChatroom(model.getUserIds())
                 .get().addOnCompleteListener(task -> {
@@ -76,6 +78,24 @@ public class RecentChatRecyclerAdapter extends FirestoreRecyclerAdapter<Chatroom
 
                     }
                 });
+
+
+        if (model.isNewMessage()) {
+
+            FirebaseUtil.getUnreadMessageCount(model.getUserIds(), holder.messageCount);
+        }
+    }
+
+    @Override
+    public void onDataChanged() {
+        super.onDataChanged();
+
+        Log.d("hey whats up", "onDataChanged: ");
+        // This method will be called when there is a change in the data set,
+        // including when items are inserted, updated, or removed.
+
+        // Add your code here to handle the item insertion event.
+        // For example, you can scroll to the newly added item, show a notification, etc.
     }
 
     @NonNull
