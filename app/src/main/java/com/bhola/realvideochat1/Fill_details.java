@@ -29,6 +29,8 @@ import androidx.core.content.ContextCompat;
 import com.bhola.realvideochat1.Models.UserModel;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.storage.FirebaseStorage;
@@ -63,7 +65,7 @@ public class Fill_details extends AppCompatActivity {
         setContentView(R.layout.activity_fill_details);
 
         loggedAs = getIntent().getStringExtra("loggedAs");
-        userId = generateUserID();
+        generateUserID();
 
 
         nextBtn = findViewById(R.id.nextBtn);
@@ -71,7 +73,11 @@ public class Fill_details extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 if (nickName.getText().toString().length() > 0 && selectedGender.length() > 0 && Birthday.length() > 0) {
-
+                    int age = new Utils().calculateAge(Birthday);
+                    if (age < 18) {
+                        Toast.makeText(Fill_details.this, "Under 18 not allowed", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
 
                     if (DP_changed) {
                         uploadImagetoFirebaseStorage(ChangeDP_URI);
@@ -157,7 +163,7 @@ public class Fill_details extends AppCompatActivity {
         editor.apply();
 
 
-        UserModel userModel = new UserModel(nickName.getText().toString(), email, photoUrl, loggedAs, selectedGender, Birthday, "", "English", "", "", false, 100, userId, new java.util.Date(), "", new ArrayList<GalleryModel>(),"",false);
+        UserModel userModel = new UserModel(nickName.getText().toString(), email, photoUrl, loggedAs, selectedGender, Birthday, "", "English", "", "", false, 100, userId, new java.util.Date(), "", new ArrayList<GalleryModel>(), "", false);
         SplashScreen.userModel = userModel;
 
 
@@ -181,9 +187,9 @@ public class Fill_details extends AppCompatActivity {
 
         //add fcm token
         FirebaseMessaging.getInstance().getToken().addOnCompleteListener(task -> {
-            if(task.isSuccessful()){
+            if (task.isSuccessful()) {
                 String token = task.getResult();
-                new Utils().updateProfileonFireStore("fcmToken",token);
+                new Utils().updateProfileonFireStore("fcmToken", token);
             }
         });
 
@@ -191,18 +197,38 @@ public class Fill_details extends AppCompatActivity {
         try {
             new Utils().downloadProfile_andGetURI(photoUrl, Fill_details.this);
         } catch (IOException e) {
-            Log.d("SpaceError", "saveProfileDetails: "+e.getMessage());
+            Log.d("SpaceError", "saveProfileDetails: " + e.getMessage());
         }
 
     }
 
-    private int generateUserID() {
+    private void generateUserID() {
         Random random = new Random();
         int min = 1000000; // The minimum 7-digit number (1,000,000)
         int max = 9999999; // The maximum 7-digit number (9,999,999)
 
         int randomInt = random.nextInt((max - min) + 1) + min;
-        return randomInt;
+
+        String collectionPath = "Users";
+        String documentId = String.valueOf(randomInt);
+
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        Task<DocumentSnapshot> documentSnapshotTask = db.collection(collectionPath).document(documentId).get();
+
+        documentSnapshotTask.addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                DocumentSnapshot document = task.getResult();
+
+                if (document.exists()) {
+                    generateUserID();
+                } else {
+                    userId = randomInt;
+                }
+            } else {
+                userId = randomInt;
+            }
+        });
+
     }
 
     private void receiveIntent() {
@@ -341,8 +367,8 @@ public class Fill_details extends AppCompatActivity {
         StorageReference imageRef = storageReference.child("Users/" + String.valueOf(userId) + "/profile.jpg");
 
 
-        int orientation = ImageResizer.getImageOrientation(croppedImageUri,Fill_details.this);
-        Bitmap bitmap=ImageResizer.imageURItoBitmap(croppedImageUri,Fill_details.this);
+        int orientation = ImageResizer.getImageOrientation(croppedImageUri, Fill_details.this);
+        Bitmap bitmap = ImageResizer.imageURItoBitmap(croppedImageUri, Fill_details.this);
         Bitmap rotatedBitmap = ImageResizer.rotateBitmap(bitmap, orientation);
 
         Bitmap redusedBitmap = ImageResizer.reduceBitmapSize(rotatedBitmap, 400000);
@@ -350,7 +376,6 @@ public class Fill_details extends AppCompatActivity {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         redusedBitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
         byte[] data = baos.toByteArray();
-
 
 
 // Upload the file to Firebase Storage

@@ -21,7 +21,6 @@ import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -51,6 +50,7 @@ import com.devlomi.record_view.RecordButton;
 import com.devlomi.record_view.RecordView;
 import com.firebase.ui.firestore.FirestoreRecyclerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
@@ -100,8 +100,8 @@ public class ChatScreen_User extends Activity {
     AlertDialog report_userSucessfully_dialog = null;
     private AudioRecorder audioRecorder;
     private File recordFile;
-    String chatroomId;
-    ChatroomModel chatroomModel;
+    public static String chatroomId;
+    public static ChatroomModel chatroomModel;
     EditText newMessage;
     ChatRecyclerAdapter adapter;
     MediaPlayer mediaPlayer;
@@ -118,7 +118,6 @@ public class ChatScreen_User extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
-        
 
 
         init();
@@ -190,6 +189,9 @@ public class ChatScreen_User extends Activity {
 
     private void getProfileDetail() {
         String userModelJson = getIntent().getStringExtra("userModelJson");
+        String chatRoomJson = getIntent().getStringExtra("chatRoomJson");
+        chatroomModel = new Gson().fromJson(chatRoomJson, ChatroomModel.class); // Using Gson for JSON deserialization
+
         otherUser = new Gson().fromJson(userModelJson, UserModel.class); // Using Gson for JSON deserialization
 
     }
@@ -205,7 +207,7 @@ public class ChatScreen_User extends Activity {
                             chatroomId,
                             Arrays.asList(String.valueOf(SplashScreen.userModel.getUserId()), String.valueOf(otherUser.getUserId())),
                             Timestamp.now(),
-                            "","",true
+                            "", "", true
                     );
                     FirebaseUtil.getChatroomReference(chatroomId).set(chatroomModel);
                 }
@@ -299,7 +301,7 @@ public class ChatScreen_User extends Activity {
         FirestoreRecyclerOptions<ChatMessageModel> options = new FirestoreRecyclerOptions.Builder<ChatMessageModel>()
                 .setQuery(query, ChatMessageModel.class).build();
 
-        adapter = new ChatRecyclerAdapter(options, ChatScreen_User.this, String.valueOf(SplashScreen.userModel.getUserId()), SplashScreen.userModel.getProfilepic(), otherUser.getProfilepic(), mediaPlayer);
+        adapter = new ChatRecyclerAdapter(options, ChatScreen_User.this, String.valueOf(SplashScreen.userModel.getUserId()), SplashScreen.userModel.getProfilepic(), otherUser.getProfilepic(), mediaPlayer,otherUser.getSelectedGender());
         LinearLayoutManager manager = new LinearLayoutManager(this);
         manager.setReverseLayout(true);
         recyclerView.setLayoutManager(manager);
@@ -325,11 +327,15 @@ public class ChatScreen_User extends Activity {
         FirebaseUtil.getChatroomReference(chatroomId).set(chatroomModel);
 
 
-        ChatMessageModel chatMessageModel = new ChatMessageModel(message, String.valueOf(SplashScreen.userModel.getUserId()), Timestamp.now(), type, extraMessage,0,0);
-        FirebaseUtil.getChatroomMessageReference(chatroomId).add(chatMessageModel)
-                .addOnCompleteListener(new OnCompleteListener<DocumentReference>() {
+        String customDocumentId = FirebaseUtil.generateDocumentId();
+        ChatMessageModel chatMessageModel = new ChatMessageModel(message, String.valueOf(SplashScreen.userModel.getUserId()), Timestamp.now(), type, extraMessage, 0, 0, customDocumentId);
+
+        DocumentReference documentReference = FirebaseUtil.getChatroomMessageReference(chatroomId).document(customDocumentId);
+// Set the ChatMessageModel data directly with the specified document ID
+        documentReference.set(chatMessageModel)
+                .addOnCompleteListener(new OnCompleteListener<Void>() {
                     @Override
-                    public void onComplete(@NonNull Task<DocumentReference> task) {
+                    public void onComplete(@NonNull Task<Void> task) {
                         if (task.isSuccessful()) {
                             EditText newMessage = findViewById(R.id.newMessage);
                             newMessage.setText("");
@@ -339,7 +345,16 @@ public class ChatScreen_User extends Activity {
                             }
                         }
                     }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        // Handle errors
+                        // e.g., Log an error message
+                    }
                 });
+
+
     }
 
 
@@ -405,6 +420,7 @@ public class ChatScreen_User extends Activity {
             fragmentManager.popBackStack();
         } else {
             // If there are no fragments in the back stack, perform the default back button behavior
+            finish();
             super.onBackPressed();
         }
     }

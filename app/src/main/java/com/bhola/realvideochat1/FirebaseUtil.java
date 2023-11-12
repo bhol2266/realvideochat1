@@ -1,7 +1,6 @@
 package com.bhola.realvideochat1;
 
 import android.util.Log;
-import android.view.View;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -19,6 +18,9 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.ListResult;
+import com.google.firebase.storage.StorageReference;
 
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
@@ -219,7 +221,6 @@ public class FirebaseUtil {
         Fragment_UserProfile.coins.setText(String.valueOf("Coins: " + SplashScreen.userModel.getCoins()));
         updateUserCoinsonFireStore(coinsAfterAdding);
 
-
     }
 
     public static void updateUserCoinsonFireStore(int value) {
@@ -268,8 +269,6 @@ public class FirebaseUtil {
                     }
                     if (unreadCount[0] != 0) {
                         messageCount.setText(String.valueOf(unreadCount[0]));
-                    } else {
-                        messageCount.setVisibility(View.GONE);
                     }
                 } else {
                     // Handle errors
@@ -280,6 +279,42 @@ public class FirebaseUtil {
 
 
     }
+
+    public static String generateDocumentId() {
+        long unixTimestampMillis = System.currentTimeMillis();
+        return String.valueOf(SplashScreen.userModel.getUserId()) + String.valueOf(unixTimestampMillis);
+
+    }
+
+
+    public static void deleteFolderAndContents(String userID) {
+        FirebaseStorage storage = FirebaseStorage.getInstance();
+
+
+        // Create a reference to the folder
+        StorageReference folderRef = storage.getReference().child("Users").child(userID);
+
+        // List all items in the folder
+        Task<ListResult> listTask = folderRef.listAll();
+        listTask.addOnSuccessListener(listResult -> {
+
+            //delete files inside videoRecording , chatimages, gallery
+            for (StorageReference reference : listResult.getPrefixes()) {
+                Task<ListResult> listTask2 = reference.listAll();
+                listTask2.addOnSuccessListener(listResult1 -> {
+                    for (StorageReference item : listResult1.getItems()) {
+                        item.delete();
+                    }
+                });
+            }
+
+            // Delete profile image
+            for (StorageReference item : listResult.getItems()) {
+                item.delete();
+            }
+        });
+    }
+
 
 }
 

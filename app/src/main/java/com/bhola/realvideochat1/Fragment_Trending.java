@@ -70,8 +70,19 @@ public class Fragment_Trending extends Fragment {
 
         setupRecycerView();
         getLocation();
-
+        gotoAdminPanel();
         return view;
+    }
+
+    private void gotoAdminPanel() {
+        TextView NearbyTextview = view.findViewById(R.id.NearbyTextview);
+        NearbyTextview.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View view) {
+                context.startActivity(new Intent(context, AdminPanel_Userlist.class));
+                return false;
+            }
+        });
     }
 
 
@@ -117,7 +128,7 @@ public class Fragment_Trending extends Fragment {
         recyclerView.setNestedScrollingEnabled(false);
 
 
-            getLatestUsers(page);
+        getLatestUsers(page);
 
 
     }

@@ -114,7 +114,7 @@ public class Utils {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
 
         CollectionReference usersRef = db.collection("Users");
-        Query query = usersRef.orderBy("date", Query.Direction.DESCENDING).whereEqualTo("selectedGender", gender_query).limit(800);
+        Query query = usersRef.orderBy("date", Query.Direction.DESCENDING).whereEqualTo("selectedGender", gender_query).whereEqualTo("banned", false).limit(100);
         query.get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
             @Override
             public void onComplete(@NonNull Task<QuerySnapshot> task) {
@@ -135,7 +135,7 @@ public class Utils {
                     adapter.notifyDataSetChanged();
                     swipeRefreshLayout.setRefreshing(false);
                 } else {
-                    Log.d("Exception", "Error getting documents: ", task.getException());
+                    Log.d("sdfsdafsdaf", "Error getting documents: ", task.getException());
                 }
             }
         });

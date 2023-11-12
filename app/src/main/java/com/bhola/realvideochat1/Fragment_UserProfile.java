@@ -35,9 +35,9 @@ import java.util.Date;
 public class Fragment_UserProfile extends Fragment {
 
 
-    ImageView profileImage;
+    ImageView profileImage, streamerTick;
     TextView name, id;
-    public  static  TextView coins;
+    public static TextView coins;
     LinearLayout logout;
     View view;
     Context context;
@@ -82,15 +82,33 @@ public class Fragment_UserProfile extends Fragment {
         profileEdit();
 
         notificationBar();
+        earning();
 
 
         return view;
+    }
+
+    private void earning() {
+        if (SplashScreen.userModel.isStreamer()) {
+            View earningBar = view.findViewById(R.id.earningBar);
+            earningBar.setVisibility(View.VISIBLE);
+            LinearLayout earning = view.findViewById(R.id.earning);
+            earning.setVisibility(View.VISIBLE);
+            earning.setOnClickListener(view -> {
+                startActivity(new Intent(context, StreamerEarning.class));
+            });
+        }
     }
 
     private void setProfileDetails() {
         SharedPreferences sh = context.getSharedPreferences("UserInfo", MODE_PRIVATE);
 
         profileImage = view.findViewById(R.id.profileUrl);
+        streamerTick = view.findViewById(R.id.streamerTick);
+        if (SplashScreen.userModel.isStreamer()) {
+            streamerTick.setVisibility(View.VISIBLE);
+
+        }
         name = view.findViewById(R.id.profileName);
         coins = view.findViewById(R.id.coins);
         id = view.findViewById(R.id.id);
@@ -160,7 +178,7 @@ public class Fragment_UserProfile extends Fragment {
             if (urll.startsWith("http")) {
 
                 Picasso.get()
-                        .load( SplashScreen.userModel.getProfilepic())
+                        .load(SplashScreen.userModel.getProfilepic())
                         .into(profileImage);
             } else {
 //                if (urll.length() > 0) {

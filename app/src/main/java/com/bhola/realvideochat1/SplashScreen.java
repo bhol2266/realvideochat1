@@ -166,7 +166,6 @@ public class SplashScreen extends AppCompatActivity {
 
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         generateNotification();
-        generateFCMToken();
 
 
 //        clearChats();
@@ -285,6 +284,8 @@ public class SplashScreen extends AppCompatActivity {
                         Utils utils = new Utils();
                         utils.updateDateonFireStore("date", new Date());
                     } else {
+
+                        SplashScreen.userLoggedIn=false;
                         // User document doesn't exist
                     }
                 })
@@ -296,14 +297,7 @@ public class SplashScreen extends AppCompatActivity {
     }
 
 
-    private void generateFCMToken() {
 
-        if (getIntent() != null && getIntent().hasExtra("KEY1")) {
-            if (getIntent().getExtras().getString("KEY1").equals("Notification_Story")) {
-                Notification_Intent_Firebase = "active";
-            }
-        }
-    }
 
 
     @Override

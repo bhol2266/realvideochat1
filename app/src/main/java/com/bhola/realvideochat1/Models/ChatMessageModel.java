@@ -8,13 +8,13 @@ public class ChatMessageModel {
     private Timestamp timestamp;
     private String messagetype;
     private String extraMessage;
-    int sent,read;
-
+    int sent, read;
+    String documentId;
 
     public ChatMessageModel() {
     }
 
-    public ChatMessageModel(String message, String senderId, Timestamp timestamp, String messagetype, String extraMessage, int sent, int read) {
+    public ChatMessageModel(String message, String senderId, Timestamp timestamp, String messagetype, String extraMessage, int sent, int read, String documentId) {
         this.message = message;
         this.senderId = senderId;
         this.timestamp = timestamp;
@@ -22,6 +22,7 @@ public class ChatMessageModel {
         this.extraMessage = extraMessage;
         this.sent = sent;
         this.read = read;
+        this.documentId = documentId;
     }
 
     public String getMessage() {
@@ -78,5 +79,13 @@ public class ChatMessageModel {
 
     public void setRead(int read) {
         this.read = read;
+    }
+
+    public String getDocumentId() {
+        return documentId;
+    }
+
+    public void setDocumentId(String documentId) {
+        this.documentId = documentId;
     }
 }

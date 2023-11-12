@@ -176,7 +176,7 @@ public class LoginScreen extends AppCompatActivity {
                     }
                 });
             } catch (ApiException e) {
-                Log.d(SplashScreen.TAG, "onActivityResult: " + e.getMessage());
+                Log.d(SplashScreen.TAG, "onActivityResulttt: " + e.getMessage());
             }
         }
         super.onActivityResult(requestCode, resultCode, data);

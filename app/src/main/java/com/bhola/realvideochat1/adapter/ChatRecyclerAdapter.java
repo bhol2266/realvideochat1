@@ -8,6 +8,7 @@ import android.media.AudioAttributes;
 import android.media.ExifInterface;
 import android.media.MediaPlayer;
 import android.net.Uri;
+import android.os.Handler;
 import android.provider.MediaStore;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -26,12 +27,17 @@ import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.airbnb.lottie.LottieAnimationView;
+import com.bhola.realvideochat1.ChatScreen_User;
+import com.bhola.realvideochat1.FirebaseUtil;
 import com.bhola.realvideochat1.Fragment_LargePhotoViewer;
 import com.bhola.realvideochat1.ImageResizer;
 import com.bhola.realvideochat1.Models.ChatMessageModel;
 import com.bhola.realvideochat1.R;
+import com.bhola.realvideochat1.SplashScreen;
 import com.firebase.ui.firestore.FirestoreRecyclerAdapter;
 import com.firebase.ui.firestore.FirestoreRecyclerOptions;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.Timestamp;
 import com.squareup.picasso.Picasso;
 
@@ -53,14 +59,16 @@ public class ChatRecyclerAdapter extends FirestoreRecyclerAdapter<ChatMessageMod
     String currentProfile;
     String otherProfile;
     MediaPlayer mediaPlayer;
+    String otherProfileGender;
 
-    public ChatRecyclerAdapter(@NonNull FirestoreRecyclerOptions<ChatMessageModel> options, Context context, String currentUserId, String currentProfile, String otherProfile, MediaPlayer mediaPlayer) {
+    public ChatRecyclerAdapter(@NonNull FirestoreRecyclerOptions<ChatMessageModel> options, Context context, String currentUserId, String currentProfile, String otherProfile, MediaPlayer mediaPlayer, String otherProfileGender) {
         super(options);
         this.context = context;
         this.currentUserId = currentUserId;
         this.currentProfile = currentProfile;
         this.otherProfile = otherProfile;
         this.mediaPlayer = mediaPlayer;
+        this.otherProfileGender = otherProfileGender;
     }
 
     @Override
@@ -179,10 +187,34 @@ public class ChatRecyclerAdapter extends FirestoreRecyclerAdapter<ChatMessageMod
 
 
             }
-            Picasso.get().load(currentProfile).into(holder.profileImage_right);
+            if (currentProfile.length() < 10) {
+                if (SplashScreen.userModel.getSelectedGender().equals("male")) {
+                    holder.profileImage_right.setImageResource(R.drawable.male_logo);
+                } else {
+                    holder.profileImage_right.setImageResource(R.drawable.female_logo);
+                }
+            } else {
+                Picasso.get().load(currentProfile).into(holder.profileImage_right);
+            }
 
 
         } else {
+            if (chatMessageModel.getRead() == 0 ) {
+                chatMessageModel.setRead(1);
+                FirebaseUtil.getChatroomMessageReference(ChatScreen_User.chatroomId).document(chatMessageModel.getDocumentId()).set(chatMessageModel).addOnCompleteListener(new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+
+                    }
+                });
+                new Handler().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        ChatScreen_User.chatroomModel.setNewMessage(false);
+                        FirebaseUtil.getChatroomReference(ChatScreen_User.chatroomId).set(ChatScreen_User.chatroomModel);
+                    }
+                }, 1000);
+            }
             holder.leftSideChat.setVisibility(View.VISIBLE);
             holder.rightSideChat.setVisibility(View.GONE);
             holder.timeStamp_left.setText(getTimeStampFormat(chatMessageModel.getTimestamp()));
@@ -293,8 +325,15 @@ public class ChatRecyclerAdapter extends FirestoreRecyclerAdapter<ChatMessageMod
 
             }
 
-
-            Picasso.get().load(otherProfile).into(holder.profileImage_left);
+            if (otherProfile.length() < 10) {
+                if (otherProfileGender.equals("male")) {
+                    holder.profileImage_left.setImageResource(R.drawable.male_logo);
+                } else {
+                    holder.profileImage_left.setImageResource(R.drawable.female_logo);
+                }
+            } else {
+                Picasso.get().load(otherProfile).into(holder.profileImage_left);
+            }
 
         }
         updateErrorIcon(holder.errorLayout_right, holder.errorIcon_right, chatMessageModel.getMessagetype());
@@ -360,20 +399,6 @@ public class ChatRecyclerAdapter extends FirestoreRecyclerAdapter<ChatMessageMod
     }
 
 
-    //    class ChatModelViewHolder extends RecyclerView.ViewHolder{
-//
-//        LinearLayout leftChatLayout,rightChatLayout;
-//        TextView leftChatTextview,rightChatTextview;
-//
-//        public ChatModelViewHolder(@NonNull View itemView) {
-//            super(itemView);
-//
-//            leftChatLayout = itemView.findViewById(R.id.left_chat_layout);
-//            rightChatLayout = itemView.findViewById(R.id.right_chat_layout);
-//            leftChatTextview = itemView.findViewById(R.id.left_chat_textview);
-//            rightChatTextview = itemView.findViewById(R.id.right_chat_textview);
-//        }
-//    }
     class ChatModelViewHolder extends RecyclerView.ViewHolder {
 
         //LeftSide

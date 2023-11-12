@@ -69,8 +69,10 @@ public class RecentChatRecyclerAdapter extends FirestoreRecyclerAdapter<Chatroom
                         holder.chatItemClick.setOnClickListener(v -> {
                             //navigate to chat activity
                             String userModelJson = new Gson().toJson(otherUserModel); // Using Google's Gson library for JSON serialization
+                            String chatRoomJson= new Gson().toJson(model);
                             Intent intent = new Intent(context, ChatScreen_User.class);
                             intent.putExtra("userModelJson", userModelJson);
+                            intent.putExtra("chatRoomJson", chatRoomJson);
                             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                             context.startActivity(intent);
 
@@ -81,8 +83,10 @@ public class RecentChatRecyclerAdapter extends FirestoreRecyclerAdapter<Chatroom
 
 
         if (model.isNewMessage()) {
-
+            holder.messageCount.setVisibility(View.VISIBLE);
             FirebaseUtil.getUnreadMessageCount(model.getUserIds(), holder.messageCount);
+        }else {
+            holder.messageCount.setVisibility(View.GONE);
         }
     }
 
