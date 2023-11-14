@@ -1,6 +1,9 @@
 package com.bhola.realvideochat1;
 
+import android.content.Context;
+import android.media.MediaPlayer;
 import android.util.Log;
+import android.view.View;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -243,7 +246,7 @@ public class FirebaseUtil {
     }
 
 
-    public static void getUnreadMessageCount(List<String> userIds, TextView messageCount) {
+    public static void getUnreadMessageCount(List<String> userIds, TextView messageCount,Context context) {
 
         String otherUserId = userIds.get(0);
         if (userIds.get(0).equals(String.valueOf(SplashScreen.userModel.getUserId()))) {
@@ -264,11 +267,17 @@ public class FirebaseUtil {
 
                         // Add your logic to handle the data as needed
                         if (chatModel.getRead() == 0 && chatModel.getSenderId().equals(finalOtherUserId)) {
+                            addChattoUnreadChatlist(chatModel,context);
                             unreadCount[0]++;
                         }
                     }
                     if (unreadCount[0] != 0) {
+                        messageCount.setVisibility(View.VISIBLE);
                         messageCount.setText(String.valueOf(unreadCount[0]));
+
+
+                    } else {
+                        messageCount.setVisibility(View.GONE);
                     }
                 } else {
                     // Handle errors
@@ -278,6 +287,44 @@ public class FirebaseUtil {
         });
 
 
+    }
+
+    public static void addChattoUnreadChatlist(ChatMessageModel chatModel, Context context) {
+
+        boolean chatisAvailable = false; // this is to check if this incoming chat is already exists in  MainActivity.unreadChatlist
+        for (ChatMessageModel chatMessageModel : MainActivity.unreadChatlist) {
+            if (chatModel.getDocumentId().equals(chatMessageModel.getDocumentId())) {
+                chatisAvailable = true;
+                break;
+            }
+        }
+        if (!chatisAvailable) {
+            MainActivity.unreadChatlist.add(chatModel);
+            MainActivity.badge_text.setText(String.valueOf(MainActivity.unreadChatlist.size()));
+            MainActivity.badge_text.setVisibility(View.VISIBLE);
+
+            MediaPlayer mediaPlayer = MediaPlayer.create(context, R.raw.message_received);
+            mediaPlayer.start();
+        }
+    }
+
+    public static void removeChattoUnreadChatlist(ChatMessageModel chatModel) {
+
+        boolean chatiRemoved = false; // this is to check if this incoming chat is already exists in  MainActivity.unreadChatlist
+        for (int i = 0; i < MainActivity.unreadChatlist.size(); i++) {
+            ChatMessageModel chatMessageModel = MainActivity.unreadChatlist.get(i);
+
+            if (chatModel.getDocumentId().equals(chatMessageModel.getDocumentId())) {
+                chatiRemoved = true;
+                MainActivity.unreadChatlist.remove(i);
+                break;
+            }
+        }
+        MainActivity.badge_text.setText(String.valueOf(MainActivity.unreadChatlist.size()));
+        MainActivity.badge_text.setVisibility(View.VISIBLE);
+        if (MainActivity.unreadChatlist.size() == 0) {
+            MainActivity.badge_text.setVisibility(View.GONE);
+        }
     }
 
     public static String generateDocumentId() {

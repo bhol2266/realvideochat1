@@ -15,6 +15,7 @@
     <color name="male_icon">#3F51B5</color>
     <color name="green">#4CAF50</color>
     <color name="color_333333">#333333</color>
+    <color name="messageSeenBlue">#008DFD</color>
 
 
 </resources>

@@ -3,12 +3,20 @@ package com.bhola.realvideochat1.ZegoCloud;
 import android.app.Application;
 import android.content.Context;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
 import com.bhola.realvideochat1.FirebaseUtil;
+import com.bhola.realvideochat1.Fragment_Trending;
 import com.bhola.realvideochat1.Models.CallogModel;
 import com.bhola.realvideochat1.Models.UserModel;
 import com.bhola.realvideochat1.SplashScreen;
@@ -20,6 +28,7 @@ import com.zegocloud.uikit.components.audiovideo.ZegoForegroundViewProvider;
 import com.zegocloud.uikit.prebuilt.call.ZegoUIKitPrebuiltCallConfig;
 import com.zegocloud.uikit.prebuilt.call.config.DurationUpdateListener;
 import com.zegocloud.uikit.prebuilt.call.config.ZegoCallDurationConfig;
+import com.zegocloud.uikit.prebuilt.call.config.ZegoHangUpConfirmDialogInfo;
 import com.zegocloud.uikit.prebuilt.call.config.ZegoNotificationConfig;
 import com.zegocloud.uikit.prebuilt.call.invite.ZegoCallInvitationData;
 import com.zegocloud.uikit.prebuilt.call.invite.ZegoUIKitPrebuiltCallConfigProvider;
@@ -34,8 +43,13 @@ import com.zegocloud.uikit.prebuilt.call.invite.internal.ZegoInvitationCallListe
 import com.zegocloud.uikit.prebuilt.call.invite.widget.ZegoSendCallInvitationButton;
 import com.zegocloud.uikit.service.defines.ZegoUIKitUser;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class ZegoCloud_Utils {
 
@@ -113,6 +127,13 @@ public class ZegoCloud_Utils {
                     }
                 };
 
+
+                config.hangUpConfirmDialogInfo = new ZegoHangUpConfirmDialogInfo();
+                config.hangUpConfirmDialogInfo.title = "Hangup confirm";
+                config.hangUpConfirmDialogInfo.message = "Do you want to end call?";
+                config.hangUpConfirmDialogInfo.cancelButtonName = "Cancel";
+                config.hangUpConfirmDialogInfo.confirmButtonName = "Confirm";
+
                 // Modify your custom calling configurations here.
                 config.audioVideoViewConfig.videoViewForegroundViewProvider = (ZegoForegroundViewProvider) (parent, uiKitUser) -> {
                     CustomView customView = new CustomView(parent.getContext(), uiKitUser.userID);
@@ -143,7 +164,7 @@ public class ZegoCloud_Utils {
 
         if (SplashScreen.isOutgoing) {
             if (!SplashScreen.userModel.isStreamer()) {
-                if (seconds !=0 && seconds % 60 == 0) {
+                if (seconds != 0 && seconds % 60 == 0) {
                     FirebaseUtil.addStreamerCoins();
                     if (SplashScreen.userModel.getCoins() < 100) {
                         ZegoUIKitPrebuiltCallInvitationService.endCall();
@@ -167,89 +188,78 @@ public class ZegoCloud_Utils {
     }
 
 
-    private void checkUserOnlineStatus(List<UserModel> femaleUsers, Context context) {
+    public static void checkUserOnlineStatus(List<UserModel> users, Context context) {
 
 
-//        ArrayList<UserOnlineModel> userlist_Online = new ArrayList<>();
-//        ZegoCloud_Signature zegoCloudSignature = new ZegoCloud_Signature();
-//        Map<String, Object> data = zegoCloudSignature.getSignature();
-//
-//        String signature = (String) data.get("signature");
-//        long unixTimestampSeconds = (long) data.get("timestamp");
-//        String SignatureNonce = (String) data.get("signatureNonce");
-//
-//        String API_URL = "https://zim-api.zego.im/?Action=QueryUserOnlineState&AppId=1889863973" + "&Timestamp=" + unixTimestampSeconds + "&Signature=" + signature + "&SignatureVersion=2.0" + "&SignatureNonce=" + SignatureNonce;
-//
-//        for (UserModel userModel : femaleUsers) {
-//
-//            String id = String.valueOf(userModel.getUserId());
-//            API_URL = API_URL + "&UserId[]=" + id;
-//        }
-//
-//
-//        StringRequest stringRequest = new StringRequest(Request.Method.GET, API_URL,
-//                new Response.Listener<String>() {
-//                    @Override
-//                    public void onResponse(String response) {
-//                        try {
-//                            JSONObject jsonObject = new JSONObject(response);
-//
-//                            JSONArray results = jsonObject.getJSONArray("Result");
-//                            Log.d("onResponse", "checkUserOnlineStatus: " + jsonObject.toString());
-//
-//                            for (int i = 0; i < results.length(); i++) {
-//                                JSONObject jsonObject1 = (JSONObject) results.get(i);
-//                                String userID = jsonObject1.getString("UserId");
-//                                String status = jsonObject1.getString("Status");
-//                                boolean isOnline = false;
-//                                if (status.equals("online")) {
-//                                    isOnline = true;
-//                                }
-//                                if (isOnline) {
-//                                    UserOnlineModel userOnlineModel = new UserOnlineModel(userID, isOnline);
-//                                    userlist_Online.add(userOnlineModel);
-//
-//                                }
-//                                if (userlist_Online.size() == 0) {
-//                                    //nobody is online so going to cameraActvity of recorded video calls
-//                                    context.startActivity(new Intent(context, CameraActivity.class));
-//                                    BeforeVideoCall.finishActivity((Activity) context);
-//                                    return;
-//                                }
-//
-//                                Random random = new Random();
-//                                int randomIndex = random.nextInt(userlist_Online.size());
-//                                int userId_forCalling = Integer.parseInt(userlist_Online.get(randomIndex).getUserID());
-//
-//
-//                                for (UserModel userModel : femaleUsers) {
-//                                    if (userModel.getUserId() == Integer.parseInt(userlist_Online.get(randomIndex).getUserID())) {
-//                                        BeforeVideoCall.targetUserID = String.valueOf(userModel.getUserId());
-//                                        BeforeVideoCall.targetuserName = userModel.getFullname();
-//                                    }
-//
-//                                }
-//                                BeforeVideoCall.clickVideoCAllBtn();
-//                                BeforeVideoCall.finishActivity((Activity) context);
-//                                invitationListners(context);
-//
-//                            }
-//
-//                        } catch (JSONException e) {
-//                            e.printStackTrace();
-//                            Log.d("onResponse", "JSONException: " + e.getMessage());
-//                        }
-//                    }
-//                }, new Response.ErrorListener() {
-//            @Override
-//            public void onErrorResponse(VolleyError error) {
-//                Log.d(TAG, "onResponse: " + error.getMessage());
-//                Toast.makeText(context, error.getMessage(), Toast.LENGTH_SHORT).show();
-//            }
-//        });
-//
-//        RequestQueue requestQueue = Volley.newRequestQueue(context);
-//        requestQueue.add(stringRequest);
+        ArrayList<String> userlist_Online = new ArrayList<>();
+        ZegoCloud_Signature zegoCloudSignature = new ZegoCloud_Signature();
+        Map<String, Object> data = zegoCloudSignature.getSignature();
+
+        String signature = (String) data.get("signature");
+        long unixTimestampSeconds = (long) data.get("timestamp");
+        String SignatureNonce = (String) data.get("signatureNonce");
+
+        String API_URL = "https://zim-api.zego.im/?Action=QueryUserOnlineState&AppId=1889863973" + "&Timestamp=" + unixTimestampSeconds + "&Signature=" + signature + "&SignatureVersion=2.0" + "&SignatureNonce=" + SignatureNonce;
+
+        for (UserModel userModel : users) {
+
+            String id = String.valueOf(userModel.getUserId());
+            API_URL = API_URL + "&UserId[]=" + id;
+        }
+
+
+        StringRequest stringRequest = new StringRequest(Request.Method.GET, API_URL,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        try {
+                            JSONObject jsonObject = new JSONObject(response);
+
+                            JSONArray results = jsonObject.getJSONArray("Result");
+
+                            for (int i = 0; i < results.length(); i++) {
+                                JSONObject jsonObject1 = (JSONObject) results.get(i);
+                                String userID = jsonObject1.getString("UserId");
+                                String status = jsonObject1.getString("Status");
+                                boolean isOnline = false;
+                                if (status.equals("online")) {
+                                    isOnline = true;
+                                }
+
+                                if (isOnline) {
+                                    userlist_Online.add(userID);
+
+                                }
+                            }
+                            Fragment_Trending.Onlineuserslist.clear();
+                            for (int i = 0; i < userlist_Online.size(); i++) {
+                                for (int j = 0; j < users.size(); j++) {
+                                    UserModel userModel = users.get(j);
+                                    if (userlist_Online.get(i).equals(String.valueOf(userModel.getUserId()))) {
+                                        Fragment_Trending.Onlineuserslist.add(userModel);
+                                    }
+                                }
+
+                            }
+                            Log.d("onResponse", "onResponse: "+ Fragment_Trending.Onlineuserslist.toString());
+                            Fragment_Trending.sliderAdapter.notifyDataSetChanged();
+
+
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                            Log.d("onResponse", "JSONException: " + e.getMessage());
+                        }
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.d("sadfsadf", "onResponse: " + error.getMessage());
+                Toast.makeText(context, error.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        RequestQueue requestQueue = Volley.newRequestQueue(context);
+        requestQueue.add(stringRequest);
 
 
     }
@@ -272,7 +282,7 @@ public class ZegoCloud_Utils {
         ZegoUIKitPrebuiltCallInvitationService.addOutgoingCallButtonListener(new OutgoingCallButtonListener() {
             @Override
             public void onOutgoingCallCancelButtonPressed() {
-                CallogModel callogModel = new CallogModel(SplashScreen.calleeId, "outgoing", Timestamp.now(), false, 0);
+                CallogModel callogModel = new CallogModel(SplashScreen.calleeId, "outgoing_canceled", Timestamp.now(), false, 0);
                 FirebaseUtil.addDocumentToCallLog(callogModel);
             }
         });
@@ -295,10 +305,10 @@ public class ZegoCloud_Utils {
 
             @Override
             public void onOutgoingCallAccepted(String callID, ZegoCallUser callee) {
-                CallogModel callogModel = new CallogModel(String.valueOf(callee.getId()), "outgoing", Timestamp.now(), true, 0);
+                CallogModel callogModel = new CallogModel(String.valueOf(callee.getId()), "outgoing_accepted", Timestamp.now(), true, 0);
                 FirebaseUtil.addDocumentToCallLog(callogModel);
                 SplashScreen.isOutgoing = true;
-                if(!SplashScreen.userModel.isStreamer()){
+                if (!SplashScreen.userModel.isStreamer()) {
                     FirebaseUtil.decreaseUserCoins(100);
                 }
 
@@ -307,20 +317,20 @@ public class ZegoCloud_Utils {
 
             @Override
             public void onOutgoingCallRejectedCauseBusy(String callID, ZegoCallUser callee) {
-                CallogModel callogModel = new CallogModel(String.valueOf(callee.getId()), "outgoing", Timestamp.now(), false, 0);
+                CallogModel callogModel = new CallogModel(String.valueOf(callee.getId()), "outgoing_busy", Timestamp.now(), false, 0);
                 FirebaseUtil.addDocumentToCallLog(callogModel);
             }
 
 
             @Override
             public void onOutgoingCallDeclined(String callID, ZegoCallUser callee) {
-                CallogModel callogModel = new CallogModel(String.valueOf(callee.getId()), "outgoing", Timestamp.now(), false, 0);
+                CallogModel callogModel = new CallogModel(String.valueOf(callee.getId()), "outgoing_rejected", Timestamp.now(), false, 0);
                 FirebaseUtil.addDocumentToCallLog(callogModel);
             }
 
             @Override
             public void onOutgoingCallTimeout(String callID, List<ZegoCallUser> callee) {
-                CallogModel callogModel = new CallogModel(String.valueOf(callee.get(0).getId()), "outgoing", Timestamp.now(), false, 0);
+                CallogModel callogModel = new CallogModel(String.valueOf(callee.get(0).getId()), "outgoing_canceled", Timestamp.now(), false, 0);
                 FirebaseUtil.addDocumentToCallLog(callogModel);
             }
         });

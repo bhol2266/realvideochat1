@@ -3,8 +3,10 @@ package com.bhola.realvideochat1.adapter;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
+import android.graphics.PorterDuff;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.InsetDrawable;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,8 +16,10 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.cardview.widget.CardView;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bhola.realvideochat1.ChatScreen_User;
 import com.bhola.realvideochat1.FirebaseUtil;
 import com.bhola.realvideochat1.Models.CallroomModel;
 import com.bhola.realvideochat1.Models.UserModel;
@@ -26,6 +30,9 @@ import com.bhola.realvideochat1.VipMembership;
 import com.bhola.realvideochat1.ZegoCloud.ZegoCloud_Utils;
 import com.firebase.ui.firestore.FirestoreRecyclerAdapter;
 import com.firebase.ui.firestore.FirestoreRecyclerOptions;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.google.gson.Gson;
 import com.squareup.picasso.Picasso;
 import com.zegocloud.uikit.prebuilt.call.invite.widget.ZegoSendCallInvitationButton;
@@ -49,6 +56,22 @@ public class RecentCallRecyclerAdapter extends FirestoreRecyclerAdapter<Callroom
     @Override
     protected void onBindViewHolder(@NonNull CallogViewHolder holder, int position, @NonNull CallroomModel model) {
 
+
+        FirebaseUtil.getCallroomLogsReference(model.getCallroomId()).get()
+                .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                    @Override
+                    public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                        int documentCount = queryDocumentSnapshots.size();
+                     holder.callCount.setText("("+String.valueOf(documentCount)+")");
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.e("Firestore", "Error getting documents: " + e.getMessage());
+                    }
+                });
+
         noCallsTextView.setVisibility(View.GONE);
 
         FirebaseUtil.getOtherUserFromCallroom(model.getUserIds())
@@ -59,6 +82,49 @@ public class RecentCallRecyclerAdapter extends FirestoreRecyclerAdapter<Callroom
 
                         UserModel otherUserModel = task.getResult().toObject(UserModel.class);
 
+                        if (lastCalledByMe) {
+                            holder.calltypeIcon.setImageResource(R.drawable.outgoing_call);
+                            if(model.getLastcallType().equals("outgoing_canceled")){
+                                holder.calltypeIcon.setColorFilter(ContextCompat.getColor(context, R.color.themeColor), PorterDuff.Mode.SRC_IN);
+
+                            }
+                            if(model.getLastcallType().equals("outgoing_accepted")){
+                                holder.calltypeIcon.setColorFilter(ContextCompat.getColor(context, R.color.green), PorterDuff.Mode.SRC_IN);
+
+                            }
+                            if(model.getLastcallType().equals("outgoing_busy")){
+                                holder.calltypeIcon.setColorFilter(ContextCompat.getColor(context, R.color.themeColor), PorterDuff.Mode.SRC_IN);
+
+                            }
+                            if(model.getLastcallType().equals("outgoing_rejected")){
+                                holder.calltypeIcon.setColorFilter(ContextCompat.getColor(context, R.color.themeColor), PorterDuff.Mode.SRC_IN);
+
+                            }
+                        } else {
+                            if(model.getLastcallType().equals("outgoing_canceled")){
+                                holder.calltypeIcon.setImageResource(R.drawable.missed_call);
+                                holder.calltypeIcon.setColorFilter(ContextCompat.getColor(context, R.color.themeColor), PorterDuff.Mode.SRC_IN);
+
+                            }
+                            if(model.getLastcallType().equals("outgoing_accepted")){
+                                holder.calltypeIcon.setImageResource(R.drawable.incomming_call);
+                                holder.calltypeIcon.setColorFilter(ContextCompat.getColor(context, R.color.green), PorterDuff.Mode.SRC_IN);
+
+                            }
+                            if(model.getLastcallType().equals("outgoing_busy")){
+                                holder.calltypeIcon.setImageResource(R.drawable.missed_call);
+                                holder.calltypeIcon.setColorFilter(ContextCompat.getColor(context, R.color.themeColor), PorterDuff.Mode.SRC_IN);
+
+                            }
+                            if(model.getLastcallType().equals("outgoing_rejected")){
+                                holder.calltypeIcon.setImageResource(R.drawable.incomming_call);
+                                holder.calltypeIcon.setColorFilter(ContextCompat.getColor(context, R.color.themeColor), PorterDuff.Mode.SRC_IN);
+
+                            }
+
+
+                        }
+
                         if (otherUserModel.getProfilepic().isEmpty()) {
                             if (otherUserModel.getSelectedGender().equals("male")) {
                                 holder.profileImage.setImageResource(R.drawable.male_logo);
@@ -68,7 +134,7 @@ public class RecentCallRecyclerAdapter extends FirestoreRecyclerAdapter<Callroom
                         } else {
                             Picasso.get().load(otherUserModel.getProfilepic()).into(holder.profileImage);
                         }
-                        holder.profileImage.setOnClickListener(v->{
+                        holder.profileImage.setOnClickListener(v -> {
                             String userModelJson = new Gson().toJson(otherUserModel); // Using Google's Gson library for JSON serialization
                             Intent intent = new Intent(context, Profile.class);
                             intent.putExtra("userModelJson", userModelJson);
@@ -77,14 +143,14 @@ public class RecentCallRecyclerAdapter extends FirestoreRecyclerAdapter<Callroom
                         holder.name.setText(otherUserModel.getFullname());
                         holder.timestamp.setText(FirebaseUtil.getTimeStampFormat(model.getLastCallTimestamp()));
 
-                        holder.chatCardView.setOnClickListener(view -> {
-                            if(SplashScreen.userModel.getCoins()<100){
+                        holder.callCardView.setOnClickListener(view -> {
+                            if (SplashScreen.userModel.getCoins() < 100) {
                                 rechargeDialog(view.getContext());
                                 return;
                             }
                             new ZegoCloud_Utils().initVoiceButton(otherUserModel.getFullname(), String.valueOf(otherUserModel.getUserId()), holder.newVoiceCall);
                             holder.newVoiceCall.performClick();
-                            SplashScreen.calleeId=String.valueOf(otherUserModel.getUserId());
+                            SplashScreen.calleeId = String.valueOf(otherUserModel.getUserId());
                             if (otherUserModel.isStreamer()) {
                                 SplashScreen.isCalleeIdStreamer = true;
                             } else {
@@ -92,20 +158,17 @@ public class RecentCallRecyclerAdapter extends FirestoreRecyclerAdapter<Callroom
                             }
 
                         });
-                        holder.videocall.setOnClickListener(view -> {
-                            if(SplashScreen.userModel.getCoins()<100){
+                        holder.chatCardView.setOnClickListener(view -> {
+                            if (SplashScreen.userModel.getCoins() < 100) {
                                 rechargeDialog(view.getContext());
                                 return;
 
                             }
-                            new ZegoCloud_Utils().initVideoButton(otherUserModel.getFullname(), String.valueOf(otherUserModel.getUserId()), holder.newVideoCall);
-                            holder.newVideoCall.performClick();
-                            SplashScreen.calleeId=String.valueOf(otherUserModel.getUserId());
-                            if (otherUserModel.isStreamer()) {
-                                SplashScreen.isCalleeIdStreamer = true;
-                            } else {
-                                SplashScreen.isCalleeIdStreamer = false;
-                            }
+                            String userModelJson = new Gson().toJson(otherUserModel); // Using Google's Gson library for JSON serialization
+                            Intent intent = new Intent(view.getContext(), ChatScreen_User.class);
+                            intent.putExtra("userModelJson", userModelJson);
+                            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                            context.startActivity(intent);
 
                         });
 
@@ -164,12 +227,11 @@ public class RecentCallRecyclerAdapter extends FirestoreRecyclerAdapter<Callroom
 
     class CallogViewHolder extends RecyclerView.ViewHolder {
         CircleImageView profileImage;
-        TextView name, timestamp;
+        TextView name, timestamp,callCount;
         ImageView calltypeIcon;
         ZegoSendCallInvitationButton newVoiceCall;
         ZegoSendCallInvitationButton newVideoCall;
-        CardView chatCardView;
-        ImageView videocall;
+        CardView chatCardView,callCardView;
 //        LinearLayout chatItemClick;
 
 
@@ -182,7 +244,8 @@ public class RecentCallRecyclerAdapter extends FirestoreRecyclerAdapter<Callroom
             newVoiceCall = itemView.findViewById(R.id.new_voice_call);
             newVideoCall = itemView.findViewById(R.id.new_video_call);
             chatCardView = itemView.findViewById(R.id.chatCardView);
-            videocall = itemView.findViewById(R.id.videocall);
+            callCardView = itemView.findViewById(R.id.callCardView);
+            callCount = itemView.findViewById(R.id.callCount);
 
 
         }

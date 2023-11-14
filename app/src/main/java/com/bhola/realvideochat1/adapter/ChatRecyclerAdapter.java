@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.FragmentManager;
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.PorterDuff;
 import android.media.AudioAttributes;
 import android.media.ExifInterface;
 import android.media.MediaPlayer;
@@ -24,6 +25,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.airbnb.lottie.LottieAnimationView;
@@ -197,21 +199,31 @@ public class ChatRecyclerAdapter extends FirestoreRecyclerAdapter<ChatMessageMod
                 Picasso.get().load(currentProfile).into(holder.profileImage_right);
             }
 
+            if (chatMessageModel.getRead() == 1) {
+                int tintColor = ContextCompat.getColor(context, R.color.messageSeenBlue);
+                holder.seenTick.setColorFilter(tintColor, PorterDuff.Mode.SRC_IN);
+            } else {
+                int tintColor = ContextCompat.getColor(context, R.color.grey);
+                holder.seenTick.setColorFilter(tintColor, PorterDuff.Mode.SRC_IN);
+            }
 
         } else {
-            if (chatMessageModel.getRead() == 0 ) {
+
+
+            if (chatMessageModel.getRead() == 0) {
+                FirebaseUtil.addChattoUnreadChatlist(chatMessageModel, context);
                 chatMessageModel.setRead(1);
                 FirebaseUtil.getChatroomMessageReference(ChatScreen_User.chatroomId).document(chatMessageModel.getDocumentId()).set(chatMessageModel).addOnCompleteListener(new OnCompleteListener<Void>() {
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
-
+                        FirebaseUtil.removeChattoUnreadChatlist(chatMessageModel);
                     }
                 });
                 new Handler().postDelayed(new Runnable() {
                     @Override
                     public void run() {
                         ChatScreen_User.chatroomModel.setNewMessage(false);
-                        FirebaseUtil.getChatroomReference(ChatScreen_User.chatroomId).set(ChatScreen_User.chatroomModel);
+                        FirebaseUtil.getChatroomReference(ChatScreen_User.chatroomId).update("newMessage", false);
                     }
                 }, 1000);
             }
@@ -426,6 +438,7 @@ public class ChatRecyclerAdapter extends FirestoreRecyclerAdapter<ChatMessageMod
         ProgressBar audioProgressBar_right;
         FrameLayout errorLayout_right;
         ImageView errorIcon_right;
+        ImageView seenTick;
         LinearLayout audioMsgLayout_right;
 
 
@@ -460,6 +473,7 @@ public class ChatRecyclerAdapter extends FirestoreRecyclerAdapter<ChatMessageMod
             errorLayout_right = itemView.findViewById(R.id.errorLayout_right);
             errorIcon_right = itemView.findViewById(R.id.errorIcon_right);
             audioMsgLayout_right = itemView.findViewById(R.id.audioMsgLayout_right);
+            seenTick = itemView.findViewById(R.id.seenTick);
         }
     }
 

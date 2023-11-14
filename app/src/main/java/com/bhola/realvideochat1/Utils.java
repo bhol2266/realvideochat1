@@ -21,15 +21,16 @@ import com.amazonaws.mobileconnectors.s3.transferutility.TransferUtility;
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.bhola.realvideochat1.Models.UserModel;
+import com.bhola.realvideochat1.ZegoCloud.ZegoCloud_Utils;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.google.firebase.messaging.FirebaseMessaging;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -41,7 +42,6 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import javax.net.ssl.HttpsURLConnection;
@@ -133,6 +133,7 @@ public class Utils {
                     }
 //                    new ZegoCloud_Utils().checkUserOnlineStatus(userslist, context);
                     adapter.notifyDataSetChanged();
+                    ZegoCloud_Utils.checkUserOnlineStatus(userslist, swipeRefreshLayout.getContext());
                     swipeRefreshLayout.setRefreshing(false);
                 } else {
                     Log.d("sdfsdafsdaf", "Error getting documents: ", task.getException());
@@ -167,44 +168,6 @@ public class Utils {
     }
 
 
-    public void readAll_FemaleUserList(Context context) {
-
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
-
-// Reference to the "users" collection in Firestore
-        CollectionReference usersCollection = db.collection("Users");
-
-// Create a query to filter users by gender
-        Query query = usersCollection.whereEqualTo("selectedGender", "female");
-
-// Execute the query and handle the results
-        query.get().addOnCompleteListener(task -> {
-            if (task.isSuccessful()) {
-                QuerySnapshot querySnapshot = task.getResult();
-                List<UserModel> femaleUsers = new ArrayList<>();
-
-                for (DocumentSnapshot document : querySnapshot.getDocuments()) {
-                    // Convert the Firestore document to a UserModel object
-                    UserModel user = document.toObject(UserModel.class);
-                    if (!SplashScreen.userModel.getEmail().equals(user.getEmail())) {
-                        //excluding self email
-                        femaleUsers.add(user);
-                    }
-
-                }
-
-//                checkUserOnlineStatus(femaleUsers, context);
-            } else {
-                // Handle the error
-                Exception e = task.getException();
-                e.printStackTrace();
-                Log.d("Exception", "Exception: " + e.getMessage());
-
-            }
-        });
-
-
-    }
 
 
     public static File uriToFile(Context context, Uri uri) {
@@ -349,6 +312,15 @@ public class Utils {
             throw new RuntimeException(e);
         }
         return 0;
+    }
+
+    public static void replaceFCMToken() {
+        FirebaseMessaging.getInstance().getToken().addOnCompleteListener(task -> {
+            if(task.isSuccessful()){
+                String token = task.getResult();
+                new Utils().updateProfileonFireStore("fcmToken",token);
+            }
+        });
     }
 
 

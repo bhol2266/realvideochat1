@@ -29,10 +29,12 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.bhola.realvideochat1.Models.UserModel;
+import com.bhola.realvideochat1.adapter.SliderAdapter;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.gson.Gson;
@@ -51,7 +53,9 @@ public class Fragment_Trending extends Fragment {
     View view;
     UserCardAdapter adapter;
     ArrayList<UserModel> userslist;
+  public static   ArrayList<UserModel> Onlineuserslist;
     GridLayoutManager layoutManager;
+    public static    SliderAdapter sliderAdapter;
     int page = 1;
     final int NOTIFICATION_REQUEST_CODE = 112;
 
@@ -71,7 +75,18 @@ public class Fragment_Trending extends Fragment {
         setupRecycerView();
         getLocation();
         gotoAdminPanel();
+        sliderAdapter();
+
         return view;
+    }
+
+    private void sliderAdapter() {
+        Onlineuserslist=new ArrayList<>();
+        RecyclerView recyclerView_slider = view.findViewById(R.id.recyclerView_slider);
+        recyclerView_slider.setVisibility(View.VISIBLE);
+        sliderAdapter = new SliderAdapter(context, Onlineuserslist);
+        recyclerView_slider.setLayoutManager(new LinearLayoutManager(context));
+        recyclerView_slider.setAdapter(sliderAdapter);
     }
 
     private void gotoAdminPanel() {

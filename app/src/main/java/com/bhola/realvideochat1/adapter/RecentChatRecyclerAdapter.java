@@ -83,8 +83,7 @@ public class RecentChatRecyclerAdapter extends FirestoreRecyclerAdapter<Chatroom
 
 
         if (model.isNewMessage()) {
-            holder.messageCount.setVisibility(View.VISIBLE);
-            FirebaseUtil.getUnreadMessageCount(model.getUserIds(), holder.messageCount);
+            FirebaseUtil.getUnreadMessageCount(model.getUserIds(), holder.messageCount,context);
         }else {
             holder.messageCount.setVisibility(View.GONE);
         }

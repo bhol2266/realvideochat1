@@ -41,7 +41,6 @@ import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
-import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.gson.Gson;
 
 import java.io.File;
@@ -226,8 +225,7 @@ public class LoginScreen extends AppCompatActivity {
                             editor.putInt("coins", SplashScreen.userModel.getCoins());
                             editor.apply();
 
-                            replaceFCMToken();
-
+                           Utils.replaceFCMToken();
 
 
                             dismissLoadingDialog();
@@ -247,14 +245,7 @@ public class LoginScreen extends AppCompatActivity {
 
     }
 
-    private void replaceFCMToken() {
-        FirebaseMessaging.getInstance().getToken().addOnCompleteListener(task -> {
-            if(task.isSuccessful()){
-                String token = task.getResult();
-                new Utils().updateProfileonFireStore("fcmToken",token);
-            }
-        });
-    }
+
 
     private void saveGalleryImages(final ArrayList<GalleryModel> galleryImages) {
 

@@ -23,10 +23,13 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.core.view.WindowInsetsControllerCompat;
 import androidx.viewpager2.widget.ViewPager2;
 
+import com.bhola.realvideochat1.Models.ChatMessageModel;
 import com.bhola.realvideochat1.ZegoCloud.ZegoCloud_Utils;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
 import com.zegocloud.uikit.prebuilt.call.invite.ZegoUIKitPrebuiltCallInvitationService;
+
+import java.util.ArrayList;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -34,6 +37,7 @@ public class MainActivity extends AppCompatActivity {
     public static TextView badge_text;
     public static int unreadMessage_count;
     public static ViewPager2 viewPager2;
+    public static ArrayList<ChatMessageModel> unreadChatlist;
     com.facebook.ads.InterstitialAd facebook_IntertitialAds;
     PowerManager.WakeLock wakeLock;
 
@@ -56,7 +60,7 @@ public class MainActivity extends AppCompatActivity {
             showAds();
         }
 
-
+unreadChatlist=new ArrayList<>();
         initializeBottonFragments();
 
 //        new Handler().postDelayed(new Runnable() {
@@ -109,13 +113,12 @@ public class MainActivity extends AppCompatActivity {
                         tab.setCustomView(view2);
 
                         badge_text = view2.findViewById(R.id.badge_text);
+                        badge_text.setText("0");
                         badge_text.setVisibility(View.GONE);
                         break;
 
                     case 2:
                         tab.setIcon(R.drawable.info_2);
-
-
                         View viewCall = getLayoutInflater().inflate(R.layout.customtab, null);
                         viewCall.findViewById(R.id.icon).setBackgroundResource(R.drawable.call);
                         tab.setCustomView(viewCall);

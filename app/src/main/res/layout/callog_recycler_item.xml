@@ -23,6 +23,12 @@
         android:layout_toEndOf="@id/profileImage"
         android:orientation="vertical">
 
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+
 
         <TextView
             android:id="@+id/name"
@@ -35,6 +41,20 @@
             android:textColor="@color/gmts_light_gray"
             android:textSize="16dp" />
 
+            <TextView
+                android:id="@+id/callCount"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/inter"
+                android:maxWidth="180dp"
+                android:maxLines="1"
+                android:layout_marginLeft="7dp"
+                android:text="(20)"
+                android:textColor="@color/gmts_light_gray"
+                android:textStyle="bold"
+                android:textSize="16dp" />
+
+        </LinearLayout>
 
         <LinearLayout
             android:layout_width="wrap_content"
@@ -84,18 +104,29 @@
                 android:layout_height="40dp"
                 android:layout_marginTop="2dp"
                 android:padding="10dp"
-                android:src="@drawable/call"
+                android:src="@drawable/chat"
                 app:tint="@color/white" />
         </androidx.cardview.widget.CardView>
 
 
-        <ImageView
-            android:id="@+id/videocall"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
+        <androidx.cardview.widget.CardView
+            android:id="@+id/callCardView"
+            android:layout_width="wrap_content"
             android:layout_marginLeft="15dp"
-            android:layout_marginRight="10dp"
-            android:src="@drawable/videocall" />
+            android:layout_marginRight="15dp"
+            android:layout_height="wrap_content"
+            app:cardBackgroundColor="@color/green"
+            app:cardCornerRadius="25dp">
+
+            <ImageView
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_marginTop="2dp"
+                android:padding="10dp"
+                android:src="@drawable/call"
+                app:tint="@color/white" />
+        </androidx.cardview.widget.CardView>
+
 
 
     </LinearLayout>

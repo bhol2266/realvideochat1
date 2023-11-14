@@ -295,7 +295,6 @@ public class UserProfileEdit extends AppCompatActivity {
             if (Gender.equals("female")) {
                 profileImage.setImageResource(R.drawable.female_logo);
             }
-
         }
         LinearLayout profileImageLayout = findViewById(R.id.profileImageLayout);
         profileImageLayout.setOnClickListener(new View.OnClickListener() {
