@@ -141,20 +141,16 @@ public class ChatRecyclerAdapter extends FirestoreRecyclerAdapter<ChatMessageMod
             }
             if (chatMessageModel.getMessagetype().equals("image")) {
 
-                holder.picMsgLayout_right.setVisibility(View.VISIBLE);
-
-                Log.d("asdf", "onBindViewHolder: " + chatMessageModel.getExtraMessage());
                 if (chatMessageModel.getExtraMessage().startsWith("http")) {
                     Picasso.get().load(chatMessageModel.getExtraMessage()).into(holder.picMsg_right);
-
                 } else {
                     try {
                         Bitmap bitmap = checkOrientation(Uri.parse(chatMessageModel.getExtraMessage())); //change orientation to default
                         holder.playAudiolottie_right.setImageBitmap(bitmap);
-
                     } catch (Exception e) {
                     }
                 }
+                holder.picMsgLayout_right.setVisibility(View.VISIBLE);
 
                 holder.message_right.setVisibility(View.GONE);
                 holder.audioMsg_right.setVisibility(View.GONE);
@@ -303,6 +299,7 @@ public class ChatRecyclerAdapter extends FirestoreRecyclerAdapter<ChatMessageMod
                     } catch (Exception e) {
                     }
                 }
+
 
                 holder.message_left.setVisibility(View.GONE);
                 holder.audioMsg_left.setVisibility(View.GONE);

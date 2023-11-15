@@ -607,7 +607,7 @@ public class ChatScreen_User extends Activity {
 
         for (int i = 0; i < items.length; i++) {
             String item = items[i];
-            int coin = 99 + (i * 100); // Calculate the "coin" value based on the index
+            int coin = 49 + (i * 100); // Calculate the "coin" value based on the index
 
             GiftItemModel giftItemModel = new GiftItemModel(item, coin, false);
             Map<String, Object> itemMap = new HashMap<>();

@@ -15,6 +15,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
@@ -41,13 +42,13 @@ public class MainActivity extends AppCompatActivity {
     com.facebook.ads.InterstitialAd facebook_IntertitialAds;
     PowerManager.WakeLock wakeLock;
 
+    private InAppUpdate inAppUpdate;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        keepScreenOn();
-//        fullscreenMode();
+        checkForupdate();
         try {
             new ZegoCloud_Utils().initCallInviteService(getApplication(), SplashScreen.userModel.getUserId(), SplashScreen.userModel.getFullname());
         } catch (Exception e) {
@@ -60,25 +61,23 @@ public class MainActivity extends AppCompatActivity {
             showAds();
         }
 
-unreadChatlist=new ArrayList<>();
+        unreadChatlist = new ArrayList<>();
         initializeBottonFragments();
 
-//        new Handler().postDelayed(new Runnable() {
-//            @Override
-//            public void run() {
-//                startActivity(new Intent(MainActivity.this,ZegoCloudActivity.class));
-//            }
-//        },3000);
-
 
     }
 
-    private void keepScreenOn() {
-        PowerManager powerManager = (PowerManager) MainActivity.this.getSystemService(MainActivity.this.POWER_SERVICE);
-        wakeLock = powerManager.newWakeLock(PowerManager.FULL_WAKE_LOCK, "My Lock");
-        wakeLock.acquire();
+    private void checkForupdate() {
+        inAppUpdate = new InAppUpdate(MainActivity.this);
+        inAppUpdate.checkForAppUpdate();
+
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        inAppUpdate.onActivityResult(requestCode, resultCode);
+    }
 
     private void initializeBottonFragments() {
         viewPager2 = findViewById(R.id.viewpager);
@@ -279,14 +278,15 @@ unreadChatlist=new ArrayList<>();
     @Override
     protected void onResume() {
         super.onResume();
-        keepScreenOn();
+        inAppUpdate.onResume();
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        wakeLock.release();
         ZegoUIKitPrebuiltCallInvitationService.unInit();
+        inAppUpdate.onDestroy();
+
     }
 
 

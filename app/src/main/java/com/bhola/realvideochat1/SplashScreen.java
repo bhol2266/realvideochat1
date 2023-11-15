@@ -11,7 +11,6 @@ import android.net.NetworkCapabilities;
 import android.net.NetworkInfo;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
 import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
@@ -184,25 +183,7 @@ public class SplashScreen extends AppCompatActivity {
 
 
     private void allUrl() {
-        if (!isInternetAvailable(SplashScreen.this)) {
-
-            Handler handler2 = new Handler();
-            handler2.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    if (Login_Times > 5) {
-                        App_updating = "inactive";
-                        Ads_State = "active";
-                        Ad_Network_Name = "admob";
-                    }
-                    if (!activityChanged) {
-                        handler_forIntent();
-                    }
-                }
-            }, 2000);
-
-            return;
-        } else {
+        if (isInternetAvailable(SplashScreen.this)){
             url_mref = FirebaseDatabase.getInstance().getReference().child("RealVideoChat1");
             url_mref.addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
@@ -222,11 +203,6 @@ public class SplashScreen extends AppCompatActivity {
                     fcmAPI_KEY = (String) snapshot.child("fcmAPI_KEY").getValue();
 
                     sharedPrefrences();
-
-                    if (animationCompleted) {
-                        handler_forIntent();
-                    }
-
 
                 }
 
@@ -283,9 +259,15 @@ public class SplashScreen extends AppCompatActivity {
                         //update user latest login date
                         Utils utils = new Utils();
                         utils.updateDateonFireStore("date", new Date());
+                        if (animationCompleted) {
+                            handler_forIntent();
+                        }
                     } else {
 
                         SplashScreen.userLoggedIn=false;
+                        if (animationCompleted) {
+                            handler_forIntent();
+                        }
                         // User document doesn't exist
                     }
                 })

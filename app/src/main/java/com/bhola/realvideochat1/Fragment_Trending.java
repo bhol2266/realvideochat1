@@ -74,7 +74,6 @@ public class Fragment_Trending extends Fragment {
 
         setupRecycerView();
         getLocation();
-        gotoAdminPanel();
         sliderAdapter();
 
         return view;
@@ -89,16 +88,7 @@ public class Fragment_Trending extends Fragment {
         recyclerView_slider.setAdapter(sliderAdapter);
     }
 
-    private void gotoAdminPanel() {
-        TextView NearbyTextview = view.findViewById(R.id.NearbyTextview);
-        NearbyTextview.setOnLongClickListener(new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View view) {
-                context.startActivity(new Intent(context, AdminPanel_Userlist.class));
-                return false;
-            }
-        });
-    }
+
 
 
     private void swipeRefreshLayout_init() {
