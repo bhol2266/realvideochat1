@@ -8,6 +8,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.LifecycleOwner;
@@ -83,6 +84,7 @@ public class Fragment_Messenger extends Fragment {
     }
 
     void setupRecyclerView(){
+        Toast.makeText(context, "Imhere", Toast.LENGTH_SHORT).show();
         recyclerView = view.findViewById(R.id.recyclerview);
 
         Query query = FirebaseUtil.allChatroomCollectionReference()

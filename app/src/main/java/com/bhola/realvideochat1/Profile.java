@@ -5,6 +5,7 @@ import android.app.FragmentManager;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
+import android.graphics.PorterDuff;
 import android.graphics.RenderEffect;
 import android.graphics.Shader;
 import android.graphics.drawable.ColorDrawable;
@@ -25,6 +26,7 @@ import android.widget.Toast;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
+import androidx.core.content.ContextCompat;
 import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.core.view.WindowInsetsControllerCompat;
@@ -56,7 +58,7 @@ public class Profile extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        
+
 
         if (SplashScreen.Ads_State.equals("active")) {
 //            showAds();
@@ -144,6 +146,15 @@ public class Profile extends AppCompatActivity {
     }
 
     private void bindDetails() {
+        ImageView genderIcon = findViewById(R.id.genderIcon);
+
+        if (model_profile.getSelectedGender().equals("male")) {
+            genderIcon.setImageResource(R.drawable.male);
+            int tintColor = ContextCompat.getColor(this, R.color.male_icon);
+            genderIcon.setColorFilter(tintColor, PorterDuff.Mode.SRC_IN);
+        }
+
+
         ImageView profileImage = findViewById(R.id.profileImage);
 
         if (model_profile.getProfilepic().isEmpty()) {
@@ -170,31 +181,33 @@ public class Profile extends AppCompatActivity {
 
         TextView country = findViewById(R.id.country);
         country.setText(model_profile.getLocation());
+        if (country.length() == 0) {
+            LinearLayout locationLayout = findViewById(R.id.locationLayout);
+            locationLayout.setVisibility(View.GONE);
+        }
 
         TextView bio = findViewById(R.id.bioTextview);
         bio.setText(model_profile.getBio().toString());
 
 
         ZegoSendCallInvitationButton newVideoCall = findViewById(R.id.new_video_call);
-        new ZegoCloud_Utils().initVideoButton(model_profile.getFullname(), String.valueOf(model_profile.getUserId()),newVideoCall);
-
-
+        new ZegoCloud_Utils().initVideoButton(model_profile.getFullname(), String.valueOf(model_profile.getUserId()), newVideoCall);
 
 
         CardView voiceCall = findViewById(R.id.voiceCall);
         voiceCall.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(SplashScreen.userModel.getCoins()<100){
-                   rechargeDialog(view.getContext());
+                if (SplashScreen.userModel.getCoins() < 100) {
+                    rechargeDialog(view.getContext());
                     return;
 
                 }
                 ZegoSendCallInvitationButton newVoiceCall = findViewById(R.id.new_voice_call);
-                new ZegoCloud_Utils().initVoiceButton(model_profile.getFullname(), String.valueOf(model_profile.getUserId()),newVoiceCall);
+                new ZegoCloud_Utils().initVoiceButton(model_profile.getFullname(), String.valueOf(model_profile.getUserId()), newVoiceCall);
 
                 newVoiceCall.performClick();
-                SplashScreen.calleeId=String.valueOf(model_profile.getUserId());
+                SplashScreen.calleeId = String.valueOf(model_profile.getUserId());
                 if (model_profile.isStreamer()) {
                     SplashScreen.isCalleeIdStreamer = true;
                 } else {
@@ -209,14 +222,14 @@ public class Profile extends AppCompatActivity {
         videoCall.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(SplashScreen.userModel.getCoins()<100){
+                if (SplashScreen.userModel.getCoins() < 100) {
                     rechargeDialog(view.getContext());
                     return;
                 }
                 ZegoSendCallInvitationButton newVideoCall = findViewById(R.id.new_video_call);
-                new ZegoCloud_Utils().initVideoButton(model_profile.getFullname(), String.valueOf(model_profile.getUserId()),newVideoCall);
+                new ZegoCloud_Utils().initVideoButton(model_profile.getFullname(), String.valueOf(model_profile.getUserId()), newVideoCall);
                 newVideoCall.performClick();
-                SplashScreen.calleeId=String.valueOf(model_profile.getUserId());
+                SplashScreen.calleeId = String.valueOf(model_profile.getUserId());
                 if (model_profile.isStreamer()) {
                     SplashScreen.isCalleeIdStreamer = true;
                 } else {
@@ -420,7 +433,6 @@ public class Profile extends AppCompatActivity {
     }
 
 
-
     private void setImageinGridLayout() {
         if (SplashScreen.App_updating.equals("active")) {
             return;
@@ -438,11 +450,14 @@ public class Profile extends AppCompatActivity {
         }
 
 
-
         RecyclerView recyclerView = findViewById(R.id.recyclerView); // Replace with your RecyclerView's ID
         recyclerView.setLayoutManager(new GridLayoutManager(this, 4));
 
         // Populate imageList with your image data
+        if (imageList.size() == 0) {
+            TextView contentTextview = findViewById(R.id.contentTextview);
+            contentTextview.setVisibility(View.GONE);
+        }
 
         ProfileGirlImageAdapter imageAdapter = new ProfileGirlImageAdapter(this, imageList);
         recyclerView.setAdapter(imageAdapter);

@@ -83,7 +83,7 @@ public class MainActivity extends AppCompatActivity {
         viewPager2 = findViewById(R.id.viewpager);
         viewPager2.setAdapter(new PagerAdapter(MainActivity.this));
 
-        viewPager2.setOffscreenPageLimit(5);
+        viewPager2.setOffscreenPageLimit(6);
         TabLayout tabLayout = findViewById(R.id.tabLayout);
 
 
